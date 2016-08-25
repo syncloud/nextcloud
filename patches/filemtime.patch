@@ -1,0 +1,18 @@
+--- lib/private/files/storage/local.php	2016-06-29 10:49:33.000000000 +0100
++++ lib/private/files/storage/local.php.patch	2016-07-11 00:25:56.328945540 +0100
+@@ -156,7 +156,14 @@
+ 
+ 	public function filemtime($path) {
+ 		clearstatcache($this->getSourcePath($path));
+-		return filemtime($this->getSourcePath($path));
++		if (!$this->file_exists($path)) {
++		    return false;
++		}
++        	$fullPath = $this->getSourcePath($path);
++        	if (PHP_INT_SIZE === 4) {
++            	    return exec ('stat -c %Y '. escapeshellarg ($fullPath));
++        	}
++        	return filemtime($fullPath);	
+ 	}
+ 
+ 	public function touch($path, $mtime = null) {

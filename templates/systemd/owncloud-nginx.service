@@ -1,0 +1,16 @@
+[Unit]
+Description=ownCloud nginx
+Requires=owncloud-php-fpm.service
+After=owncloud-php-fpm.service
+
+[Service]
+User=owncloud
+Type=forking
+PIDFile={{ app_dir }}/nginx/logs/nginx.pid
+ExecStartPre={{ app_dir }}/nginx/sbin/nginx -t -c {{ app_dir }}/config/nginx.conf -p {{ app_dir }}/nginx
+ExecStart={{ app_dir }}/nginx/sbin/nginx -c {{ app_dir }}/config/nginx.conf -p {{ app_dir }}/nginx
+ExecReload={{ app_dir }}/nginx/sbin/nginx -c {{ app_dir }}/config/nginx.conf -s reload -p {{ app_dir }}/nginx
+ExecStop={{ app_dir }}/nginx/sbin/nginx -c {{ app_dir }}/config/nginx.conf -s stop -p {{ app_dir }}/nginx
+
+[Install]
+WantedBy=multi-user.target
