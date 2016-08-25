@@ -1,10 +1,10 @@
---- lib/private/files/storage/local.php	2016-06-29 10:49:33.000000000 +0100
-+++ lib/private/files/storage/local.php.patch	2016-07-11 00:25:56.328945540 +0100
+--- lib/private/Files/Storage/Local.php	2016-06-29 10:49:33.000000000 +0100
++++ lib/private/Files/Storage/Local.php.patch	2016-07-11 00:25:56.328945540 +0100
 @@ -156,7 +156,14 @@
  
  	public function filemtime($path) {
  		clearstatcache($this->getSourcePath($path));
--		return filemtime($this->getSourcePath($path));
+-		return $this->file_exists($path) ? filemtime($this->getSourcePath($path)) : false;
 +		if (!$this->file_exists($path)) {
 +		    return false;
 +		}

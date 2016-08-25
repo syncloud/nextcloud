@@ -236,7 +236,7 @@ def test_reinstall(auth):
 
 def __local_install(auth):
     email, password, domain, release, version, arch = auth
-    run_scp('{0}/../owncloud-{1}-{2}.tar.gz root@localhost:/'.format(DIR, version, arch), password=DEVICE_PASSWORD)
-    run_ssh('/opt/app/sam/bin/sam --debug install /owncloud-{0}-{1}.tar.gz'.format(version, arch), password=DEVICE_PASSWORD)
+    run_scp('{0}/../nextcloud-{1}-{2}.tar.gz root@localhost:/'.format(DIR, version, arch), password=DEVICE_PASSWORD)
+    run_ssh('/opt/app/sam/bin/sam --debug install /nextcloud-{0}-{1}.tar.gz'.format(version, arch), password=DEVICE_PASSWORD)
     set_docker_ssh_port(DEVICE_PASSWORD)
     time.sleep(3)

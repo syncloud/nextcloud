@@ -13,3 +13,7 @@ log
 .cache
 lib
 src/version
+.coin.cache
+geckodriver
+*.test.download
+*.test.upload
