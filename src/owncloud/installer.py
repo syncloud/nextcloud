@@ -14,19 +14,19 @@ from owncloud.cron import OwncloudCron
 from owncloud.octools import OCConsole, OCConfig
 from owncloud.webface import Setup
 
-SYSTEMD_NGINX_NAME = 'owncloud-nginx'
-SYSTEMD_PHP_FPM_NAME = 'owncloud-php-fpm'
-SYSTEMD_POSTGRESQL = 'owncloud-postgresql'
+SYSTEMD_NGINX_NAME = 'nextcloud-nginx'
+SYSTEMD_PHP_FPM_NAME = 'nextcloud-php-fpm'
+SYSTEMD_POSTGRESQL = 'nextcloud-postgresql'
 INSTALL_USER = 'installer'
 APP_NAME = 'nextcloud'
 USER_NAME = 'nextcloud'
-DB_NAME = 'owncloud'
-DB_USER = 'owncloud'
+DB_NAME = 'nextcloud'
+DB_USER = 'nextcloud'
 PSQL_PATH = 'postgresql/bin/psql'
 OCC_RUNNER_PATH = 'bin/occ-runner'
-OC_CONFIG_PATH = 'bin/owncloud-config'
-OWNCLOUD_LOG_PATH = 'log/owncloud.log'
-CRON_CMD = 'bin/owncloud-cron'
+OC_CONFIG_PATH = 'bin/nextcloud-config'
+OWNCLOUD_LOG_PATH = 'log/nextcloud.log'
+CRON_CMD = 'bin/nextcloud-cron'
 CRON_USER = 'nextcloud'
 OWNCLOUD_APP_CONFIG_PATH = 'nextcloud/config'
 OWNCLOUD_DATA_CONFIG_FILE_PATH = 'config/config.php'
@@ -34,7 +34,7 @@ OWNCLOUD_PORT = 1082
 
 class OwncloudInstaller:
     def __init__(self):
-        self.log = logger.get_logger('owncloud_installer')
+        self.log = logger.get_logger('nextcloud_installer')
         self.app = api.get_app_setup(APP_NAME)
 
     def install(self):
@@ -127,7 +127,7 @@ class OwncloudInstaller:
         print("creating database files")
 
         db_postgres = Database(join(self.app.get_install_dir(), PSQL_PATH), database='postgres', user=DB_USER)
-        db_postgres.execute("ALTER USER owncloud WITH PASSWORD 'owncloud';")
+        db_postgres.execute("ALTER USER nextcloud WITH PASSWORD 'nextcloud';")
 
         web_setup = Setup(OWNCLOUD_PORT)
         web_setup.finish(INSTALL_USER, unicode(uuid.uuid4().hex), self.app.get_storage_dir())
@@ -167,9 +167,9 @@ class OwncloudInstaller:
         cron = OwncloudCron(join(self.app.get_install_dir(), CRON_CMD), CRON_USER)
         cron.run()
 
-        db_owncloud = Database(join(self.app.get_install_dir(), PSQL_PATH), database=DB_NAME, user=DB_USER)
-        db_owncloud.execute("update oc_ldap_group_mapping set owncloud_name = 'admin';")
-        db_owncloud.execute("update oc_ldap_group_members set owncloudname = 'admin';")
+        db = Database(join(self.app.get_install_dir(), PSQL_PATH), database=DB_NAME, user=DB_USER)
+        db.execute("update oc_ldap_group_mapping set owncloud_name = 'admin';")
+        db.execute("update oc_ldap_group_members set owncloudname = 'admin';")
 
         occ.run('user:delete {0}'.format(INSTALL_USER))
 

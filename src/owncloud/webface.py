@@ -6,7 +6,7 @@ from syncloud_app import logger
 
 class Setup:
     def __init__(self, port):
-        self.log = logger.get_logger('owncloud.setup.finish')
+        self.log = logger.get_logger('nextcloud.setup.finish')
         self.port = port
         self.index_url = 'http://localhost:{}/index.php'.format(port)
 
@@ -21,8 +21,8 @@ class Setup:
                                  data={
                                      'install': 'true', 'adminlogin': login,
                                      'adminpass': password, 'adminpass-clone': password,
-                                     'dbtype': 'pgsql', 'dbname': 'owncloud',
-                                     'dbuser': 'owncloud', 'dbpass': 'owncloud',
+                                     'dbtype': 'pgsql', 'dbname': 'nextcloud',
+                                     'dbuser': 'nextcloud', 'dbpass': 'nextcloud',
                                      'dbhost': 'localhost', 'directory': data_dir}, allow_redirects=False)
 
         if response.status_code == 302:
@@ -46,15 +46,15 @@ class Setup:
             self.log.debug('{0} response'.format(self.index_url))
             self.log.debug(response)
             if response.status_code == 400:
-                raise Exception("ownCloud is not trusting you to access {}".format(self.index_url))
+                raise Exception("nextcloud is not trusting you to access {}".format(self.index_url))
 
             if response.status_code != 200:
                 soup = BeautifulSoup(response.text, "html.parser")
                 error = soup.find('li', class_='error')
                 self.log.error(error)
-                raise Exception("ownCloud is not available at {}".format(self.index_url))
+                raise Exception("nextcloud is not available at {}".format(self.index_url))
 
             return "Finish setup" not in response.text
 
         except requests.ConnectionError:
-            raise Exception("ownCloud is not available at {}".format(self.index_url))
+            raise Exception("nextcloud is not available at {}".format(self.index_url))

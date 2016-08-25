@@ -42,7 +42,7 @@ def module_teardown():
     run_scp('root@localhost:/opt/data/platform/log/* {0}'.format(platform_log_dir), password=LOGS_SSH_PASSWORD)
     owncloud_log_dir = join(LOG_DIR, 'owncloud_log')
     os.mkdir(owncloud_log_dir)
-    run_scp('root@localhost:/opt/data/owncloud/log/*.log {0}'.format(owncloud_log_dir), password=LOGS_SSH_PASSWORD)
+    run_scp('root@localhost:/opt/data/nextcloud/log/*.log {0}'.format(owncloud_log_dir), password=LOGS_SSH_PASSWORD)
 
     print('-------------------------------------------------------')
     print('syncloud docker image is running')
@@ -137,12 +137,12 @@ def _test_sync(user_domain, megabites):
     sync_full_path_file = join(sync_dir_download, sync_file)
 
     assert os.path.isfile(sync_full_path_file)
-    run_ssh('rm /data/owncloud/{0}/files/{1}'.format(DEVICE_USER, sync_file), password=DEVICE_PASSWORD)
+    run_ssh('rm /data/nextcloud/{0}/files/{1}'.format(DEVICE_USER, sync_file), password=DEVICE_PASSWORD)
     files_scan()
 
 
 def files_scan():
-    run_ssh('/opt/app/owncloud/bin/occ-runner files:scan --all', password=DEVICE_PASSWORD)
+    run_ssh('/opt/app/nextcloud/bin/occ-runner files:scan --all', password=DEVICE_PASSWORD)
 
 
 def test_visible_through_platform(auth, user_domain):
@@ -226,7 +226,7 @@ def __check_test_dir(owncloud_session, test_dir, user_domain):
 
 
 def test_remove(syncloud_session):
-    response = syncloud_session.get('http://localhost/rest/remove?app_id=owncloud', allow_redirects=False)
+    response = syncloud_session.get('http://localhost/rest/remove?app_id=nextcloud', allow_redirects=False)
     assert response.status_code == 200, response.text
 
 

@@ -2,7 +2,7 @@ from os.path import dirname, join, abspath, isdir
 from os import listdir
 import sys
 
-app_path = abspath(join(dirname(__file__), '..', '..', 'owncloud'))
+app_path = abspath(join(dirname(__file__), '..', '..', 'nextcloud'))
 sys.path.append(join(app_path, 'src'))
 
 lib_path = join(app_path, 'lib')

@@ -6,7 +6,7 @@ class OCConsole:
         self.occ_runner_path = occ_runner_path
 
     def run(self, args):
-        log = logger.get_logger('owncloud.occ')
+        log = logger.get_logger('nextcloud.occ')
         output = check_output('{0} {1}'.format(self.occ_runner_path, args), shell=True).strip()
         if output:
             log.info(output)

@@ -1,3 +1,3 @@
 #!/bin/bash
 APP_DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && cd .. && pwd )
-${APP_DIR}/bin/php-runner -f ${APP_DIR}/owncloud/cron.php
+${APP_DIR}/bin/php-runner -f ${APP_DIR}/nextcloud/cron.php

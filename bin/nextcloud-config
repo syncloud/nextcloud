@@ -1,6 +1,6 @@
-#!/opt/app/owncloud/bin/php-runner
+#!/opt/app/nextcloud/bin/php-runner
 <?php
-require_once '/opt/app/owncloud/owncloud/lib/base.php';
+require_once '/opt/app/nextcloud/nextcloud/lib/base.php';
 
 if ($argc > 2) {
     if ($argc == 3) {

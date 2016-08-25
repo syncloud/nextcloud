@@ -1,10 +1,10 @@
 [Unit]
-Description=ownCloud php fpm
-Requires=owncloud-postgresql.service
-After=owncloud-postgresql.service
+Description=nextcloud php fpm
+Requires=nextcloud-postgresql.service
+After=nextcloud-postgresql.service
 
 [Service]
-User=owncloud
+User=nextcloud
 Type=forking
 PIDFile={{ app_data_dir }}/php-fpm.pid
 ExecStart={{ app_dir }}/php/sbin/php-fpm -y {{ app_dir }}/config/php-fpm.conf -c {{ app_dir }}/config/php.ini

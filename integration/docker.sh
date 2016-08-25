@@ -1,6 +1,6 @@
 #!/bin/bash -e
 
-ROOTFS=/tmp/owncloud/rootfs
+ROOTFS=/tmp/nextcloud/rootfs
 APP_DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && cd .. && pwd )
 cd ${APP_DIR}
 if [[ $EUID -ne 0 ]]; then

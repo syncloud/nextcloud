@@ -13,7 +13,7 @@ DIR = dirname(__file__)
 LOG_DIR = join(DIR, 'log')
 DEVICE_USER = 'user'
 DEVICE_PASSWORD = 'password'
-log_dir = join(LOG_DIR, 'owncloud_log')
+log_dir = join(LOG_DIR, 'nextcloud_log')
 
 
 def test_web_with_selenium(user_domain):

@@ -16,13 +16,13 @@ def overwrite_webroot(config):
     if found:
         existing = found.group(0)
         old_config = config.split(existing)
-        return old_config[0] + "'overwritewebroot' => '/owncloud'" + old_config[1]
+        return old_config[0] + "'overwritewebroot' => '/nextcloud'" + old_config[1]
     else:
         prog = re.compile(r"\);", re.MULTILINE)
         found = prog.search(config)
         end_of_conf = found.group(0)
         old_config = config.split(end_of_conf)
-        return old_config[0] + "'overwritewebroot' => '/owncloud'\n);" + old_config[1]
+        return old_config[0] + "'overwritewebroot' => '/nextcloud'\n);" + old_config[1]
 
 
 class ConfigManager:

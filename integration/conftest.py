@@ -27,6 +27,6 @@ def auth(request):
 @pytest.fixture(scope='module')
 def user_domain(auth):
     email, password, domain, release, version, arch = auth
-    return 'owncloud.{0}.{1}'.format(domain, SYNCLOUD_INFO)
+    return 'nextcloud.{0}.{1}'.format(domain, SYNCLOUD_INFO)
 
 
