@@ -40,11 +40,9 @@ def module_teardown():
     platform_log_dir = join(LOG_DIR, 'platform_log')
     os.mkdir(platform_log_dir)
     run_scp('root@localhost:/opt/data/platform/log/* {0}'.format(platform_log_dir), password=LOGS_SSH_PASSWORD)
-    owncloud_log_dir = join(LOG_DIR, 'owncloud_log')
-    os.mkdir(owncloud_log_dir)
-    run_scp('root@localhost:/opt/data/nextcloud/log/*.log {0}'.format(owncloud_log_dir), password=LOGS_SSH_PASSWORD)
-
-    run_scp('root@localhost:/var/log/sam.log {0}'.format(platform_log_dir), password=LOGS_SSH_PASSWORD)
+    nextcloud_log_dir = join(LOG_DIR, 'nextcloud_log')
+    os.mkdir(nextcloud_log_dir)
+    run_scp('root@localhost:/opt/data/nextcloud/log/*.log {0}'.format(nextcloud_log_dir), password=LOGS_SSH_PASSWORD)
 
     print('-------------------------------------------------------')
     print('syncloud docker image is running')
@@ -60,16 +58,16 @@ def syncloud_session():
 
 
 @pytest.fixture(scope='function')
-def owncloud_session_domain(user_domain):
+def nextcloud_session_domain(user_domain):
     session = requests.session()
-    response = session.get('http://127.0.0.1', headers={"Host": user_domain}, allow_redirects=False)
+    response = session.get('http://127.0.0.1/index.php/login', headers={"Host": user_domain}, allow_redirects=False)
     soup = BeautifulSoup(response.text, "html.parser")
     requesttoken = soup.find_all('input', {'name': 'requesttoken'})[0]['value']
-    response = session.post('http://127.0.0.1/index.php',
+    response = session.post('http://127.0.0.1/index.php/login',
                             headers={"Host": user_domain},
                             data={'user': DEVICE_USER, 'password': DEVICE_PASSWORD, 'requesttoken': requesttoken},
                             allow_redirects=False)
-    assert response.status_code == 302, response.text
+    assert response.status_code == 303, response.text
     return session, requesttoken
 
 
@@ -100,9 +98,10 @@ def test_activate_device(auth):
 def test_install(auth):
     __local_install(auth)
 
-def test_resource(owncloud_session_domain, user_domain):
-    session, _ = owncloud_session_domain
-    response = session.get('http://127.0.0.1/core/img/filetypes/text.png', headers={"Host": user_domain})
+
+def test_resource(nextcloud_session_domain, user_domain):
+    session, _ = nextcloud_session_domain
+    response = session.get('http://127.0.0.1/core/img/loading.gif', headers={"Host": user_domain})
     assert response.status_code == 200, response.text
 
 
@@ -148,18 +147,18 @@ def files_scan():
 
 
 def test_visible_through_platform(auth, user_domain):
-    response = requests.get('http://127.0.0.1', headers={"Host": user_domain}, allow_redirects=False)
+    response = requests.get('http://127.0.0.1/index.php/login', headers={"Host": user_domain}, allow_redirects=False)
     assert response.status_code == 200, response.text
 
 
-def test_admin(owncloud_session_domain, user_domain):
-    session, _ = owncloud_session_domain
+def test_admin(nextcloud_session_domain, user_domain):
+    session, _ = nextcloud_session_domain
     response = session.get('http://127.0.0.1/index.php/settings/admin', headers={"Host": user_domain}, allow_redirects=False)
     assert response.status_code == 200, response.text
 
 
-def test_verification(owncloud_session_domain, user_domain):
-    session, _ = owncloud_session_domain
+def test_verification(nextcloud_session_domain, user_domain):
+    session, _ = nextcloud_session_domain
     response = session.get('http://{0}/index.php/settings/integrity/failed'.format(user_domain), allow_redirects=False)
     print(response.text)
     assert response.status_code == 200, response.text
@@ -167,8 +166,8 @@ def test_verification(owncloud_session_domain, user_domain):
     assert 'EXCEPTION' not in response.text
 
 
-# def test_integrity(owncloud_session_domain, user_domain):
-#     session, _ = owncloud_session_domain
+# def test_integrity(nextcloud_session_domain, user_domain):
+#     session, _ = nextcloud_session_domain
 #     response = session.get('http://{0}/index.php/settings/ajax/checksetup'.format(user_domain), allow_redirects=False)
 #     print(response.text)
 #     assert response.status_code == 200, response.text
@@ -183,18 +182,15 @@ def test_disk(syncloud_session, user_domain):
     device0 = loop_device_add('ext4', 0, DEVICE_PASSWORD)
     __activate_disk(syncloud_session, device0)
     __create_test_dir('test0', user_domain)
-    __check_test_dir(owncloud_session_domain(user_domain), 'test0', user_domain)
+    __check_test_dir(nextcloud_session_domain(user_domain), 'test0', user_domain)
 
     device1 = loop_device_add('ext2', 1, DEVICE_PASSWORD)
     __activate_disk(syncloud_session, device1)
     __create_test_dir('test1', user_domain)
-    __check_test_dir(owncloud_session_domain(user_domain), 'test1', user_domain)
+    __check_test_dir(nextcloud_session_domain(user_domain), 'test1', user_domain)
 
     __activate_disk(syncloud_session, device0)
-    __check_test_dir(owncloud_session_domain(user_domain), 'test0', user_domain)
-
-    #loop_device_cleanup(0, DEVICE_PASSWORD)
-    #loop_device_cleanup(1, DEVICE_PASSWORD)
+    __check_test_dir(nextcloud_session_domain(user_domain), 'test0', user_domain)
 
 
 def __activate_disk(syncloud_session, loop_device):
@@ -212,15 +208,15 @@ def __create_test_dir(test_dir, user_domain):
     assert response.status_code == 201, response.text
 
 
-def __check_test_dir(owncloud_session, test_dir, user_domain):
+def __check_test_dir(nextcloud_session, test_dir, user_domain):
 
     response = requests.get('http://127.0.0.1', headers={"Host": user_domain})
     assert response.status_code == 200, BeautifulSoup(response.text, "html.parser").find('li', class_='error')
 
-    owncloud, _ = owncloud_session
-    response = owncloud.get('http://127.0.0.1/index.php/apps/files/ajax/list.php?dir=/',
-                            headers={"Host": user_domain},
-                            allow_redirects=False)
+    nextcloud, _ = nextcloud_session
+    response = nextcloud.get('http://127.0.0.1/index.php/apps/files/ajax/list.php?dir=/',
+                             headers={"Host": user_domain},
+                             allow_redirects=False)
     info = json.loads(response.text)
     print(response.text)
     dirs = map(lambda v: v['name'], info['data']['files'])

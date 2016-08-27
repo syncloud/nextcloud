@@ -35,7 +35,7 @@ coin --to ${BUILD_DIR} raw ${DOWNLOAD_URL}/thirdparty_postgresql_${ARCH}/lastSuc
 coin --to ${BUILD_DIR} raw https://download.nextcloud.com/server/releases/${NAME}-${NEXTCLOUD_VERSION}.tar.bz2
 
 cp -r bin ${BUILD_DIR}
-cp -r templates ${BUILD_DIR}
+cp -r config ${BUILD_DIR}/config.templates
 cp -r lib ${BUILD_DIR}
 
 rm -rf ${BUILD_DIR}/${NAME}/config

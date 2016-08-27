@@ -10,7 +10,7 @@ class Setup:
         self.port = port
         self.index_url = 'http://localhost:{}/index.php'.format(port)
 
-    def finish(self, login, password, data_dir):
+    def finish(self, login, password, data_dir, database_path):
 
         if self.is_finished():
             return True
@@ -23,7 +23,7 @@ class Setup:
                                      'adminpass': password, 'adminpass-clone': password,
                                      'dbtype': 'pgsql', 'dbname': 'nextcloud',
                                      'dbuser': 'nextcloud', 'dbpass': 'nextcloud',
-                                     'dbhost': 'localhost', 'directory': data_dir}, allow_redirects=False)
+                                     'dbhost': database_path, 'directory': data_dir}, allow_redirects=False)
 
         if response.status_code == 302:
             self.log.info("successful login redirect")

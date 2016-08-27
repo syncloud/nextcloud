@@ -28,11 +28,17 @@ def test_web_with_selenium(user_domain):
     profile.set_preference("webdriver.log.file", "{0}/firefox.log".format(log_dir))
     driver = webdriver.Firefox(profile, capabilities=caps)
 
-    driver.get("http://{0}".format(user_domain))
+    screenshot_dir = join(DIR, 'screenshot')
+    if exists(screenshot_dir):
+        shutil.rmtree(screenshot_dir)
+    os.mkdir(screenshot_dir)
+
+    driver.get("http://{0}/index.php/login".format(user_domain))
     user = driver.find_element_by_id("user")
     user.send_keys(DEVICE_USER)
     password = driver.find_element_by_id("password")
     password.send_keys(DEVICE_PASSWORD)
+    driver.get_screenshot_as_file(join(screenshot_dir, 'login.png'))
     password.submit()
     wait_driver = WebDriverWait(driver, 10)
     wait_driver.until(EC.text_to_be_present_in_element((By.CSS_SELECTOR, '#header #expandDisplayName'), DEVICE_USER))
@@ -40,11 +46,6 @@ def test_web_with_selenium(user_domain):
     wait_driver.until(EC.element_to_be_clickable((By.ID, 'closeWizard')))
     wizard_close_button = driver.find_element_by_id("closeWizard")
     wizard_close_button.click()
-
-    screenshot_dir = join(DIR, 'screenshot')
-    if exists(screenshot_dir):
-        shutil.rmtree(screenshot_dir)
-    os.mkdir(screenshot_dir)
 
     time.sleep(2)
     driver.get_screenshot_as_file(join(screenshot_dir, 'main.png'))
