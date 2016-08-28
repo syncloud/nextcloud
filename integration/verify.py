@@ -195,11 +195,18 @@ def test_disk(syncloud_session, user_domain):
     __check_test_dir(nextcloud_session_domain(user_domain), 'test0', user_domain)
 
 
-def __activate_disk(syncloud_session, loop_device):
-    response = syncloud_session.get('http://localhost/rest/settings/disk_activate',
-                                    params={'device': loop_device}, allow_redirects=False)
+def __log_data_dir():
     run_ssh('ls -la /data', password=DEVICE_PASSWORD)
     run_ssh('ls -la /data/', password=DEVICE_PASSWORD)
+    run_ssh('ls -la /data/nextcloud', password=DEVICE_PASSWORD)
+
+
+def __activate_disk(syncloud_session, loop_device):
+
+    __log_data_dir()
+    response = syncloud_session.get('http://localhost/rest/settings/disk_activate',
+                                    params={'device': loop_device}, allow_redirects=False)
+    __log_data_dir()
     files_scan()
     assert response.status_code == 200, response.text
 
