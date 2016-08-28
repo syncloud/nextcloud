@@ -10,4 +10,4 @@ libs = [join(lib_path, item) for item in listdir(lib_path) if isdir(join(lib_pat
 map(sys.path.append, libs)
 
 from owncloud.installer import OwncloudInstaller
-OwncloudInstaller().prepare_storage()
+OwncloudInstaller().on_disk_change()

@@ -100,7 +100,7 @@ class OwncloudInstaller:
         oc_config.set_value('datadirectory', self.app.get_storage_dir())
         oc_config.set_value('integrity.check.disabled', 'true')
 
-        self.update_domain()
+        self.on_domain_change()
 
         fs.chownpath(self.app.get_data_dir(), USER_NAME, recursive=True)
 
@@ -183,6 +183,11 @@ class OwncloudInstaller:
 
         occ.run('user:delete {0}'.format(INSTALL_USER))
 
+    def on_disk_change(self):
+        self.prepare_storage()
+        self.app.restart_service(SYSTEMD_PHP_FPM_NAME)
+        self.app.restart_service(SYSTEMD_NGINX_NAME)
+
     def prepare_storage(self):
         app_storage_dir = self.app.init_storage(USER_NAME)
         fs.touchfile(join(app_storage_dir, '.ocdata'))
@@ -191,7 +196,7 @@ class OwncloudInstaller:
         fs.makepath(tmp_storage_path)
         fs.chownpath(tmp_storage_path, USER_NAME)
 
-    def update_domain(self):
+    def on_domain_change(self):
         app_domain = self.app.app_domain_name()
         local_ip = check_output(["hostname", "-I"]).split(" ")[0]
         domains = ['localhost', local_ip, app_domain]
