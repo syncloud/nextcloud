@@ -1,5 +1,4 @@
-from subprocess import check_output
-
+from subprocess import check_output, CalledProcessError
 
 DOCKER_SSH_PORT = 2222
 SSH = 'ssh -o StrictHostKeyChecking=no -p {0} root@localhost'.format(DOCKER_SSH_PORT)
@@ -31,7 +30,8 @@ def _run_command(command, throw, debug, password):
             print output
             print
         return output
-    except Exception, e:
+    except CalledProcessError, e:
+        print(e.output)
         print(e.message)
         if throw:
             raise e
