@@ -44,6 +44,8 @@ def module_teardown():
     os.mkdir(nextcloud_log_dir)
     run_scp('root@localhost:/opt/data/nextcloud/log/*.log {0}'.format(nextcloud_log_dir), password=LOGS_SSH_PASSWORD)
 
+    run_scp('root@localhost:/var/log/sam.log {0}'.format(platform_log_dir), password=LOGS_SSH_PASSWORD)
+
     print('-------------------------------------------------------')
     print('syncloud docker image is running')
     print('connect using: {0}'.format(ssh_command(DEVICE_PASSWORD, SSH)))
@@ -196,6 +198,8 @@ def test_disk(syncloud_session, user_domain):
 def __activate_disk(syncloud_session, loop_device):
     response = syncloud_session.get('http://localhost/rest/settings/disk_activate',
                                     params={'device': loop_device}, allow_redirects=False)
+    run_ssh('ls -la /data', password=DEVICE_PASSWORD)
+    run_ssh('ls -la /data/', password=DEVICE_PASSWORD)
     files_scan()
     assert response.status_code == 200, response.text
 
