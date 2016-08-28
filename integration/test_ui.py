@@ -6,6 +6,7 @@ import time
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
+from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
 
@@ -39,7 +40,8 @@ def test_web_with_selenium(user_domain):
     password = driver.find_element_by_id("password")
     password.send_keys(DEVICE_PASSWORD)
     driver.get_screenshot_as_file(join(screenshot_dir, 'login.png'))
-    password.submit()
+    password.send_keys(Keys.RETURN)
+
     wait_driver = WebDriverWait(driver, 10)
     wait_driver.until(EC.text_to_be_present_in_element((By.CSS_SELECTOR, '#header #expandDisplayName'), DEVICE_USER))
 
