@@ -30,8 +30,19 @@ CRON_CMD = 'bin/nextcloud-cron'
 CRON_USER = 'nextcloud'
 APP_CONFIG_PATH = 'nextcloud/config'
 DATA_CONFIG_FILE_PATH = 'config/config.php'
-POSTGRESQL_CONF = 'postgresql.conf'
 WEB_PORT = 1085
+
+
+def database_init(logger, app_install_dir, app_data_dir, user_name):
+    database_path = join(app_data_dir, 'database')
+    if not isdir(database_path):
+        psql_initdb = join(app_install_dir, 'postgresql/bin/initdb')
+        logger.info(check_output(['sudo', '-H', '-u', user_name, psql_initdb, database_path]))
+        postgresql_conf_to = join(database_path, 'postgresql.conf')
+        postgresql_conf_from = join(app_install_dir, 'config', 'postgresql.conf')
+        shutil.copy(postgresql_conf_from, postgresql_conf_to)
+    else:
+        logger.info('Database path "{0}" already exists'.format(database_path))
 
 
 class OwncloudInstaller:
@@ -70,14 +81,7 @@ class OwncloudInstaller:
         config_app_dir = join(self.app.get_install_dir(), APP_CONFIG_PATH)
         symlink(config_data_dir, config_app_dir)
 
-        if not isdir(self.database_path):
-            psql_initdb = join(self.app.get_install_dir(), 'postgresql/bin/initdb')
-            self.log.info(check_output(['sudo', '-H', '-u', USER_NAME, psql_initdb, self.database_path]))
-            postgresql_conf_to = join(self.database_path, POSTGRESQL_CONF)
-            if exists(postgresql_conf_to):
-                remove(postgresql_conf_to)
-            postgresql_conf_from = join(config_path, POSTGRESQL_CONF)
-            shutil.copy(postgresql_conf_from, postgresql_conf_to)
+        database_init(self.log, self.app.get_install_dir(), self.app.get_data_dir(), USER_NAME)
 
         print("setup systemd")
         self.app.add_service(SYSTEMD_POSTGRESQL)
