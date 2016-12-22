@@ -1,33 +1,38 @@
 from integration.util.ssh import run_ssh
 
 
-def loop_device_cleanup(num, password):
+def loop_device_cleanup(dev_file, password):
     print('cleanup')
     for mount in run_ssh('mount', password=password).splitlines():
-        if 'loop' in mount:
+        if dev_file in mount:
             print(mount)
+            for i in range(0, 10):
+                if 'loop{0}'.format(i) in mount:
+                    run_ssh('umount /dev/loop{0}'.format(i), throw=False, password=password)
 
     for loop in run_ssh('losetup', password=password).splitlines():
-        if 'loop{0}'.format(num) in loop:
-            run_ssh('losetup -d /dev/loop{0}'.format(num), throw=False, password=password)
+        if dev_file in loop:
+            for i in range(0, 10):
+                if 'loop{0}'.format(i) in loop:
+                    run_ssh('losetup -d /dev/loop{0}'.format(i), throw=False, password=password) 
 
     run_ssh('losetup', password=password)
 
     for loop in run_ssh('dmsetup ls', password=password).splitlines():
-        if 'loop{0}'.format(num) in loop:
-            run_ssh('sudo dmsetup remove loop{0}p1'.format(num), password=password)
+        if 'loop0p1' in loop:
+            run_ssh('sudo dmsetup remove loop0p1', password=password)
+        if 'loop0p2' in loop:
+            run_ssh('sudo dmsetup remove loop0p2', password=password)
 
-    for loop_disk in run_ssh('ls -la /tmp', password=password).splitlines():
-        if '/tmp/disk{0}'.format(num) in loop_disk:
-            run_ssh('rm -fr /tmp/disk{0}'.format(num), throw=False, password=password)
+    run_ssh('rm -rf {0}'.format(dev_file), throw=False, password=password)
 
 
-def loop_device_add(fs, dev_num, pasword):
+def loop_device_add(fs, dev_file, password):
 
     print('adding loop device')
-    run_ssh('dd if=/dev/zero bs=1M count=10 of=/tmp/disk{0}'.format(dev_num), password=pasword)
+    run_ssh('dd if=/dev/zero bs=1M count=10 of={0}'.format(dev_file), password=password)
 
-    run_ssh('losetup /dev/loop{0} /tmp/disk{0}'.format(dev_num), password=pasword)
-    run_ssh('file -s /dev/loop{0}'.format(dev_num), password=pasword)
-    run_ssh('mkfs.{0} /dev/loop{1}'.format(fs, dev_num), password=pasword)
-    return '/dev/loop{0}'.format(dev_num)
+    loop = run_ssh('losetup -f --show {0}'.format(dev_file), password=password)
+    run_ssh('file -s {0}'.format(loop), password=password)
+    run_ssh('mkfs.{0} {1}'.format(fs, loop), password=password)
+    return loop

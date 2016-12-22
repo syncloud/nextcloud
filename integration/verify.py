@@ -178,15 +178,15 @@ def test_verification(nextcloud_session_domain, user_domain):
 
 def test_disk(syncloud_session, user_domain):
 
-    loop_device_cleanup(0, DEVICE_PASSWORD)
-    loop_device_cleanup(1, DEVICE_PASSWORD)
+    loop_device_cleanup('/tmp/test0', DEVICE_PASSWORD)
+    loop_device_cleanup('/tmp/test1', DEVICE_PASSWORD)
 
-    device0 = loop_device_add('ext4', 0, DEVICE_PASSWORD)
+    device0 = loop_device_add('ext4', '/tmp/test0', DEVICE_PASSWORD)
     __activate_disk(syncloud_session, device0)
     __create_test_dir('test0', user_domain)
     __check_test_dir(nextcloud_session_domain(user_domain), 'test0', user_domain)
 
-    device1 = loop_device_add('ext2', 1, DEVICE_PASSWORD)
+    device1 = loop_device_add('ext2', '/tmp/test1', DEVICE_PASSWORD)
     __activate_disk(syncloud_session, device1)
     __create_test_dir('test1', user_domain)
     __check_test_dir(nextcloud_session_domain(user_domain), 'test1', user_domain)
