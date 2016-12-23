@@ -1,6 +1,7 @@
 from subprocess import check_output
 from syncloud_app import logger
 
+
 class OCConsole:
     def __init__(self, occ_runner_path):
         self.occ_runner_path = occ_runner_path
