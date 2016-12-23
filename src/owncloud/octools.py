@@ -11,6 +11,7 @@ class OCConsole:
         output = check_output('{0} {1}'.format(self.occ_runner_path, args), shell=True).strip()
         if output:
             log.info(output)
+        return output
 
 
 class OCConfig:

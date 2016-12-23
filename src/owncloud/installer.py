@@ -22,6 +22,7 @@ APP_NAME = 'nextcloud'
 USER_NAME = 'nextcloud'
 DB_NAME = 'nextcloud'
 DB_USER = 'nextcloud'
+DB_PASSWORD = 'nextcloud'
 PSQL_PATH = 'postgresql/bin/psql'
 OCC_RUNNER_PATH = 'bin/occ-runner'
 OC_CONFIG_PATH = 'bin/nextcloud-config'
@@ -135,9 +136,11 @@ class OwncloudInstaller:
         return 'installed' in open(config_file).read().strip()
 
     def upgrade(self):
-        self.occ.run('maintenance:mode --on')
-        self.occ.run('upgrade')
-        self.occ.run('maintenance:mode --off')
+
+        if 'require upgrade' in self.occ.run('status'):
+            self.occ.run('maintenance:mode --on')
+            self.occ.run('upgrade')
+            self.occ.run('maintenance:mode --off')
 
     def initialize(self):
 
@@ -148,7 +151,7 @@ class OwncloudInstaller:
         db_postgres = Database(
             join(self.app.get_install_dir(), PSQL_PATH),
             database='postgres', user=DB_USER, database_path=self.database_path)
-        db_postgres.execute("ALTER USER nextcloud WITH PASSWORD 'nextcloud';")
+        db_postgres.execute("ALTER USER {0} WITH PASSWORD '{1}';".format(DB_USER, DB_PASSWORD))
 
         web_setup = Setup(WEB_PORT)
         web_setup.finish(INSTALL_USER, unicode(uuid.uuid4().hex), self.app.get_storage_dir(), self.database_path)
