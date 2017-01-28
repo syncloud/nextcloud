@@ -7,8 +7,7 @@ After=nextcloud-postgresql.service
 User=nextcloud
 Type=forking
 PIDFile={{ app_data_dir }}/php-fpm.pid
-ExecStart={{ app_dir }}/php/sbin/php-fpm -y {{ app_dir }}/config/php-fpm.conf -c {{ app_dir }}/config/php.ini
-Environment=LD_LIBRARY_PATH={{ app_dir }}/php/lib
+ExecStart={{ app_dir }}/bin/service.php-fpm.sh
 RemainAfterExit=yes
 
 [Install]
