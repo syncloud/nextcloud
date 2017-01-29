@@ -106,7 +106,6 @@ class OwncloudInstaller:
         oc_config.set_value('loglevel', '2')
         oc_config.set_value('logfile', join(self.app.get_data_dir(), OWNCLOUD_LOG_PATH))
         oc_config.set_value('datadirectory', self.app.get_storage_dir())
-        oc_config.set_value('integrity.check.disabled', 'true')
 
         self.on_domain_change()
 

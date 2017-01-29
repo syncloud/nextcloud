@@ -52,13 +52,12 @@ echo "extracting rootfs"
 rm -rf ${ROOTFS}
 mkdir -p ${ROOTFS}
 tar xzf ${APP_DIR}/${ROOTFS_FILE} -C ${ROOTFS}
-sed -i 's/Port 22/Port 2222/g' ${ROOTFS}/etc/ssh/sshd_config
 
 echo "importing rootfs"
 tar -C ${ROOTFS} -c . | docker import - syncloud
 
 echo "starting rootfs"
-docker run --net host -v /var/run/dbus:/var/run/dbus --name rootfs --privileged -d -it syncloud /sbin/init
+docker run -v /var/run/dbus:/var/run/dbus --name rootfs --cap-add=ALL -p 2222:22 -p 80:80 -p 81:81 --privileged -d -it syncloud /sbin/init 
 
 ssh-keygen -f "/root/.ssh/known_hosts" -R [localhost]:2222
 
