@@ -44,9 +44,5 @@ mkdir build/${NAME}/META
 echo ${NAME} >> build/${NAME}/META/app
 echo ${VERSION} >> build/${NAME}/META/version
 
-echo "patching filemtime for huge file support on 32 bit php (with special compile flags)"
-cd ${BUILD_DIR}/${NAME}
-patch -p0 < ${DIR}/patches/filemtime.patch
-
 echo "zipping"
 tar cpzf ${DIR}/${NAME}-${VERSION}-${ARCH}.tar.gz -C ${DIR}/build/ ${NAME}
