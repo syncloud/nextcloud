@@ -16,4 +16,4 @@ mv ${DIR}/geckodriver/geckodriver ${DIR}/geckodriver/wires
 
 pip2 install -r ${DIR}/../src/dev_requirements.txt
 pip2 install -U pytest
-xvfb-run py.test -x -s verify.py test_ui.py --email=$1 --password=$2 --domain=$3 --release=$4 --app-version=$5 --arch=$6
+xvfb-run --server-args="-screen 0, 1024x768x24" py.test -x -s verify.py test_ui.py --email=$1 --password=$2 --domain=$3 --release=$4 --app-version=$5 --arch=$6
