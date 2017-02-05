@@ -7,7 +7,7 @@ export TMPDIR=/tmp
 export TMP=/tmp
 
 NAME=nextcloud
-NEXTCLOUD_VERSION=11.0.0
+NEXTCLOUD_VERSION=11.0.1
 COIN_CACHE_DIR=${DIR}/coin.cache
 ARCH=$(dpkg-architecture -qDEB_HOST_GNU_CPU)
 if [ ! -z "$1" ]; then
