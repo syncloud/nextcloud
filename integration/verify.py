@@ -81,7 +81,7 @@ def test_start(module_setup):
 
 
 def test_activate_device(auth):
-    email, password, domain, release, version, arch = auth
+    email, password, domain, release, _ = auth
 
     run_ssh('/opt/app/sam/bin/sam update --release {0}'.format(release), password=DEFAULT_DEVICE_PASSWORD)
     run_ssh('/opt/app/sam/bin/sam --debug upgrade platform', password=DEFAULT_DEVICE_PASSWORD)
@@ -100,8 +100,8 @@ def test_activate_device(auth):
 #     assert response.status_code == 200
 
 
-def test_install(auth):
-    __local_install(auth)
+def test_install(app_archive_path):
+    __local_install(app_archive_path)
 
 
 def test_resource(nextcloud_session_domain, user_domain):
@@ -151,7 +151,7 @@ def files_scan():
     run_ssh('/opt/app/nextcloud/bin/occ-runner files:scan --all', password=DEVICE_PASSWORD)
 
 
-def test_visible_through_platform(auth, user_domain):
+def test_visible_through_platform(user_domain):
     response = requests.get('http://127.0.0.1/index.php/login', headers={"Host": user_domain}, allow_redirects=False)
     assert response.status_code == 200, response.text
 
@@ -242,13 +242,12 @@ def test_remove(syncloud_session):
     assert response.status_code == 200, response.text
 
 
-def test_reinstall(auth):
-    __local_install(auth)
+def test_reinstall(app_archive_path):
+    __local_install(app_archive_path)
 
 
-def __local_install(auth):
-    email, password, domain, release, version, arch = auth
-    run_scp('{0}/../nextcloud-{1}-{2}.tar.gz root@localhost:/'.format(DIR, version, arch), password=DEVICE_PASSWORD)
-    run_ssh('/opt/app/sam/bin/sam --debug install /nextcloud-{0}-{1}.tar.gz'.format(version, arch), password=DEVICE_PASSWORD)
+def __local_install(app_archive_path):
+    run_scp('{0} root@localhost:/app.tar.gz'.format(app_archive_path), password=DEVICE_PASSWORD)
+    run_ssh('/opt/app/sam/bin/sam --debug install /app.tar.gz', password=DEVICE_PASSWORD)
     set_docker_ssh_port(DEVICE_PASSWORD)
     time.sleep(3)
