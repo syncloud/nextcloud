@@ -4,6 +4,7 @@ SYNCLOUD_INFO = 'syncloud.info'
 DEVICE_USER = 'user'
 DEVICE_PASSWORD = 'password'
 
+
 def pytest_addoption(parser):
     parser.addoption("--email", action="store")
     parser.addoption("--password", action="store")
@@ -24,7 +25,7 @@ def auth(request):
 
 @pytest.fixture(scope='module')
 def user_domain(auth):
-    email, password, domain, release, version, arch = auth
+    email, password, domain, release, _ = auth
     return 'nextcloud.{0}.{1}'.format(domain, SYNCLOUD_INFO)
 
 
