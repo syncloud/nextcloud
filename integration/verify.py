@@ -116,7 +116,7 @@ def test_sync(user_domain, megabytes):
     sync_file = 'test.file-{0}'.format(megabytes)
     if os.path.isfile(sync_file):
         os.remove(sync_file)
-    print(check_output('dd if=/dev/zero of={0} count={1} bs=1M'.format(sync_file, megabites), shell=True))
+    print(check_output('dd if=/dev/zero of={0} count={1} bs=1M'.format(sync_file, megabytes), shell=True))
     print(check_output(webdav_upload(DEVICE_USER, DEVICE_PASSWORD, sync_file, user_domain), shell=True))
 
     sync_file_download = 'test.file.download'
