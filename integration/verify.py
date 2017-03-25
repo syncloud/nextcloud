@@ -134,7 +134,7 @@ def webdav_upload(user, password, file_from, file_to, user_domain):
 
 
 def webdav_download(user, password, file_from, file_to, user_domain):
-    return 'curl -O {3} http://{0}:{1}@{4}/remote.php/webdav/{2}'.format(user, password, file_from, file_to, user_domain)
+    return 'curl -o {3} http://{0}:{1}@{4}/remote.php/webdav/{2}'.format(user, password, file_from, file_to, user_domain)
 
 
 def files_scan():
