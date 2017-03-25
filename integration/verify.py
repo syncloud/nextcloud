@@ -117,24 +117,24 @@ def test_sync(user_domain, megabytes):
     if os.path.isfile(sync_file):
         os.remove(sync_file)
     print(check_output('dd if=/dev/zero of={0} count={1} bs=1M'.format(sync_file, megabytes), shell=True))
-    print(check_output(webdav_upload(DEVICE_USER, DEVICE_PASSWORD, sync_file, user_domain), shell=True))
+    print(check_output(webdav_upload(DEVICE_USER, DEVICE_PASSWORD, sync_file, sync_file, user_domain), shell=True))
 
     sync_file_download = 'test.file.download'
     if os.path.isfile(sync_file_download):
         os.remove(sync_file_download)
-    print(check_output(webdav_download(DEVICE_USER, DEVICE_PASSWORD, sync_file_download, user_domain), shell=True))
+    print(check_output(webdav_download(DEVICE_USER, DEVICE_PASSWORD, sync_file, sync_file_download, user_domain), shell=True))
 
     assert os.path.isfile(sync_file_download)
     run_ssh('rm /data/nextcloud/{0}/files/{1}'.format(DEVICE_USER, sync_file), password=DEVICE_PASSWORD)
     files_scan()
 
 
-def webdav_upload(user, password, sync_file, user_domain):
-    return 'curl -T {2} http://{0}:{1}@{3}/remote.php/webdav/{2}'.format(user, password, sync_file, user_domain)
+def webdav_upload(user, password, file_from, file_to, user_domain):
+    return 'curl -T {2} http://{0}:{1}@{4}/remote.php/webdav/{3}'.format(user, password, file_from, file_to, user_domain)
 
 
-def webdav_download(user, password, sync_file, user_domain):
-    return 'curl -O {2} http://{0}:{1}@{3}/remote.php/webdav/{2}'.format(user, password, sync_file, user_domain)
+def webdav_download(user, password, file_from, file_to, user_domain):
+    return 'curl -O {3} http://{0}:{1}@{4}/remote.php/webdav/{2}'.format(user, password, file_from, file_to, user_domain)
 
 
 def files_scan():
