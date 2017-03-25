@@ -110,41 +110,31 @@ def test_resource(nextcloud_session_domain, user_domain):
     assert response.status_code == 200, response.text
 
 
-#def test_sync_1m_file(user_domain):
-#    _test_sync(user_domain, 1)
+@pytest.mark.parametrize("megabytes", [1, 300, 3000])
+def test_sync(user_domain, megabytes):
 
+    sync_file = 'test.file-{0}'.format(megabytes)
+    if os.path.isfile(sync_file):
+        os.remove(sync_file)
+    print(check_output('dd if=/dev/zero of={0} count={1} bs=1M'.format(sync_file, megabites), shell=True))
+    print(check_output(webdav_upload(DEVICE_USER, DEVICE_PASSWORD, sync_file, user_domain), shell=True))
 
-#def test_sync_300m_file(user_domain):
-#    _test_sync(user_domain, 300)
+    sync_file_download = 'test.file.download'
+    if os.path.isfile(sync_file_download):
+        os.remove(sync_file_download)
+    print(check_output(webdav_download(DEVICE_USER, DEVICE_PASSWORD, sync_file_download, user_domain), shell=True))
 
-
-# def test_sync_3g_file(user_domain):
-#     _test_sync(user_domain, 3000)
-
-
-def sync_cmd(sync_dir, user_domain):
-    return 'owncloudcmd -u {0} -p {1} {2} http://{3}'.format(DEVICE_USER, DEVICE_PASSWORD, sync_dir, user_domain)
-
-
-def _test_sync(user_domain, megabites):
-
-    sync_dir_upload = 'sync.test.upload'
-    sync_file = 'test.file-{0}'.format(megabites)
-    shutil.rmtree(sync_dir_upload, ignore_errors=True)
-    os.mkdir(sync_dir_upload)
-    sync_full_path_file = join(sync_dir_upload, sync_file)
-    print(check_output('dd if=/dev/zero of={0} count={1} bs=1M'.format(sync_full_path_file, megabites), shell=True))
-    print(check_output(sync_cmd(sync_dir_upload, user_domain), shell=True))
-
-    sync_dir_download = 'sync.test.download'
-    shutil.rmtree(sync_dir_download, ignore_errors=True)
-    os.mkdir(sync_dir_download)
-    print(check_output(sync_cmd(sync_dir_download, user_domain), shell=True))
-    sync_full_path_file = join(sync_dir_download, sync_file)
-
-    assert os.path.isfile(sync_full_path_file)
+    assert os.path.isfile(sync_file_download)
     run_ssh('rm /data/nextcloud/{0}/files/{1}'.format(DEVICE_USER, sync_file), password=DEVICE_PASSWORD)
     files_scan()
+
+
+def webdav_upload(user, password, sync_file, user_domain):
+    return 'curl -T {2} http://{0}:{1}@{3}/remote.php/webdav/{2}'.format(user, password, sync_file, user_domain)
+
+
+def webdav_download(user, password, sync_file, user_domain):
+    return 'curl -O {2} http://{0}:{1}@{3}/remote.php/webdav/{2}'.format(user, password, sync_file, user_domain)
 
 
 def files_scan():
