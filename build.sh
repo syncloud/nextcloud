@@ -3,25 +3,23 @@
 DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
 cd ${DIR}
 
+if [[ -z "$1" || -z "$2" ]]; then
+    echo "usage $0 app_arch app_version"
+    exit 1
+fi
+
 export TMPDIR=/tmp
 export TMP=/tmp
 
 NAME=nextcloud
-NEXTCLOUD_VERSION=11.0.1
+NEXTCLOUD_VERSION=11.0.2
 COIN_CACHE_DIR=${DIR}/coin.cache
-ARCH=$(dpkg-architecture -qDEB_HOST_GNU_CPU)
-if [ ! -z "$1" ]; then
-    ARCH=$1
-fi
-
-VERSION="local"
-if [ ! -z "$2" ]; then
-    VERSION=$2
-fi
+ARCH=$1
+VERSION=$2
 
 ./coin_lib.sh
 
-cp -r ${DIR}/src lib/syncloud-owncloud-${VERSION}
+cp -r ${DIR}/src lib/syncloud-${NAME}-${VERSION}
 
 rm -rf build
 BUILD_DIR=${DIR}/build/${NAME}

@@ -81,7 +81,7 @@ def test_start(module_setup):
 
 
 def test_activate_device(auth):
-    email, password, domain, release, version, arch = auth
+    email, password, domain, release, _ = auth
 
     run_ssh('/opt/app/sam/bin/sam update --release {0}'.format(release), password=DEFAULT_DEVICE_PASSWORD)
     run_ssh('/opt/app/sam/bin/sam --debug upgrade platform', password=DEFAULT_DEVICE_PASSWORD)
@@ -100,8 +100,8 @@ def test_activate_device(auth):
 #     assert response.status_code == 200
 
 
-def test_install(auth):
-    __local_install(auth)
+def test_install(app_archive_path):
+    __local_install(app_archive_path)
 
 
 def test_resource(nextcloud_session_domain, user_domain):
@@ -110,48 +110,38 @@ def test_resource(nextcloud_session_domain, user_domain):
     assert response.status_code == 200, response.text
 
 
-def test_sync_1m_file(user_domain):
-    _test_sync(user_domain, 1)
+@pytest.mark.parametrize("megabytes", [1, 300, 3000])
+def test_sync(user_domain, megabytes):
 
+    sync_file = 'test.file-{0}'.format(megabytes)
+    if os.path.isfile(sync_file):
+        os.remove(sync_file)
+    print(check_output('dd if=/dev/zero of={0} count={1} bs=1M'.format(sync_file, megabytes), shell=True))
+    print(check_output(webdav_upload(DEVICE_USER, DEVICE_PASSWORD, sync_file, sync_file, user_domain), shell=True))
 
-def test_sync_300m_file(user_domain):
-    _test_sync(user_domain, 300)
+    sync_file_download = 'test.file.download'
+    if os.path.isfile(sync_file_download):
+        os.remove(sync_file_download)
+    print(check_output(webdav_download(DEVICE_USER, DEVICE_PASSWORD, sync_file, sync_file_download, user_domain), shell=True))
 
-
-# def test_sync_3g_file(user_domain):
-#     _test_sync(user_domain, 3000)
-
-
-def sync_cmd(sync_dir, user_domain):
-    return 'owncloudcmd -u {0} -p {1} {2} http://{3}'.format(DEVICE_USER, DEVICE_PASSWORD, sync_dir, user_domain)
-
-
-def _test_sync(user_domain, megabites):
-
-    sync_dir_upload = 'sync.test.upload'
-    sync_file = 'test.file-{0}'.format(megabites)
-    shutil.rmtree(sync_dir_upload, ignore_errors=True)
-    os.mkdir(sync_dir_upload)
-    sync_full_path_file = join(sync_dir_upload, sync_file)
-    print(check_output('dd if=/dev/zero of={0} count={1} bs=1M'.format(sync_full_path_file, megabites), shell=True))
-    print(check_output(sync_cmd(sync_dir_upload, user_domain), shell=True))
-
-    sync_dir_download = 'sync.test.download'
-    shutil.rmtree(sync_dir_download, ignore_errors=True)
-    os.mkdir(sync_dir_download)
-    print(check_output(sync_cmd(sync_dir_download, user_domain), shell=True))
-    sync_full_path_file = join(sync_dir_download, sync_file)
-
-    assert os.path.isfile(sync_full_path_file)
+    assert os.path.isfile(sync_file_download)
     run_ssh('rm /data/nextcloud/{0}/files/{1}'.format(DEVICE_USER, sync_file), password=DEVICE_PASSWORD)
     files_scan()
+
+
+def webdav_upload(user, password, file_from, file_to, user_domain):
+    return 'curl -T {2} http://{0}:{1}@{4}/remote.php/webdav/{3}'.format(user, password, file_from, file_to, user_domain)
+
+
+def webdav_download(user, password, file_from, file_to, user_domain):
+    return 'curl -o {3} http://{0}:{1}@{4}/remote.php/webdav/{2}'.format(user, password, file_from, file_to, user_domain)
 
 
 def files_scan():
     run_ssh('/opt/app/nextcloud/bin/occ-runner files:scan --all', password=DEVICE_PASSWORD)
 
 
-def test_visible_through_platform(auth, user_domain):
+def test_visible_through_platform(user_domain):
     response = requests.get('http://127.0.0.1/index.php/login', headers={"Host": user_domain}, allow_redirects=False)
     assert response.status_code == 200, response.text
 
@@ -242,13 +232,12 @@ def test_remove(syncloud_session):
     assert response.status_code == 200, response.text
 
 
-def test_reinstall(auth):
-    __local_install(auth)
+def test_reinstall(app_archive_path):
+    __local_install(app_archive_path)
 
 
-def __local_install(auth):
-    email, password, domain, release, version, arch = auth
-    run_scp('{0}/../nextcloud-{1}-{2}.tar.gz root@localhost:/'.format(DIR, version, arch), password=DEVICE_PASSWORD)
-    run_ssh('/opt/app/sam/bin/sam --debug install /nextcloud-{0}-{1}.tar.gz'.format(version, arch), password=DEVICE_PASSWORD)
+def __local_install(app_archive_path):
+    run_scp('{0} root@localhost:/app.tar.gz'.format(app_archive_path), password=DEVICE_PASSWORD)
+    run_ssh('/opt/app/sam/bin/sam --debug install /app.tar.gz', password=DEVICE_PASSWORD)
     set_docker_ssh_port(DEVICE_PASSWORD)
     time.sleep(3)
