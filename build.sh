@@ -17,7 +17,13 @@ COIN_CACHE_DIR=${DIR}/coin.cache
 ARCH=$1
 VERSION=$2
 
-./coin_lib.sh
+rm -rf ${DIR}/lib
+mkdir ${DIR}/lib
+
+coin --to lib py https://pypi.python.org/packages/2.7/b/beautifulsoup4/beautifulsoup4-4.4.0-py2-none-any.whl
+coin --to lib py https://pypi.python.org/packages/2.7/r/requests/requests-2.7.0-py2.py3-none-any.whl
+coin --to lib py https://pypi.python.org/packages/source/m/massedit/massedit-0.67.1.zip
+coin --to lib py https://pypi.python.org/packages/source/s/syncloud-lib/syncloud-lib-2.tar.gz
 
 cp -r ${DIR}/src lib/syncloud-${NAME}-${VERSION}
 
