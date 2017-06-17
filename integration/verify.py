@@ -36,7 +36,6 @@ def module_setup(request, device_host):
 
 
 def module_teardown(device_host):
-    os.mkdir(LOG_DIR)
     platform_log_dir = join(LOG_DIR, 'platform_log')
     os.mkdir(platform_log_dir)
     run_scp('root@{0}:/opt/data/platform/log/* {1}'.format(device_host, platform_log_dir), password=LOGS_SSH_PASSWORD)
@@ -73,7 +72,7 @@ def nextcloud_session_domain(user_domain, device_host):
 
 def test_start(module_setup):
     shutil.rmtree(LOG_DIR, ignore_errors=True)
-
+    os.mkdir(LOG_DIR)
 
 def test_activate_device(auth, device_host):
     email, password, domain, release, _ = auth
