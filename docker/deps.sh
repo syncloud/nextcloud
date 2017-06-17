@@ -1,6 +1,6 @@
 #!/bin/bash -xe
 
-apt-get install -y dpkg-dev libfontconfig libgtk-3-0 libasound2 libdbus-glib-1-2
+apt-get install -y dpkg-dev sshpass curl netcat xvfb wget unzip libfontconfig libgtk-3-0 libasound2 libdbus-glib-1-2
 wget https://bootstrap.pypa.io/get-pip.py
 python get-pip.py
 pip install -U pytest
