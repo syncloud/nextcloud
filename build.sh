@@ -3,8 +3,8 @@
 DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
 cd ${DIR}
 
-if [[ -z "$1" || -z "$2" ]]; then
-    echo "usage $0 app_arch app_version"
+if [[ -z "$1" ]]; then
+    echo "usage $0 version"
     exit 1
 fi
 
@@ -14,8 +14,8 @@ export TMP=/tmp
 NAME=nextcloud
 NEXTCLOUD_VERSION=11.0.2
 COIN_CACHE_DIR=${DIR}/coin.cache
-ARCH=$1
-VERSION=$2
+ARCH=$(uname -m)
+VERSION=$1
 
 rm -rf ${DIR}/lib
 mkdir ${DIR}/lib
@@ -31,11 +31,11 @@ rm -rf build
 BUILD_DIR=${DIR}/build/${NAME}
 mkdir -p ${BUILD_DIR}
 
-DOWNLOAD_URL=http://build.syncloud.org:8111/guestAuth/repository/download
+DOWNLOAD_URL=http://artifact.syncloud.org/3rdparty
 
-coin --to ${BUILD_DIR} raw ${DOWNLOAD_URL}/thirdparty_php_${ARCH}/lastSuccessful/php-${ARCH}.tar.gz
-coin --to ${BUILD_DIR} raw ${DOWNLOAD_URL}/thirdparty_nginx_${ARCH}/lastSuccessful/nginx-${ARCH}.tar.gz
-coin --to ${BUILD_DIR} raw ${DOWNLOAD_URL}/thirdparty_postgresql_${ARCH}/lastSuccessful/postgresql-${ARCH}.tar.gz
+coin --to ${BUILD_DIR} raw ${DOWNLOAD_URL}/php-${ARCH}.tar.gz
+coin --to ${BUILD_DIR} raw ${DOWNLOAD_URL}/nginx-${ARCH}.tar.gz
+coin --to ${BUILD_DIR} raw ${DOWNLOAD_URL}/postgresql-${ARCH}.tar.gz
 coin --to ${BUILD_DIR} raw https://download.nextcloud.com/server/releases/${NAME}-${NEXTCLOUD_VERSION}.tar.bz2
 
 cp -r bin ${BUILD_DIR}
