@@ -9,10 +9,9 @@ def pytest_addoption(parser):
     parser.addoption("--email", action="store")
     parser.addoption("--password", action="store")
     parser.addoption("--domain", action="store")
-    parser.addoption("--release", action="store")
     parser.addoption("--installer", action="store")
     parser.addoption("--device-host", action="store")
-    parser.addoption("--app_archive_path", action="store")
+    parser.addoption("--app-archive-path", action="store")
 
 
 @pytest.fixture(scope="session")
@@ -20,14 +19,13 @@ def auth(request):
     config = request.config
     return config.getoption("--email"), \
            config.getoption("--password"), \
-           config.getoption("--domain"), \
-           config.getoption("--release")
+           config.getoption("--domain")
 
 
 @pytest.fixture(scope='module')
 def user_domain(auth):
-    _, _, domain, _ = auth
-    return 'nextcloud.{0}.{1}'.format(domain, SYNCLOUD_INFO)
+    _, _, domain = auth
+    return 'diaspora.{0}.{1}'.format(domain, SYNCLOUD_INFO)
 
 
 @pytest.fixture(scope='module')
