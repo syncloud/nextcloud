@@ -174,15 +174,15 @@ def test_disk(syncloud_session, user_domain, device_host):
     device0 = loop_device_add(device_host, 'ext4', '/tmp/test0', DEVICE_PASSWORD)
     __activate_disk(syncloud_session, device0, device_host)
     __create_test_dir('test0', user_domain, device_host)
-    __check_test_dir(nextcloud_session_domain(user_domain), 'test0', user_domain, device_host)
+    __check_test_dir(nextcloud_session_domain(user_domain, device_host), 'test0', user_domain, device_host)
 
     device1 = loop_device_add(device_host, 'ext2', '/tmp/test1', DEVICE_PASSWORD)
     __activate_disk(syncloud_session, device1, device_host)
     __create_test_dir('test1', user_domain, device_host)
-    __check_test_dir(nextcloud_session_domain(user_domain), 'test1', user_domain, device_host)
+    __check_test_dir(nextcloud_session_domain(user_domain, device_host), 'test1', user_domain, device_host)
 
     __activate_disk(syncloud_session, device0, device_host)
-    __check_test_dir(nextcloud_session_domain(user_domain), 'test0', user_domain, device_host)
+    __check_test_dir(nextcloud_session_domain(user_domain, device_host), 'test0', user_domain, device_host)
 
 
 def __log_data_dir(device_host):
