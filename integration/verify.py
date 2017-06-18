@@ -193,11 +193,11 @@ def __log_data_dir(device_host):
 
 def __activate_disk(syncloud_session, loop_device, device_host):
 
-    __log_data_dir()
+    __log_data_dir(device_host)
     response = syncloud_session.get('http://{0}/rest/settings/disk_activate'.format(device_host),
                                     params={'device': loop_device}, allow_redirects=False)
-    __log_data_dir()
-    files_scan()
+    __log_data_dir(device_host)
+    files_scan(device_host)
     assert response.status_code == 200, response.text
 
 
