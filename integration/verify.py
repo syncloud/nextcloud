@@ -61,7 +61,7 @@ def syncloud_session(device_host):
 @pytest.fixture(scope='function')
 def nextcloud_session_domain(user_domain, device_host):
     session = requests.session()
-    response = session.get('http://{0}/index.php/login'.format(device_host), headers={"Host": user_domain}, allow_redirects=False)
+    response = session.get('http://{0}'.format(device_host), headers={"Host": user_domain}, allow_redirects=False)
     print(response.text)
     soup = BeautifulSoup(response.text, "html.parser")
     requesttoken = soup.find_all('input', {'name': 'requesttoken'})[0]['value']
