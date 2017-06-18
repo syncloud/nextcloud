@@ -16,7 +16,7 @@ LOG_DIR = join(DIR, 'log')
 DEVICE_USER = 'user'
 DEVICE_PASSWORD = 'password'
 log_dir = join(LOG_DIR, 'nextcloud_log')
-
+screenshot_dir = join(DIR, 'screenshot')
 
 @pytest.fixture(scope="module")
 def driver():
