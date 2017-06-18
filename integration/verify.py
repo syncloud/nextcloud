@@ -233,7 +233,7 @@ def test_reinstall(app_archive_path, device_host):
 
 
 def __local_install(app_archive_path, device_host):
-    run_scp('{0} root@{1}:/app.tar.gz'.format(app_archive_path< device_host), password=DEVICE_PASSWORD)
+    run_scp('{0} root@{1}:/app.tar.gz'.format(app_archive_path, device_host), password=DEVICE_PASSWORD)
     run_ssh(device_host, '/opt/app/sam/bin/sam --debug install /app.tar.gz', password=DEVICE_PASSWORD)
     set_docker_ssh_port(DEVICE_PASSWORD)
     time.sleep(3)
