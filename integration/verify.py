@@ -39,15 +39,17 @@ def module_teardown(device_host):
     platform_log_dir = join(LOG_DIR, 'platform_log')
     os.mkdir(platform_log_dir)
     run_scp('root@{0}:/opt/data/platform/log/* {1}'.format(device_host, platform_log_dir), password=LOGS_SSH_PASSWORD)
+    
+    run_scp('root@{0}:/var/log/sam.log {1}'.format(device_host, platform_log_dir), password=LOGS_SSH_PASSWORD)
+
+    print('systemd logs')
+    run_ssh(device_host, 'journalctl | tail -200', password=LOGS_SSH_PASSWORD)
+
     nextcloud_log_dir = join(LOG_DIR, 'nextcloud_log')
     os.mkdir(nextcloud_log_dir)
     run_scp('root@{0}:/opt/data/nextcloud/log/*.log {1}'.format(device_host, nextcloud_log_dir), password=LOGS_SSH_PASSWORD)
 
-    run_scp('root@{0}:/var/log/sam.log {1}'.format(device_host, platform_log_dir), password=LOGS_SSH_PASSWORD)
-
-    print('systemd logs')
-    run_ssh('journalctl | tail -200', password=LOGS_SSH_PASSWORD)
-
+    
 
 @pytest.fixture(scope='function')
 def syncloud_session(device_host):
