@@ -108,7 +108,7 @@ def test_resource(nextcloud_session_domain, user_domain, device_host):
 
 
 @pytest.mark.parametrize("megabytes", [1, 300, 3000])
-def test_sync(user_domain, megabytes):
+def test_sync(user_domain, megabytes, device_host):
 
     sync_file = 'test.file-{0}'.format(megabytes)
     if os.path.isfile(sync_file):
