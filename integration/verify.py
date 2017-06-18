@@ -77,7 +77,7 @@ def test_start(module_setup):
     os.mkdir(LOG_DIR)
 
 def test_activate_device(auth, device_host):
-    email, password, domain, release, _ = auth
+    email, password, domain, release = auth
 
     run_ssh(device_host, '/opt/app/sam/bin/sam update --release {0}'.format(release), password=DEFAULT_DEVICE_PASSWORD)
     run_ssh(device_host, '/opt/app/sam/bin/sam --debug upgrade platform', password=DEFAULT_DEVICE_PASSWORD)
