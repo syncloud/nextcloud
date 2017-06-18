@@ -26,7 +26,7 @@ def auth(request):
 
 @pytest.fixture(scope='module')
 def user_domain(request):
-    return 'diaspora.{0}.{1}'.format(request.config.getoption("--domain"), SYNCLOUD_INFO)
+    return 'nextcloud.{0}.{1}'.format(request.config.getoption("--domain"), SYNCLOUD_INFO)
 
 
 @pytest.fixture(scope='module')
