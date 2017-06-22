@@ -14,6 +14,7 @@ RELEASE=$6
 TEST=$7
 INSTALLER=$8
 DEVICE_HOST=$9
+APP=nextcloud
 
 GECKODRIVER=0.14.0
 FIREFOX=52.0
@@ -59,7 +60,7 @@ curl https://raw.githubusercontent.com/mguillem/JSErrorCollector/master/dist/JSE
 
 #fix dns
 device_ip=$(getent hosts ${DEVICE_HOST} | awk '{ print $1 }')
-echo "$device_ip gogs.$DOMAIN.syncloud.info" >> /etc/hosts
+echo "$device_ip $APP.$DOMAIN.syncloud.info" >> /etc/hosts
 
 cat /etc/hosts
 
