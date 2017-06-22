@@ -7,6 +7,7 @@ if [ "$#" -lt 9 ]; then
     exit 1
 fi
 
+DOMAIN=$3
 APP_ARCHIVE_PATH=$(realpath "$4")
 INSTALLER_VERSION=$5
 RELEASE=$6
@@ -56,4 +57,10 @@ coin --to ${DIR} raw --subfolder geckodriver https://github.com/mozilla/geckodri
 coin --to ${DIR} raw https://ftp.mozilla.org/pub/firefox/releases/${FIREFOX}/linux-x86_64/en-US/firefox-${FIREFOX}.tar.bz2
 curl https://raw.githubusercontent.com/mguillem/JSErrorCollector/master/dist/JSErrorCollector.xpi -o  JSErrorCollector.xpi
 
-xvfb-run -l --server-args="-screen 0, 1024x4096x24" py.test -x -s ${TEST_SUITE} --email=$1 --password=$2 --domain=$3 --release=$RELEASE --app-archive-path=${APP_ARCHIVE_PATH} --installer=${INSTALLER} --device-host=${DEVICE_HOST}
+#fix dns
+device_ip=$(getent hosts ${DEVICE_HOST} | awk '{ print $1 }')
+echo "$device_ip gogs.$DOMAIN.syncloud.info" >> /etc/hosts
+
+cat /etc/hosts
+
+xvfb-run -l --server-args="-screen 0, 1024x4096x24" py.test -x -s ${TEST_SUITE} --email=$1 --password=$2 --domain=$DOMAIN --release=$RELEASE --app-archive-path=${APP_ARCHIVE_PATH} --installer=${INSTALLER} --device-host=${DEVICE_HOST}
