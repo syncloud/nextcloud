@@ -44,15 +44,16 @@ def driver():
 
 def test_web_with_selenium(driver, user_domain):
 
-    driver.get("http://{0}/index.php/login".format(user_domain))
+    driver.get("http://{0}".format(user_domain))
     user = driver.find_element_by_id("user")
     user.send_keys(DEVICE_USER)
     password = driver.find_element_by_id("password")
     password.send_keys(DEVICE_PASSWORD)
     driver.get_screenshot_as_file(join(screenshot_dir, 'login.png'))
+    print(driver.page_source)
     password.send_keys(Keys.RETURN)
 
-    wait_driver = WebDriverWait(driver, 10)
+    wait_driver = WebDriverWait(driver, 30)
     wait_driver.until(EC.text_to_be_present_in_element((By.CSS_SELECTOR, '#header #expandDisplayName'), DEVICE_USER))
 
     wait_driver.until(EC.element_to_be_clickable((By.ID, 'closeWizard')))
