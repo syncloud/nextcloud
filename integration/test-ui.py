@@ -50,7 +50,7 @@ def test_web_with_selenium(driver, user_domain):
     password = driver.find_element_by_id("password")
     password.send_keys(DEVICE_PASSWORD)
     driver.get_screenshot_as_file(join(screenshot_dir, 'login.png'))
-    print(driver.page_source)
+    print(decode(driver.page_source))
     password.send_keys(Keys.RETURN)
 
     wait_driver = WebDriverWait(driver, 30)
