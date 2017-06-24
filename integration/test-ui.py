@@ -52,21 +52,23 @@ def test_web_with_selenium(driver, user_domain):
     driver.get_screenshot_as_file(join(screenshot_dir, 'login.png'))
     print(driver.page_source.encode('utf-8'))
     # submit = driver.find_element_by_id("submit")
-    password.submit()
+    # password.submit()
     #password.send_keys(Keys.RETURN)
-    time.sleep(10)
-    driver.get_screenshot_as_file(join(screenshot_dir, 'after_lpgin.png'))
-    wait_driver = WebDriverWait(driver, 30)
-    wait_driver.until(EC.text_to_be_present_in_element((By.CSS_SELECTOR, '#header #expandDisplayName'), DEVICE_USER))
+    # time.sleep(10)
+    # driver.get_screenshot_as_file(join(screenshot_dir, 'after_lpgin.png'))
+    # wait_driver = WebDriverWait(driver, 30)
+    # wait_driver.until(EC.text_to_be_present_in_element((By.CSS_SELECTOR, '#header #expandDisplayName'), DEVICE_USER))
+    #
+    # wait_driver.until(EC.element_to_be_clickable((By.ID, 'closeWizard')))
+    # wizard_close_button = driver.find_element_by_id("closeWizard")
+    # wizard_close_button.click()
+    #
+    # time.sleep(2)
+    # driver.get_screenshot_as_file(join(screenshot_dir, 'main.png'))
 
-    wait_driver.until(EC.element_to_be_clickable((By.ID, 'closeWizard')))
-    wizard_close_button = driver.find_element_by_id("closeWizard")
-    wizard_close_button.click()
 
-    time.sleep(2)
-    driver.get_screenshot_as_file(join(screenshot_dir, 'main.png'))
-
-    driver.get("http://{0}/index.php/settings/admin".format(user_domain))
-    time.sleep(10)
-    driver.get_screenshot_as_file(join(screenshot_dir, 'admin.png'))
-
+# def test_settings(driver, user_domain):
+#     driver.get("http://{0}/index.php/settings/admin".format(user_domain))
+#     time.sleep(10)
+#     driver.get_screenshot_as_file(join(screenshot_dir, 'admin.png'))
+#
