@@ -52,7 +52,7 @@ def test_web_with_selenium(driver, user_domain):
     driver.get_screenshot_as_file(join(screenshot_dir, 'login.png'))
     print(driver.page_source.encode('utf-8'))
     # submit = driver.find_element_by_id("submit")
-    password.sumbit()
+    password.submit()
     #password.send_keys(Keys.RETURN)
     time.sleep(10)
     driver.get_screenshot_as_file(join(screenshot_dir, 'after_lpgin.png'))
