@@ -52,13 +52,16 @@ def test_web_with_selenium(driver, user_domain):
     password.send_keys(DEVICE_PASSWORD)
     driver.get_screenshot_as_file(join(screenshot_dir, 'login.png'))
     print(driver.page_source.encode('utf-8'))
-    driver.find_element_by_tag_name('body').send_keys(Keys.CONTROL + Keys.SHIFT + 'k')
-    driver.get_screenshot_as_file(join(screenshot_dir, 'login_debug.png'))
+
+    #driver.find_element_by_tag_name('body').send_keys(Keys.CONTROL + Keys.SHIFT + 'k')
+    #driver.get_screenshot_as_file(join(screenshot_dir, 'login_debug.png'))
 
     # submit = driver.find_element_by_id("submit")
     # password.submit()
-    # password.send_keys(Keys.RETURN)
-    # time.sleep(10)
+
+    password.send_keys(Keys.RETURN)
+    time.sleep(30)
+    
     # driver.get_screenshot_as_file(join(screenshot_dir, 'after_lpgin.png'))
     # wait_driver = WebDriverWait(driver, 30)
     # wait_driver.until(EC.text_to_be_present_in_element((By.CSS_SELECTOR, '#header #expandDisplayName'), DEVICE_USER))
@@ -68,7 +71,7 @@ def test_web_with_selenium(driver, user_domain):
     # wizard_close_button.click()
     #
     # time.sleep(2)
-    # driver.get_screenshot_as_file(join(screenshot_dir, 'main.png'))
+    driver.get_screenshot_as_file(join(screenshot_dir, 'main.png'))
 
 
 # def test_settings(driver, user_domain):
