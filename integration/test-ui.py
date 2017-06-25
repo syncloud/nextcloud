@@ -63,18 +63,21 @@ def test_main(driver, user_domain):
     driver.get_screenshot_as_file(join(screenshot_dir, 'login.png'))
     # print(driver.page_source.encode('utf-8'))
 
-    try:
-        password.submit()
-    except WebDriverException, e:
-        if 'submit is not a function' in e.msg:
-            print("https://github.com/SeleniumHQ/selenium/issues/3483")
-            print(e)
-            pass
-        else:
-            raise e
-    time.sleep(5)
-    
-    driver.get_screenshot_as_file(join(screenshot_dir, 'login_progress.png'))
+    password.send_keys(Keys.RETURN)
+
+    # try:
+    #     password.submit()
+    # except WebDriverException, e:
+    #     if 'submit is not a function' in e.msg:
+    #         print("https://github.com/SeleniumHQ/selenium/issues/3483")
+    #         print(e)
+    #         pass
+    #     else:
+    #         raise e
+    # time.sleep(5)
+    #
+    # driver.get_screenshot_as_file(join(screenshot_dir, 'login_progress.png'))
+
     wait_driver = WebDriverWait(driver, 30)
     wait_driver.until(EC.text_to_be_present_in_element((By.CSS_SELECTOR, '#header #expandDisplayName'), DEVICE_USER))
 
