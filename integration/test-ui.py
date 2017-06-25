@@ -40,7 +40,7 @@ def driver():
                                firefox_binary=binary, executable_path=join(DIR, 'geckodriver/geckodriver'))
     # driver.set_page_load_timeout(30)
     # print driver.capabilities['version']
-    return WebDriverWait(driver, 20)
+    return driver
 
 
 def test_web_with_selenium(driver, user_domain):
