@@ -67,9 +67,9 @@ def test_main(driver, user_domain):
 
     # submit = driver.find_element_by_id("submit")
     # password.submit()
-
+    time.sleep(2)
     password.send_keys(Keys.RETURN)
-    print(driver.execute_script('return window.JSErrorCollector_errors ? window.JSErrorC.. papollector_errors.pump() : []'))
+    print(driver.execute_script('return window.JSErrorCollector_errors ? window.JSErrorCollector_errors.pump() : []'))
     time.sleep(30)
     
     driver.get_screenshot_as_file(join(screenshot_dir, 'after_login.png'))
