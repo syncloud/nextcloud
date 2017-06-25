@@ -4,6 +4,7 @@ from os.path import dirname, join, exists
 import time
 import pytest
 from selenium import webdriver
+from selenium.common.exceptions import WebDriverException
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
 from selenium.webdriver.common.keys import Keys
@@ -58,23 +59,22 @@ def test_main(driver, user_domain):
     user = driver.find_element_by_id("user")
     user.send_keys(DEVICE_USER)
     password = driver.find_element_by_id("password")
-    password.send_keys(DEVICE_PASSWORD + '\n')
+    password.send_keys(DEVICE_PASSWORD)
     driver.get_screenshot_as_file(join(screenshot_dir, 'login.png'))
-    #print(driver.page_source.encode('utf-8'))
+    # print(driver.page_source.encode('utf-8'))
 
-    #driver.find_element_by_tag_name('body').send_keys(Keys.CONTROL + Keys.SHIFT + 'k')
-    #driver.get_screenshot_as_file(join(screenshot_dir, 'login_debug.png'))
-
-    # submit = driver.find_element_by_id("submit")
-    # password.submit()
-    time.sleep(2)
-    password.send_keys(Keys.RETURN)
-    print(driver.execute_script('return window.JSErrorCollector_errors ? window.JSErrorCollector_errors.pump() : []'))
-    time.sleep(30)
+    try:
+        password.submit()
+    except WebDriverException, e:
+        if 'submit is not a function' in e.msg:
+            print("https://github.com/SeleniumHQ/selenium/issues/3483")
+            print(e)
+            pass
+        else:
+            raise e
+    time.sleep(5)
     
-    driver.get_screenshot_as_file(join(screenshot_dir, 'after_login.png'))
-    print(driver.page_source.encode('utf-8'))
-
+    driver.get_screenshot_as_file(join(screenshot_dir, 'login_progress.png'))
     wait_driver = WebDriverWait(driver, 30)
     wait_driver.until(EC.text_to_be_present_in_element((By.CSS_SELECTOR, '#header #expandDisplayName'), DEVICE_USER))
 
