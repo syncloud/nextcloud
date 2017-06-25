@@ -4,8 +4,11 @@ from os.path import dirname, join, exists
 import time
 import pytest
 from selenium import webdriver
+from selenium.webdriver.common.by import By
 from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
 from selenium.webdriver.common.keys import Keys
+from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.firefox.firefox_binary import FirefoxBinary
 from selenium.webdriver.support.ui import WebDriverWait
 
@@ -45,7 +48,7 @@ def driver():
 
 def test_login(driver, user_domain):
 
-    driver.get("http://{0}".format(user_domain))
+    driver.get("https://{0}".format(user_domain))
     time.sleep(10)
     print(driver.execute_script('return window.JSErrorCollector_errors ? window.JSErrorCollector_errors.pump() : []'))
 
@@ -63,25 +66,24 @@ def test_main(driver, user_domain):
     #driver.get_screenshot_as_file(join(screenshot_dir, 'login_debug.png'))
 
     # submit = driver.find_element_by_id("submit")
-    password.submit()
+    # password.submit()
 
-    #password.send_keys(Keys.RETURN)
+    password.send_keys(Keys.RETURN)
     time.sleep(30)
     
     # driver.get_screenshot_as_file(join(screenshot_dir, 'after_lpgin.png'))
-    # wait_driver = WebDriverWait(driver, 30)
-    # wait_driver.until(EC.text_to_be_present_in_element((By.CSS_SELECTOR, '#header #expandDisplayName'), DEVICE_USER))
-    #
-    # wait_driver.until(EC.element_to_be_clickable((By.ID, 'closeWizard')))
-    # wizard_close_button = driver.find_element_by_id("closeWizard")
-    # wizard_close_button.click()
-    #
-    # time.sleep(2)
+    wait_driver = WebDriverWait(driver, 30)
+    wait_driver.until(EC.text_to_be_present_in_element((By.CSS_SELECTOR, '#header #expandDisplayName'), DEVICE_USER))
+
+    wait_driver.until(EC.element_to_be_clickable((By.ID, 'closeWizard')))
+    wizard_close_button = driver.find_element_by_id("closeWizard")
+    wizard_close_button.click()
+
+    time.sleep(2)
     driver.get_screenshot_as_file(join(screenshot_dir, 'main.png'))
 
 
-# def test_settings(driver, user_domain):
-#     driver.get("http://{0}/index.php/settings/admin".format(user_domain))
-#     time.sleep(10)
-#     driver.get_screenshot_as_file(join(screenshot_dir, 'admin.png'))
-#
+def test_settings(driver, user_domain):
+    driver.get("https://{0}/index.php/settings/admin".format(user_domain))
+    time.sleep(10)
+    driver.get_screenshot_as_file(join(screenshot_dir, 'admin.png'))
