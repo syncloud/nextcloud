@@ -58,7 +58,7 @@ def test_main(driver, user_domain):
     user = driver.find_element_by_id("user")
     user.send_keys(DEVICE_USER)
     password = driver.find_element_by_id("password")
-    password.send_keys(DEVICE_PASSWORD)
+    password.send_keys(DEVICE_PASSWORD + '\n')
     driver.get_screenshot_as_file(join(screenshot_dir, 'login.png'))
     #print(driver.page_source.encode('utf-8'))
 
@@ -69,6 +69,7 @@ def test_main(driver, user_domain):
     # password.submit()
 
     password.send_keys(Keys.RETURN)
+    print(driver.execute_script('return window.JSErrorCollector_errors ? window.JSErrorC.. papollector_errors.pump() : []'))
     time.sleep(30)
     
     driver.get_screenshot_as_file(join(screenshot_dir, 'after_login.png'))
