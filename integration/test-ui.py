@@ -43,9 +43,15 @@ def driver():
     return driver
 
 
-def test_web_with_selenium(driver, user_domain):
+def test_login(driver, user_domain):
 
     driver.get("http://{0}".format(user_domain))
+    time.sleep(10)
+    print(driver.execute_script('return window.JSErrorCollector_errors ? window.JSErrorCollector_errors.pump() : []'))
+
+
+def test_main(driver, user_domain):
+
     user = driver.find_element_by_id("user")
     user.send_keys(DEVICE_USER)
     password = driver.find_element_by_id("password")
@@ -57,9 +63,9 @@ def test_web_with_selenium(driver, user_domain):
     #driver.get_screenshot_as_file(join(screenshot_dir, 'login_debug.png'))
 
     # submit = driver.find_element_by_id("submit")
-    # password.submit()
+    password.submit()
 
-    password.send_keys(Keys.RETURN)
+    #password.send_keys(Keys.RETURN)
     time.sleep(30)
     
     # driver.get_screenshot_as_file(join(screenshot_dir, 'after_lpgin.png'))
