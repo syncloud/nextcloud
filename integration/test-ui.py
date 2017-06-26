@@ -76,7 +76,7 @@ def test_main(driver, user_domain):
     #         raise e
     # time.sleep(5)
     #
-    # driver.get_screenshot_as_file(join(screenshot_dir, 'login_progress.png'))
+    driver.get_screenshot_as_file(join(screenshot_dir, 'login_progress.png'))
 
     wait_driver = WebDriverWait(driver, 30)
     wait_driver.until(EC.text_to_be_present_in_element((By.CSS_SELECTOR, '#header #expandDisplayName'), DEVICE_USER))
