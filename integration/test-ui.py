@@ -65,8 +65,8 @@ def test_main(driver, user_domain):
 
     password.send_keys(Keys.RETURN)
     driver.get_screenshot_as_file(join(screenshot_dir, 'login_progress.png'))
-    time.sleep(30)
-    driver.get_screenshot_as_file(join(screenshot_dir, 'login_progress_2.png'))
+    #time.sleep(30)
+    #driver.get_screenshot_as_file(join(screenshot_dir, 'login_progress_2.png'))
    
     # try:
     #     password.submit()
@@ -81,7 +81,7 @@ def test_main(driver, user_domain):
     #
     
     wait_driver = WebDriverWait(driver, 120)
-    wait_driver.until(EC.text_to_be_present_in_element((By.CSS_SELECTOR, '#header #expandDisplayName'), DEVICE_USER))
+    #wait_driver.until(EC.text_to_be_present_in_element((By.CSS_SELECTOR, '#header #expandDisplayName'), DEVICE_USER))
 
     wait_driver.until(EC.element_to_be_clickable((By.ID, 'closeWizard')))
     wizard_close_button = driver.find_element_by_id("closeWizard")
