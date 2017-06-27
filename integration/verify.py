@@ -224,7 +224,7 @@ def __check_test_dir(nextcloud_session, test_dir, user_domain, device_host):
     assert test_dir in dirs, response.text
 
 
-test_phpinfo(device_host):
+def test_phpinfo(device_host):
     run_ssh(device_host, '/opt/app/nextcloud/bin/php-runner -i > /opt/data/nextcloud/log/phpinfo.log', password=DEVICE_PASSWORD)
 
 
