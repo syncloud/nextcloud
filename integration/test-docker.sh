@@ -3,12 +3,12 @@
 DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
 
 if [ "$#" -lt 9 ]; then
-    echo "usage $0 redirect_user redirect_password redirect_domain app_archive_path installer_version release [all|test_suite] [sam|snapd] device_host"
+    echo "usage $0 redirect_user redirect_password redirect_domain version installer_version release [all|test_suite] [sam|snapd] device_host"
     exit 1
 fi
 
 DOMAIN=$3
-APP_ARCHIVE_PATH=$(realpath "$4")
+VERSION=$4
 INSTALLER_VERSION=$5
 RELEASE=$6
 TEST=$7
@@ -18,6 +18,19 @@ APP=nextcloud
 
 GECKODRIVER=0.14.0
 FIREFOX=52.0
+ARCH=$(uname -m)
+
+if [ $ARCH == "x86_64" ]; then
+    SNAP_ARCH=amd64
+else
+    SNAP_ARCH=armhf
+fi
+
+ARCHIVE=${NAME}-${VERSION}-${ARCH}.tar.gz
+if [ $INSTALLER == "snap" ]; then
+    ARCHIVE=${NAME}_${VERSION}_${SAM_ARCH}.snap
+fi
+APP_ARCHIVE_PATH=$(realpath "$ARCHIVE")
 
 cd ${DIR}
 

@@ -1,8 +1,8 @@
-platform: ${platform}
+platform: linux/${drone_arch}
 
 clone:
   git:
-    image: ${git}
+    image: syncloud/drone-git-${arch}
     depth: 50
 
 pipeline:
@@ -21,8 +21,7 @@ pipeline:
     image: syncloud/nextcloud-build-deps-${arch}
     commands:
       - VERSION=$(cat version)
-      - NAME=nextcloud${separator}$${VERSION}${separator}${installer_arch}.${installer_ext}
-      - ./integration/test-docker.sh teamcity@syncloud.it password teamcity $NAME ${installer_version} master ${integration_test} ${installer} device
+      - ./integration/test-docker.sh teamcity@syncloud.it password teamcity $${VERSION} ${installer_version} master ${integration_test} ${installer} device
 
   upload:
     image: syncloud/nextcloud-build-deps-${arch}
@@ -52,44 +51,26 @@ services:
  
 matrix:
   include:
-    - platform: linux/arm
-      git: syncloud/armhf-drone-git
+    - drone_arch: arm
       arch: armhf
       installer: sam
       installer_version: 89
-      installer_arch: armv7l
-      installer_ext: tar.gz
-      separator: "-"
       integration_test: verify
       
-    - platform: linux/amd64
-      git: plugins/git
+    - drone_arch: amd64
       arch: amd64
       installer: sam
       installer_version: 89
-      installer_arch: x86_64
-      installer_ext: tar.gz
-      separator: "-"
       integration_test: all
 
-# disable snap until migration from Team City is done
-
-#    - platform: linux/arm
-#      git: syncloud/armhf-drone-git
+#    - drone_arch: arm
 #      arch: armhf
 #      installer: snapd
 #      installer_version: 170523
-#      installer_arch: armhf
-#      installer_ext: snap
-#      separator: _
 #      integration_test: verify
 
-#    - platform: linux/amd64
-#      git: plugins/git
+#    - drone_arch: amd64
 #      arch: amd64
 #      installer: snapd
 #      installer_version: 170523
-#      installer_arch: amd64
-#      installer_ext: snap
-#      separator: _
 #      integration_test: all
