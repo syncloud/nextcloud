@@ -33,10 +33,12 @@ mkdir -p ${BUILD_DIR}
 
 DOWNLOAD_URL=http://artifact.syncloud.org/3rdparty
 
-coin --to ${BUILD_DIR} raw ${DOWNLOAD_URL}/php-${ARCH}.tar.gz
+coin --to ${BUILD_DIR} raw ${DOWNLOAD_URL}/php7-${ARCH}.tar.gz
 coin --to ${BUILD_DIR} raw ${DOWNLOAD_URL}/nginx-${ARCH}.tar.gz
 coin --to ${BUILD_DIR} raw ${DOWNLOAD_URL}/postgresql-${ARCH}.tar.gz
 coin --to ${BUILD_DIR} raw https://download.nextcloud.com/server/releases/${NAME}-${NEXTCLOUD_VERSION}.tar.bz2
+
+mv ${BUILD_DIR}/php7 ${BUILD_DIR}/php
 
 cp -r bin ${BUILD_DIR}
 cp -r config ${BUILD_DIR}/config.templates
