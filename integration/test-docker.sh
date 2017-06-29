@@ -17,6 +17,7 @@ APP=nextcloud
 GECKODRIVER=0.14.0
 FIREFOX=52.0
 ARCH=$(uname -m)
+NAME=nextcloud
 
 if [ $ARCH == "x86_64" ]; then
     SNAP_ARCH=amd64
