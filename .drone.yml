@@ -21,7 +21,7 @@ pipeline:
     image: syncloud/nextcloud-build-deps-${arch}
     commands:
       - VERSION=$(cat version)
-      - ./integration/test-docker.sh teamcity@syncloud.it password teamcity $${VERSION} ${installer_version} master ${integration_test} ${installer} device
+      - ./integration/test-docker.sh teamcity@syncloud.it password teamcity $VERSION master ${installer} device
 
   upload:
     image: syncloud/nextcloud-build-deps-${arch}
@@ -54,23 +54,15 @@ matrix:
     - drone_arch: arm
       arch: armhf
       installer: sam
-      installer_version: 89
-      integration_test: verify
       
     - drone_arch: amd64
       arch: amd64
       installer: sam
-      installer_version: 89
-      integration_test: all
 
 #    - drone_arch: arm
 #      arch: armhf
 #      installer: snapd
-#      installer_version: 170523
-#      integration_test: verify
 
 #    - drone_arch: amd64
 #      arch: amd64
 #      installer: snapd
-#      installer_version: 170523
-#      integration_test: all
