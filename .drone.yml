@@ -2,7 +2,7 @@ platform: linux/${drone_arch}
 
 clone:
   git:
-    image: syncloud/drone-git-${arch}
+    image: syncloud/drone-git-${drone_arch}
     depth: 50
 
 pipeline:
