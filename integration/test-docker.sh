@@ -12,12 +12,11 @@ VERSION=$4
 RELEASE=$5
 INSTALLER=$6
 DEVICE_HOST=$7
-APP=nextcloud
 
+APP=nextcloud
 GECKODRIVER=0.14.0
 FIREFOX=52.0
 ARCH=$(uname -m)
-NAME=nextcloud
 
 if [ $ARCH == "x86_64" ]; then
     SNAP_ARCH=amd64
@@ -26,10 +25,10 @@ else
 fi
 
 if [ $INSTALLER == "snapd" ]; then
-    ARCHIVE=${NAME}_${VERSION}_${SAM_ARCH}.snap
+    ARCHIVE=${APP}_${VERSION}_${SAM_ARCH}.snap
     INSTALLER_VERSION=170523
 else
-    ARCHIVE=${NAME}-${VERSION}-${ARCH}.tar.gz
+    ARCHIVE=${APP}-${VERSION}-${ARCH}.tar.gz
     INSTALLER_VERSION=89
 fi
 APP_ARCHIVE_PATH=$(realpath "$ARCHIVE")
