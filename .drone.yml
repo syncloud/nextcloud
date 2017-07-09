@@ -1,8 +1,8 @@
-platform: linux/${drone_arch}
+platform: linux/${arch}
 
 clone:
   git:
-    image: syncloud/drone-git-${drone_arch}
+    image: syncloud/drone-git-${arch}
     depth: 50
 
 pipeline:
@@ -37,8 +37,8 @@ pipeline:
     image: syncloud/nextcloud-build-deps-${arch}
     secrets: [ARTIFACT_SSH_KEY]
     commands:
-      - ./upload-artifact.sh integration/log $DRONE_BUILD_NUMBER-${installer}-${arch}
-      - ./upload-artifact.sh integration/screenshot $DRONE_BUILD_NUMBER-${installer}-${arch}
+      - ./upload-artifact.sh integration/log $DRONE_BUILD_NUMBER-${installer}-${dpkg --print-architecture}
+      - ./upload-artifact.sh integration/screenshot $DRONE_BUILD_NUMBER-${installer}-${dpkg --print-architecture}
     when:
       status: [ failure, success ] 
 
@@ -50,19 +50,9 @@ services:
       - /var/run/dbus:/var/run/dbus
  
 matrix:
-  include:
-    - drone_arch: arm
-      arch: armhf
-      installer: sam
-      
-    - drone_arch: amd64
-      arch: amd64
-      installer: sam
-
-#    - drone_arch: arm
-#      arch: armhf
-#      installer: snapd
-
-#    - drone_arch: amd64
-#      arch: amd64
-#      installer: snapd
+  arch:
+    - arm
+    - amd64
+  installer:
+    - sam
+#    - snapd
