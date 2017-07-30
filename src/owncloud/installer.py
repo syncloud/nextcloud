@@ -198,6 +198,7 @@ class OwncloudInstaller:
 
     def on_disk_change(self):
         self.prepare_storage()
+        self.occ.run('config:system:delete instanceid')
         self.app.restart_service(SYSTEMD_PHP_FPM_NAME)
         self.app.restart_service(SYSTEMD_NGINX_NAME)
 
@@ -208,7 +209,7 @@ class OwncloudInstaller:
         tmp_storage_path = join(app_storage_dir, 'tmp')
         fs.makepath(tmp_storage_path)
         fs.chownpath(tmp_storage_path, USER_NAME)
-
+        
     def on_domain_change(self):
         app_domain = self.app.app_domain_name()
         local_ip = check_output(["hostname", "-I"]).split(" ")[0]
