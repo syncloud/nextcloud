@@ -45,9 +45,9 @@ def module_teardown(device_host):
     print('systemd logs')
     run_ssh(device_host, 'journalctl | tail -200', password=LOGS_SSH_PASSWORD)
 
-    nextcloud_log_dir = join(LOG_DIR, 'nextcloud_log')
-    os.mkdir(nextcloud_log_dir)
-    run_scp('root@{0}:/opt/data/nextcloud/log/*.log {1}'.format(device_host, nextcloud_log_dir), password=LOGS_SSH_PASSWORD)
+    app_log_dir  = join(LOG_DIR, 'nextcloud_log')
+    os.mkdir(app_log_dir )
+    run_scp('root@{0}:/opt/data/nextcloud/log/*.log {1}'.format(device_host, app_log_dir ), password=LOGS_SSH_PASSWORD)
 
     
 
