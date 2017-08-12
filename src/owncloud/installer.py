@@ -24,6 +24,7 @@ DB_NAME = 'nextcloud'
 DB_USER = 'nextcloud'
 DB_PASSWORD = 'nextcloud'
 PSQL_PATH = 'postgresql/bin/psql'
+PSQL_PORT = 5436
 OCC_RUNNER_PATH = 'bin/occ-runner'
 OC_CONFIG_PATH = 'bin/nextcloud-config'
 OWNCLOUD_LOG_PATH = 'log/nextcloud.log'
@@ -67,7 +68,8 @@ class OwncloudInstaller:
         variables = {
             'app_dir': self.app.get_install_dir(),
             'app_data_dir': app_data_dir,
-            'web_port': WEB_PORT
+            'web_port': WEB_PORT,
+            'db_psql_port': PSQL_PORT
         }
         gen.generate_files(templates_path, config_path, variables)
         fs.chownpath(self.app.get_install_dir(), USER_NAME, recursive=True)
