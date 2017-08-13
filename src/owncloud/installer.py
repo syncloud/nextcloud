@@ -152,7 +152,7 @@ class OwncloudInstaller:
 
         db_postgres = Database(
             join(self.app.get_install_dir(), PSQL_PATH),
-            database='postgres', user=DB_USER, database_path=self.database_path)
+            database='postgres', user=DB_USER, database_path=self.database_path, port=PSQL_PORT)
         db_postgres.execute("ALTER USER {0} WITH PASSWORD '{1}';".format(DB_USER, DB_PASSWORD))
 
         web_setup = Setup(WEB_PORT)
@@ -193,7 +193,7 @@ class OwncloudInstaller:
         cron.run()
 
         db = Database(join(self.app.get_install_dir(), PSQL_PATH),
-                      database=DB_NAME, user=DB_USER, database_path=self.database_path)
+                      database=DB_NAME, user=DB_USER, database_path=self.database_path, port=PSQL_PORT)
         db.execute("update oc_ldap_group_mapping set owncloud_name = 'admin';")
         db.execute("update oc_ldap_group_members set owncloudname = 'admin';")
 

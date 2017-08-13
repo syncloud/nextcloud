@@ -77,6 +77,7 @@ def test_start(module_setup):
     shutil.rmtree(LOG_DIR, ignore_errors=True)
     os.mkdir(LOG_DIR)
 
+
 def test_activate_device(auth, device_host):
     email, password, domain, release = auth
 
@@ -136,6 +137,10 @@ def webdav_download(user, password, file_from, file_to, user_domain):
 
 def files_scan(device_host):
     run_ssh(device_host, '/opt/app/nextcloud/bin/occ-runner files:scan --all', password=DEVICE_PASSWORD)
+
+
+def test_occ(device_host):
+    run_ssh(device_host, '/opt/app/nextcloud/bin/occ-runner', password=DEVICE_PASSWORD)
 
 
 def test_visible_through_platform(user_domain, device_host):
