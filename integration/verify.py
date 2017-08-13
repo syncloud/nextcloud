@@ -45,9 +45,9 @@ def module_teardown(device_host):
     print('systemd logs')
     run_ssh(device_host, 'journalctl | tail -200', password=LOGS_SSH_PASSWORD)
 
-    nextcloud_log_dir = join(LOG_DIR, 'nextcloud_log')
-    os.mkdir(nextcloud_log_dir)
-    run_scp('root@{0}:/opt/data/nextcloud/log/*.log {1}'.format(device_host, nextcloud_log_dir), password=LOGS_SSH_PASSWORD)
+    app_log_dir  = join(LOG_DIR, 'nextcloud_log')
+    os.mkdir(app_log_dir )
+    run_scp('root@{0}:/opt/data/nextcloud/log/*.log {1}'.format(device_host, app_log_dir ), password=LOGS_SSH_PASSWORD)
 
     
 
@@ -76,6 +76,7 @@ def nextcloud_session_domain(user_domain, device_host):
 def test_start(module_setup):
     shutil.rmtree(LOG_DIR, ignore_errors=True)
     os.mkdir(LOG_DIR)
+
 
 def test_activate_device(auth, device_host):
     email, password, domain, release = auth
@@ -136,6 +137,10 @@ def webdav_download(user, password, file_from, file_to, user_domain):
 
 def files_scan(device_host):
     run_ssh(device_host, '/opt/app/nextcloud/bin/occ-runner files:scan --all', password=DEVICE_PASSWORD)
+
+
+def test_occ(device_host):
+    run_ssh(device_host, '/opt/app/nextcloud/bin/occ-runner', password=DEVICE_PASSWORD)
 
 
 def test_visible_through_platform(user_domain, device_host):
