@@ -156,7 +156,7 @@ class OwncloudInstaller:
         db_postgres.execute("ALTER USER {0} WITH PASSWORD '{1}';".format(DB_USER, DB_PASSWORD))
 
         web_setup = Setup(WEB_PORT)
-        web_setup.finish(INSTALL_USER, unicode(uuid.uuid4().hex), self.app.get_storage_dir(), self.database_path)
+        web_setup.finish(INSTALL_USER, unicode(uuid.uuid4().hex), self.app.get_storage_dir(), self.database_path, PSQL_PORT)
 
         self.occ.run('app:enable user_ldap')
 
