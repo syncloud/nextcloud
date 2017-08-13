@@ -50,7 +50,7 @@ def database_init(logger, app_install_dir, app_data_dir, user_name):
 
 class OwncloudInstaller:
     def __init__(self):
-        self.log = logger.get_logger('{0}_installer').format(APP_NAME)
+        self.log = logger.get_logger('{0}_installer'.format(APP_NAME))
         self.app = api.get_app_setup(APP_NAME)
         self.database_path = join(self.app.get_data_dir(), 'database')
         self.occ = OCConsole(join(self.app.get_install_dir(), OCC_RUNNER_PATH))
