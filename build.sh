@@ -45,6 +45,10 @@ cp -r config ${BUILD_DIR}/config.templates
 cp -r lib ${BUILD_DIR}
 
 rm -rf ${BUILD_DIR}/${NAME}/config
+ls -la ${BUILD_DIR}/${NAME}/apps
+
+#disable internal updates as they break us
+rm -r ${BUILD_DIR}/${NAME}/apps/updatenotification
 
 mkdir build/${NAME}/META
 echo ${NAME} >> build/${NAME}/META/app
