@@ -192,6 +192,7 @@ def test_disk(syncloud_session, user_domain, device_host):
 
 def __log_data_dir(device_host):
     run_ssh(device_host, 'ls -la /data', password=DEVICE_PASSWORD)
+    run_ssh(device_host, 'mount', password=DEVICE_PASSWORD)
     run_ssh(device_host, 'ls -la /data/', password=DEVICE_PASSWORD)
     run_ssh(device_host, 'ls -la /data/nextcloud', password=DEVICE_PASSWORD)
 
