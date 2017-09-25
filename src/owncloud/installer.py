@@ -1,4 +1,4 @@
-from os import symlink
+from os import symlink, environ
 from os.path import isdir, join, isfile
 import shutil
 import uuid
@@ -54,6 +54,8 @@ class OwncloudInstaller:
         self.app = api.get_app_setup(APP_NAME)
         self.database_path = join(self.app.get_data_dir(), 'database')
         self.occ = OCConsole(join(self.app.get_install_dir(), OCC_RUNNER_PATH))
+        self.nextcloud_config_path = join(self.app.get_data_dir(), 'nextcloud', 'config')
+        environ['NEXTCLOUD_CONFIG_DIR'] = self.nextcloud_config_path
 
     def install(self):
 
@@ -62,10 +64,9 @@ class OwncloudInstaller:
         linux.useradd(USER_NAME)
 
         templates_path = join(self.app.get_install_dir(), 'config.templates')
-        config_path = join(self.app.get_install_dir(), 'config')
-
         app_data_dir = self.app.get_data_dir()
-
+        config_path = join(app_data_dir, 'config')
+        
         variables = {
             'app_dir': self.app.get_install_dir(),
             'app_data_dir': app_data_dir,
@@ -75,16 +76,12 @@ class OwncloudInstaller:
         gen.generate_files(templates_path, config_path, variables)
         fs.chownpath(self.app.get_install_dir(), USER_NAME, recursive=True)
 
-        config_data_dir = join(app_data_dir, 'config')
         log_dir = join(app_data_dir, 'log')
 
-        fs.makepath(config_data_dir)
         fs.makepath(log_dir)
-
+        fs.makepath(self.nextcloud_config_path)
+        
         fs.chownpath(app_data_dir, USER_NAME, recursive=True)
-
-        config_app_dir = join(self.app.get_install_dir(), APP_CONFIG_PATH)
-        symlink(config_data_dir, config_app_dir)
 
         database_init(self.log, self.app.get_install_dir(), self.app.get_data_dir(), USER_NAME)
 
