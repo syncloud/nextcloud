@@ -74,6 +74,12 @@ class OwncloudInstaller:
             'db_psql_port': PSQL_PORT
         }
         gen.generate_files(templates_path, config_path, variables)
+        
+        default_config_file = join(config_path, 'config.php')
+        config_file = join(self.nextcloud_config_path, 'config.php')
+        if not isfile(config_file):
+            shutil.copy(default_config_file, config_file)
+        
         fs.chownpath(self.app.get_install_dir(), USER_NAME, recursive=True)
 
         log_dir = join(app_data_dir, 'log')
