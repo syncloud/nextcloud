@@ -15,7 +15,7 @@ pipeline:
     image: syncloud/nextcloud-build-deps-${arch}
     commands:
       - VERSION=$(cat version)
-      - ./build.sh $VERSION
+      - ./build.sh $VERSION ${installer}
 
   integration:
     image: syncloud/nextcloud-build-deps-${arch}

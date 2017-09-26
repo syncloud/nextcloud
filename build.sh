@@ -3,8 +3,8 @@
 DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
 cd ${DIR}
 
-if [[ -z "$1" ]]; then
-    echo "usage $0 version"
+if [[ -z "$2" ]]; then
+    echo "usage $0 version installer"
     exit 1
 fi
 
@@ -16,6 +16,7 @@ NEXTCLOUD_VERSION=12.0.0
 COIN_CACHE_DIR=${DIR}/coin.cache
 ARCH=$(uname -m)
 VERSION=$1
+INSTALLER=$2
 
 rm -rf ${DIR}/lib
 mkdir ${DIR}/lib
