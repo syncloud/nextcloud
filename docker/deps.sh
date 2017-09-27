@@ -1,7 +1,7 @@
 #!/bin/bash -xe
 
 apt-get update
-apt-get install -y dpkg-dev sshpass curl netcat xvfb wget unzip libfontconfig libgtk-3-0 libasound2 libdbus-glib-1-2 squashfs-tools
+apt-get install -y dpkg-dev sshpass curl netcat xvfb wget unzip libfontconfig libgtk-3-0 libasound2 libdbus-glib-1-2 squashfs-tools python-dev
 wget https://bootstrap.pypa.io/get-pip.py
 python get-pip.py
 pip install -U pytest
