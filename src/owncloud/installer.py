@@ -53,10 +53,8 @@ class OwncloudInstaller:
         self.app = api.get_app_setup(APP_NAME)
         self.database_path = join(self.app.get_data_dir(), 'database')
         self.occ = OCConsole(join(self.app.get_install_dir(), OCC_RUNNER_PATH))
-        self.nextcloud_config_path = join(self.app.get_data_dir(), 'nextcloud', 'config')
-        self.nextcloud_config_file = join(self.nextcloud_config_path, 'config.php')
-        
-        environ['NEXTCLOUD_CONFIG_DIR'] = self.nextcloud_config_path
+        self.nextcloud_config_file = join(self.app.get_data_dir(), 'nextcloud', 'config', 'config.php')
+ 
         environ['DATA_DIR'] = self.app.get_data_dir()
 
     def install(self):
