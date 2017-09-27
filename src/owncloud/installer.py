@@ -57,6 +57,7 @@ class OwncloudInstaller:
         self.nextcloud_config_file = join(self.nextcloud_config_path, 'config.php')
         
         environ['NEXTCLOUD_CONFIG_DIR'] = self.nextcloud_config_path
+        environ['DATA_DIR'] = self.app.get_data_dir()
 
     def install(self):
 
