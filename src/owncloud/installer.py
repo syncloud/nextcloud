@@ -74,7 +74,6 @@ class OwncloudInstaller:
             'db_psql_port': PSQL_PORT
         }
         gen.generate_files(templates_path, config_path, variables)
-        
                 
         fs.chownpath(self.app.get_install_dir(), USER_NAME, recursive=True)
 
