@@ -64,6 +64,7 @@ if [ $INSTALLER == "sam" ]; then
 else
 
     echo "snapping"
+    SNAP_DIR=${DIR}/build/snap
     ARCH=$(dpkg-architecture -q DEB_HOST_ARCH)
     rm -rf ${DIR}/*.snap
     mkdir ${SNAP_DIR}
