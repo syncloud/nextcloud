@@ -31,7 +31,6 @@ OWNCLOUD_LOG_PATH = 'log/{0}.log'.format(APP_NAME)
 CRON_CMD = 'bin/{0}-cron'.format(APP_NAME)
 CRON_USER = APP_NAME
 APP_CONFIG_PATH = '{0}/config'.format(APP_NAME)
-DATA_CONFIG_FILE_PATH = 'config/config.php'
 PSQL_PORT = 5436
 WEB_PORT = 1085
 
@@ -55,6 +54,8 @@ class OwncloudInstaller:
         self.database_path = join(self.app.get_data_dir(), 'database')
         self.occ = OCConsole(join(self.app.get_install_dir(), OCC_RUNNER_PATH))
         self.nextcloud_config_path = join(self.app.get_data_dir(), 'nextcloud', 'config')
+        self.nextcloud_config_file = join(self.nextcloud_config_path, 'config.php')
+        
         environ['NEXTCLOUD_CONFIG_DIR'] = self.nextcloud_config_path
 
     def install(self):
@@ -83,9 +84,9 @@ class OwncloudInstaller:
         fs.makepath(self.nextcloud_config_path)
 
         default_config_file = join(config_path, 'config.php')
-        config_file = join(self.nextcloud_config_path, 'config.php')
-        if not isfile(config_file):
-            shutil.copy(default_config_file, config_file)
+        
+        if not isfile(self.nextcloud_config_file):
+            shutil.copy(default_config_file, self.nextcloud_config_file)
 
         fs.chownpath(app_data_dir, USER_NAME, recursive=True)
 
@@ -133,12 +134,7 @@ class OwncloudInstaller:
             shutil.rmtree(self.app.get_install_dir())
 
     def installed(self):
-
-        config_file = join(self.app.get_data_dir(), DATA_CONFIG_FILE_PATH)
-        if not isfile(config_file):
-            return False
-
-        return 'installed' in open(config_file).read().strip()
+        return 'installed' in open(self.nextcloud_config_file).read().strip()
 
     def upgrade(self):
 
