@@ -81,18 +81,18 @@ def ssh_env_vars(installer):
 
 
 @pytest.fixture(scope="session")
-def module_setup(request, device_host, data_dir, platform_data_dir):
-    request.addfinalizer(lambda: module_teardown(device_host, data_dir, platform_data_dir))
+def module_setup(request, device_host, data_dir, platform_data_dir, app_dir):
+    request.addfinalizer(lambda: module_teardown(device_host, data_dir, platform_data_dir, app_dir))
 
 
-def module_teardown(device_host, data_dir, platform_data_dir):
+def module_teardown(device_host, data_dir, platform_data_dir, app_dir):
     platform_log_dir = join(LOG_DIR, 'platform_log')
     os.mkdir(platform_log_dir)
     run_ssh(device_host, 'ls -la {0}'.format(data_dir), password=LOGS_SSH_PASSWORD)
     run_ssh(device_host, 'ls -la {0}/nextcloud/config'.format(data_dir), password=LOGS_SSH_PASSWORD)
     run_ssh(device_host, 'ls -la /data/nextcloud', password=LOGS_SSH_PASSWORD)
     run_ssh(device_host, 'cat {0}/nextcloud/config/config.php'.format(data_dir), password=LOGS_SSH_PASSWORD)
-
+    run_ssh(device_host, '{0}/bin/occ-runner'.format(app_dir), password=LOGS_SSH_PASSWORD)
     run_scp('root@{0}:{1}/log/* {2}'.format(device_host, platform_data_dir, platform_log_dir), password=LOGS_SSH_PASSWORD)
     
     run_scp('root@{0}:/var/log/sam.log {1}'.format(device_host, platform_log_dir), password=LOGS_SSH_PASSWORD)
