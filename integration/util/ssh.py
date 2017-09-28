@@ -11,7 +11,7 @@ def run_ssh(host, command, throw=True, debug=True, password='syncloud', retries=
     retry = 0
     while True:
         try:
-            command='{0}{1}'.format(env_vars, command)
+            command='{0} {1}'.format(env_vars, command)
             return _run_command('ssh -o StrictHostKeyChecking=no root@{0} "{1}"'.format(host, command), throw, debug, password)
         except Exception, e:
             if retry >= retries:
