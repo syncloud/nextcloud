@@ -164,7 +164,7 @@ def test_resource(nextcloud_session_domain, user_domain, device_host):
 
 
 @pytest.mark.parametrize("megabytes", [1, 300])
-def test_sync(user_domain, megabytes, device_host):
+def test_sync(user_domain, megabytes, device_host, data_dir):
 
     sync_file = 'test.file-{0}'.format(megabytes)
     if os.path.isfile(sync_file):
@@ -179,7 +179,7 @@ def test_sync(user_domain, megabytes, device_host):
 
     assert os.path.isfile(sync_file_download)
     run_ssh(device_host, 'rm /data/nextcloud/{0}/files/{1}'.format(DEVICE_USER, sync_file), password=DEVICE_PASSWORD)
-    files_scan(device_host)
+    files_scan(device_host, data_dir)
 
 
 def webdav_upload(user, password, file_from, file_to, user_domain):
@@ -190,12 +190,12 @@ def webdav_download(user, password, file_from, file_to, user_domain):
     return 'curl -o {3} http://{0}:{1}@{4}/remote.php/webdav/{2}'.format(user, password, file_from, file_to, user_domain)
 
 
-def files_scan(device_host):
-    run_ssh(device_host, '/opt/app/nextcloud/bin/occ-runner files:scan --all', password=DEVICE_PASSWORD)
+def files_scan(device_host, data_dir):
+    run_ssh(device_host, '/opt/app/nextcloud/bin/occ-runner files:scan --all', password=DEVICE_PASSWORD, env_vars='DATA_DIR={0}'.format(data_dir))
 
 
-def test_occ(device_host):
-    run_ssh(device_host, '/opt/app/nextcloud/bin/occ-runner', password=DEVICE_PASSWORD)
+def test_occ(device_host, data_dir):
+    run_ssh(device_host, '/opt/app/nextcloud/bin/occ-runner', password=DEVICE_PASSWORD, env_vars='DATA_DIR={0}'.format(data_dir))
 
 
 def test_visible_through_platform(user_domain, device_host):
