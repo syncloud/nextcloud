@@ -26,4 +26,4 @@ class OwncloudCron:
 
     def run(self):
         self.log.info("running: {0}".format(self.cron_cmd))
-        self.log.info(check_output('sudo -H -u {0} {1}'.format(self.cron_user, self.cron_cmd), shell=True))
+        self.log.info(check_output('sudo -E -H -u {0} {1}'.format(self.cron_user, self.cron_cmd), shell=True))
