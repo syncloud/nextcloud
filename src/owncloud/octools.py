@@ -18,7 +18,7 @@ class OCConsole:
 class OCConfig:
     def __init__(self, oc_config_path):
         self.oc_config_path = oc_config_path
-        log = logger.get_logger('nextcloud_config')
+        self.log = logger.get_logger('nextcloud_config')
         
     def set_value(self, key, value):
         output = check_output('{0} {1} {2}'.format(
