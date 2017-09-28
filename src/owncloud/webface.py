@@ -5,10 +5,10 @@ from syncloud_app import logger
 
 
 class Setup:
-    def __init__(self, port):
+    def __init__(self, data_dir):
         self.log = logger.get_logger('nextcloud.setup.finish')
-        self.port = port
-        self.index_url = 'http://localhost:{}/index.php'.format(port)
+        socket = '{0}/web.socket'.format(data_dir).replace('/', '%2F')
+        self.index_url = 'http+unix://{0}'.format(socket)
 
     def finish(self, login, password, data_dir, database_path, port):
 

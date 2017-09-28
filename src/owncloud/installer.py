@@ -32,7 +32,6 @@ CRON_CMD = 'bin/{0}-cron'.format(APP_NAME)
 CRON_USER = APP_NAME
 APP_CONFIG_PATH = '{0}/config'.format(APP_NAME)
 PSQL_PORT = 5436
-WEB_PORT = 1085
 
 
 def database_init(logger, app_install_dir, app_data_dir, user_name):
@@ -118,11 +117,8 @@ class OwncloudInstaller:
 
         fs.chownpath(self.app.get_data_dir(), USER_NAME, recursive=True)
 
-        self.app.register_web(WEB_PORT)
-
     def remove(self):
 
-        self.app.unregister_web()
         cron = OwncloudCron(join(self.app.get_install_dir(), CRON_CMD), CRON_USER)
         self.app.remove_service(SYSTEMD_NGINX_NAME)
         self.app.remove_service(SYSTEMD_PHP_FPM_NAME)
@@ -154,8 +150,9 @@ class OwncloudInstaller:
             database='postgres', user=DB_USER, database_path=self.database_path, port=PSQL_PORT)
         db_postgres.execute("ALTER USER {0} WITH PASSWORD '{1}';".format(DB_USER, DB_PASSWORD))
 
-        web_setup = Setup(WEB_PORT)
+        web_setup = Setup(self.app.get_data_dir())
         web_setup.finish(INSTALL_USER, unicode(uuid.uuid4().hex), self.app.get_storage_dir(), self.database_path, PSQL_PORT)
+        #self.occ.run('maintenance:install  --database psql --database-name nextcloud --database-user {0} --database-pass {1} --admin-user {2} --admin-pass {3}'.format(DB_USER, DB_PASSWORD, INSTALL_USER, unicode(uuid.uuid4().hex)))
 
         self.occ.run('app:enable user_ldap')
 
