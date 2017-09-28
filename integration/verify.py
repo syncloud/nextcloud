@@ -226,22 +226,22 @@ def test_verification(nextcloud_session_domain, user_domain):
 #     assert not json.loads(response.text)['hasPassedCodeIntegrityCheck'], 'you can fix me now'
 
 
-def test_disk(syncloud_session, user_domain, device_host):
+def test_disk(syncloud_session, user_domain, device_host, data_dir):
 
     loop_device_cleanup(device_host, '/tmp/test0', DEVICE_PASSWORD)
     loop_device_cleanup(device_host, '/tmp/test1', DEVICE_PASSWORD)
 
     device0 = loop_device_add(device_host, 'ext4', '/tmp/test0', DEVICE_PASSWORD)
-    __activate_disk(syncloud_session, device0, device_host)
+    __activate_disk(syncloud_session, device0, device_host, data_dir)
     __create_test_dir('test0', user_domain, device_host)
     __check_test_dir(nextcloud_session_domain(user_domain, device_host), 'test0', user_domain, device_host)
 
     device1 = loop_device_add(device_host, 'ext2', '/tmp/test1', DEVICE_PASSWORD)
-    __activate_disk(syncloud_session, device1, device_host)
+    __activate_disk(syncloud_session, device1, device_host, data_dir)
     __create_test_dir('test1', user_domain, device_host)
     __check_test_dir(nextcloud_session_domain(user_domain, device_host), 'test1', user_domain, device_host)
 
-    __activate_disk(syncloud_session, device0, device_host)
+    __activate_disk(syncloud_session, device0, device_host, data_dir)
     __check_test_dir(nextcloud_session_domain(user_domain, device_host), 'test0', user_domain, device_host)
 
 
@@ -252,13 +252,13 @@ def __log_data_dir(device_host):
     run_ssh(device_host, 'ls -la /data/nextcloud', password=DEVICE_PASSWORD)
 
 
-def __activate_disk(syncloud_session, loop_device, device_host):
+def __activate_disk(syncloud_session, loop_device, device_host, data_dir):
 
     __log_data_dir(device_host)
     response = syncloud_session.get('http://{0}/rest/settings/disk_activate'.format(device_host),
                                     params={'device': loop_device}, allow_redirects=False)
     __log_data_dir(device_host)
-    files_scan(device_host)
+    files_scan(device_host, data_dir)
     assert response.status_code == 200, response.text
 
 
