@@ -70,7 +70,6 @@ class OwncloudInstaller:
         variables = {
             'app_dir': self.app.get_install_dir(),
             'app_data_dir': app_data_dir,
-            'web_port': WEB_PORT,
             'db_psql_port': PSQL_PORT
         }
         gen.generate_files(templates_path, config_path, variables)
