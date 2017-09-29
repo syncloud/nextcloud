@@ -44,7 +44,8 @@ class Setup:
     def is_finished(self,):
 
         try:
-            response = requests.get(self.index_url, verify=False)
+            session = requests_unixsocket.Session() 
+            response = session.get(self.index_url, verify=False)
             self.log.debug('{0} response'.format(self.index_url))
             self.log.debug(response)
             if response.status_code == 400:
