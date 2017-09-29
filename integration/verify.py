@@ -149,6 +149,8 @@ def test_activate_device(auth, device_host):
 #     assert '"success": true' in response.text
 #     assert response.status_code == 200
 
+def test_occ(device_host, app_dir, data_dir):
+    run_ssh(device_host, '{0}/bin/occ-runner help maintenance:install'.format(app_dir), password=LOGS_SSH_PASSWORD, env_vars='DATA_DIR={0}'.format(data_dir))
 
 def test_install(app_archive_path, device_host):
     __local_install(app_archive_path, device_host)

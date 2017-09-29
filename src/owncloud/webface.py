@@ -1,4 +1,4 @@
-import requests
+import requests_unixsocket
 import re
 from bs4 import BeautifulSoup
 from syncloud_app import logger
@@ -16,8 +16,8 @@ class Setup:
             return True
 
         self.log.info("will finish setup using: {0}".format(self.index_url))
-
-        response = requests.post(self.index_url,
+        session = requests_unixsocket.Session() 
+        response = session.post(self.index_url,
                                  data={
                                      'install': 'true', 'adminlogin': login,
                                      'adminpass': password, 'adminpass-clone': password,
