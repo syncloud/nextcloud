@@ -102,7 +102,7 @@ def module_teardown(device_host, data_dir, platform_data_dir, app_dir):
 
     app_log_dir  = join(LOG_DIR, 'nextcloud_log')
     os.mkdir(app_log_dir )
-    run_scp('root@{0}:{1}/log/*.log {2}'.format(device_host, data_dir, app_log_dir), password=LOGS_SSH_PASSWORD)
+    run_scp('root@{0}:{1}/log/*.log {2}'.format(device_host, data_dir, app_log_dir), password=LOGS_SSH_PASSWORD, throw=False)
 
     
 
