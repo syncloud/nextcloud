@@ -10,7 +10,7 @@ import shutil
 
 from integration.util.loop import loop_device_add, loop_device_cleanup
 from integration.util.ssh import run_scp, run_ssh
-
+from integration.util.helper import local_install
 app_path = join(dirname(__file__), '..')
 sys.path.append(join(app_path, 'src'))
 
@@ -152,8 +152,8 @@ def test_activate_device(auth, device_host):
 #def test_occ(device_host, app_dir, data_dir):
 #    run_ssh(device_host, '{0}/bin/occ-runner help maintenance:install'.format(app_dir), password=LOGS_SSH_PASSWORD, env_vars='DATA_DIR={0}'.format(data_dir))
 
-def test_install(app_archive_path, device_host):
-    __local_install(app_archive_path, device_host)
+def test_install(app_archive_path, device_host, installer):
+    local_install(device_host, DEVICE_PASSWORD, app_archive_path, installer)
 
 
 def test_resource(nextcloud_session_domain, user_domain, device_host):
@@ -293,11 +293,8 @@ def test_remove(syncloud_session, device_host):
     assert response.status_code == 200, response.text
 
 
-def test_reinstall(app_archive_path, device_host):
-    __local_install(app_archive_path, device_host)
+def test_reinstall(app_archive_path, device_host, installer):
+    local_install(device_host, DEVICE_PASSWORD, app_archive_path, installer)
 
 
-def __local_install(app_archive_path, device_host):
-    run_scp('{0} root@{1}:/app.tar.gz'.format(app_archive_path, device_host), password=DEVICE_PASSWORD)
-    run_ssh(device_host, '/opt/app/sam/bin/sam --debug install /app.tar.gz', password=DEVICE_PASSWORD)
-    time.sleep(3)
+
