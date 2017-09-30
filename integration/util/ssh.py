@@ -3,15 +3,24 @@ from subprocess import check_output, STDOUT, CalledProcessError
 import time
 
 
-def run_scp(command, throw=True, debug=True, password='syncloud'):
-    return _run_command('scp -o StrictHostKeyChecking=no {0}'.format(command), throw, debug, password)
+def run_scp(command, throw=True, debug=True, password='syncloud', retries=0, sleep=1):
+    retry = 0
+    while True:
+        try:
+            return _run_command('scp -o StrictHostKeyChecking=no {0}'.format(command), throw, debug, password)
+        except Exception, e:
+            if retry >= retries:
+                raise e
+            retry += 1
+            time.sleep(sleep)
+            print('retrying {0}'.format(retry))
 
 
 def run_ssh(host, command, throw=True, debug=True, password='syncloud', retries=0, sleep=1, env_vars=''):
     retry = 0
     while True:
         try:
-            command='{0} {1}'.format(env_vars, command)
+            command='{0}{1}'.format(env_vars, command)
             return _run_command('ssh -o StrictHostKeyChecking=no root@{0} "{1}"'.format(host, command), throw, debug, password)
         except Exception, e:
             if retry >= retries:
