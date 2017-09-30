@@ -16,7 +16,7 @@ apps:
     - network-bind
     restart-condition: always
 confinement: strict
-description: Files
+description: Nextcloud
 grade: stable
-name: files
-summary: Files
+name: nextcloud
+summary: Nextcloud
