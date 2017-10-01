@@ -1,14 +1,14 @@
-import requests
+import requests_unixsocket
 import re
 from bs4 import BeautifulSoup
 from syncloud_app import logger
 
 
 class Setup:
-    def __init__(self, port):
+    def __init__(self, data_dir):
         self.log = logger.get_logger('nextcloud.setup.finish')
-        self.port = port
-        self.index_url = 'http://localhost:{}/index.php'.format(port)
+        socket = '{0}/web.socket'.format(data_dir).replace('/', '%2F')
+        self.index_url = 'http+unix://{0}'.format(socket)
 
     def finish(self, login, password, data_dir, database_path, port):
 
@@ -16,8 +16,8 @@ class Setup:
             return True
 
         self.log.info("will finish setup using: {0}".format(self.index_url))
-
-        response = requests.post(self.index_url,
+        session = requests_unixsocket.Session() 
+        response = session.post(self.index_url,
                                  data={
                                      'install': 'true', 'adminlogin': login,
                                      'adminpass': password, 'adminpass-clone': password,
@@ -44,7 +44,8 @@ class Setup:
     def is_finished(self,):
 
         try:
-            response = requests.get(self.index_url, verify=False)
+            session = requests_unixsocket.Session() 
+            response = session.get(self.index_url, verify=False)
             self.log.debug('{0} response'.format(self.index_url))
             self.log.debug(response)
             if response.status_code == 400:

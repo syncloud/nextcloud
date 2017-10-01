@@ -1,4 +1,4 @@
-from os import symlink
+from os import symlink, environ
 from os.path import isdir, join, isfile
 import shutil
 import uuid
@@ -31,9 +31,7 @@ OWNCLOUD_LOG_PATH = 'log/{0}.log'.format(APP_NAME)
 CRON_CMD = 'bin/{0}-cron'.format(APP_NAME)
 CRON_USER = APP_NAME
 APP_CONFIG_PATH = '{0}/config'.format(APP_NAME)
-DATA_CONFIG_FILE_PATH = 'config/config.php'
 PSQL_PORT = 5436
-WEB_PORT = 1085
 
 
 def database_init(logger, app_install_dir, app_data_dir, user_name):
@@ -42,7 +40,7 @@ def database_init(logger, app_install_dir, app_data_dir, user_name):
         psql_initdb = join(app_install_dir, 'postgresql/bin/initdb')
         logger.info(check_output(['sudo', '-H', '-u', user_name, psql_initdb, database_path]))
         postgresql_conf_to = join(database_path, 'postgresql.conf')
-        postgresql_conf_from = join(app_install_dir, 'config', 'postgresql.conf')
+        postgresql_conf_from = join(app_data_dir, 'config', 'postgresql.conf')
         shutil.copy(postgresql_conf_from, postgresql_conf_to)
     else:
         logger.info('Database path "{0}" already exists'.format(database_path))
@@ -54,6 +52,10 @@ class OwncloudInstaller:
         self.app = api.get_app_setup(APP_NAME)
         self.database_path = join(self.app.get_data_dir(), 'database')
         self.occ = OCConsole(join(self.app.get_install_dir(), OCC_RUNNER_PATH))
+        self.nextcloud_config_path = join(self.app.get_data_dir(), 'nextcloud', 'config')
+        self.nextcloud_config_file = join(self.nextcloud_config_path, 'config.php')
+        
+        environ['DATA_DIR'] = self.app.get_data_dir()
 
     def install(self):
 
@@ -62,29 +64,29 @@ class OwncloudInstaller:
         linux.useradd(USER_NAME)
 
         templates_path = join(self.app.get_install_dir(), 'config.templates')
-        config_path = join(self.app.get_install_dir(), 'config')
-
         app_data_dir = self.app.get_data_dir()
-
+        config_path = join(app_data_dir, 'config')
+        
         variables = {
             'app_dir': self.app.get_install_dir(),
             'app_data_dir': app_data_dir,
-            'web_port': WEB_PORT,
             'db_psql_port': PSQL_PORT
         }
         gen.generate_files(templates_path, config_path, variables)
+                
         fs.chownpath(self.app.get_install_dir(), USER_NAME, recursive=True)
 
-        config_data_dir = join(app_data_dir, 'config')
         log_dir = join(app_data_dir, 'log')
 
-        fs.makepath(config_data_dir)
         fs.makepath(log_dir)
+        fs.makepath(self.nextcloud_config_path)
+
+        default_config_file = join(config_path, 'config.php')
+        
+        if not isfile(self.nextcloud_config_file):
+            shutil.copy(default_config_file, self.nextcloud_config_file)
 
         fs.chownpath(app_data_dir, USER_NAME, recursive=True)
-
-        config_app_dir = join(self.app.get_install_dir(), APP_CONFIG_PATH)
-        symlink(config_data_dir, config_app_dir)
 
         database_init(self.log, self.app.get_install_dir(), self.app.get_data_dir(), USER_NAME)
 
@@ -114,11 +116,8 @@ class OwncloudInstaller:
 
         fs.chownpath(self.app.get_data_dir(), USER_NAME, recursive=True)
 
-        self.app.register_web(WEB_PORT)
-
     def remove(self):
 
-        self.app.unregister_web()
         cron = OwncloudCron(join(self.app.get_install_dir(), CRON_CMD), CRON_USER)
         self.app.remove_service(SYSTEMD_NGINX_NAME)
         self.app.remove_service(SYSTEMD_PHP_FPM_NAME)
@@ -130,12 +129,7 @@ class OwncloudInstaller:
             shutil.rmtree(self.app.get_install_dir())
 
     def installed(self):
-
-        config_file = join(self.app.get_data_dir(), DATA_CONFIG_FILE_PATH)
-        if not isfile(config_file):
-            return False
-
-        return 'installed' in open(config_file).read().strip()
+        return 'installed' in open(self.nextcloud_config_file).read().strip()
 
     def upgrade(self):
 
@@ -155,8 +149,9 @@ class OwncloudInstaller:
             database='postgres', user=DB_USER, database_path=self.database_path, port=PSQL_PORT)
         db_postgres.execute("ALTER USER {0} WITH PASSWORD '{1}';".format(DB_USER, DB_PASSWORD))
 
-        web_setup = Setup(WEB_PORT)
+        web_setup = Setup(self.app.get_data_dir())
         web_setup.finish(INSTALL_USER, unicode(uuid.uuid4().hex), self.app.get_storage_dir(), self.database_path, PSQL_PORT)
+        #self.occ.run('maintenance:install  --database psql --database-name nextcloud --database-user {0} --database-pass {1} --admin-user {2} --admin-pass {3}'.format(DB_USER, DB_PASSWORD, INSTALL_USER, unicode(uuid.uuid4().hex)))
 
         self.occ.run('app:enable user_ldap')
 
@@ -207,7 +202,9 @@ class OwncloudInstaller:
 
     def prepare_storage(self):
         app_storage_dir = self.app.init_storage(USER_NAME)
-        fs.touchfile(join(app_storage_dir, '.ocdata'))
+        ocdata = join(app_storage_dir, '.ocdata')
+        fs.touchfile(ocdata)
+        check_output('chown {0}. {1}'.format(USER_NAME, ocdata), shell=True)
         check_output('chmod 770 {0}'.format(app_storage_dir), shell=True)
         tmp_storage_path = join(app_storage_dir, 'tmp')
         fs.makepath(tmp_storage_path)

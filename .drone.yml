@@ -15,7 +15,7 @@ pipeline:
     image: syncloud/nextcloud-build-deps-${arch}
     commands:
       - VERSION=$(cat version)
-      - ./build.sh $VERSION
+      - ./build.sh $VERSION ${installer}
 
   integration:
     image: syncloud/nextcloud-build-deps-${arch}
@@ -29,9 +29,6 @@ pipeline:
     commands:
       - VERSION=$(cat version)
       - ./upload.sh $DRONE_BRANCH $VERSION
-    when:
-      matrix:
-        installer: sam
 
   ci-artifact:
     image: syncloud/nextcloud-build-deps-${arch}

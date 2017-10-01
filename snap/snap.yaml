@@ -1,0 +1,22 @@
+apps:
+  nginx:
+    command: bin/service.nginx.sh start
+    daemon: forking
+    plugs:
+    - network
+    - network-bind
+    restart-condition: always
+    stop-command: bin/service.nginx.sh stop
+    reload-command: bin/service.nginx.sh reload
+  uwsgi:
+    command: bin/service.uwsgi.sh files
+    daemon: notify
+    plugs:
+    - network
+    - network-bind
+    restart-condition: always
+confinement: strict
+description: Nextcloud
+grade: stable
+name: nextcloud
+summary: Nextcloud
