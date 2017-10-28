@@ -7,31 +7,31 @@ clone:
 
 pipeline:
   version:
-    image: syncloud/nextcloud-build-deps-${arch}
+    image: syncloud/build-deps-${arch}
     commands:
       - echo $(date +%y%m%d) > version
       
   build:
-    image: syncloud/nextcloud-build-deps-${arch}
+    image: syncloud/build-deps-${arch}
     commands:
       - VERSION=$(cat version)
       - ./build.sh $VERSION ${installer}
 
   integration:
-    image: syncloud/nextcloud-build-deps-${arch}
+    image: syncloud/build-deps-${arch}
     commands:
       - VERSION=$(cat version)
       - ./integration/test-docker.sh teamcity@syncloud.it password teamcity $VERSION master ${installer} device
 
   upload:
-    image: syncloud/nextcloud-build-deps-${arch}
+    image: syncloud/build-deps-${arch}
     secrets: [AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY]
     commands:
       - VERSION=$(cat version)
       - ./upload.sh $DRONE_BRANCH $VERSION
 
   ci-artifact:
-    image: syncloud/nextcloud-build-deps-${arch}
+    image: syncloud/build-deps-${arch}
     secrets: [ARTIFACT_SSH_KEY]
     commands:
       - ./upload-artifact.sh integration/log $DRONE_BUILD_NUMBER-${installer}-$(dpkg --print-architecture)
