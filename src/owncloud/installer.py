@@ -68,17 +68,23 @@ class OwncloudInstaller:
         config_path = join(app_data_dir, 'config')
         
         fs.makepath(self.nextcloud_config_path)
-        default_config_file = join(config_path, 'config.php')
-        if not isfile(self.nextcloud_config_file):
-            shutil.copy(default_config_file, self.nextcloud_config_file)
-
+        
+        # TODO: remove after 17.10
+        old_nextcloud_config_file = join(config_path, 'config.php')
+        if isfile(old_nextcloud_config_file) and not isfile(self.nextcloud_config_file):
+            shutil.copy(old_nextcloud_config_file, self.nextcloud_config_file)
+       
         variables = {
             'app_dir': self.app.get_install_dir(),
             'app_data_dir': app_data_dir,
             'db_psql_port': PSQL_PORT
         }
         gen.generate_files(templates_path, config_path, variables)
-                
+
+        default_config_file = join(config_path, 'config.php')
+        if not isfile(self.nextcloud_config_file):
+            shutil.copy(default_config_file, self.nextcloud_config_file)
+        
         fs.chownpath(self.app.get_install_dir(), USER_NAME, recursive=True)
 
         log_dir = join(app_data_dir, 'log')
