@@ -9,5 +9,5 @@ lib_path = join(app_path, 'lib')
 libs = [join(lib_path, item) for item in listdir(lib_path) if isdir(join(lib_path, item))]
 map(sys.path.append, libs)
 
-from owncloud.installer import OwncloudInstaller
+from nextcloud.installer import OwncloudInstaller
 OwncloudInstaller().on_disk_change()
