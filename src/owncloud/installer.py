@@ -67,6 +67,11 @@ class OwncloudInstaller:
         app_data_dir = self.app.get_data_dir()
         config_path = join(app_data_dir, 'config')
         
+        fs.makepath(self.nextcloud_config_path)
+        default_config_file = join(config_path, 'config.php')
+        if not isfile(self.nextcloud_config_file):
+            shutil.copy(default_config_file, self.nextcloud_config_file)
+
         variables = {
             'app_dir': self.app.get_install_dir(),
             'app_data_dir': app_data_dir,
@@ -79,13 +84,7 @@ class OwncloudInstaller:
         log_dir = join(app_data_dir, 'log')
 
         fs.makepath(log_dir)
-        fs.makepath(self.nextcloud_config_path)
-
-        default_config_file = join(config_path, 'config.php')
         
-        if not isfile(self.nextcloud_config_file):
-            shutil.copy(default_config_file, self.nextcloud_config_file)
-
         fs.chownpath(app_data_dir, USER_NAME, recursive=True)
 
         database_init(self.log, self.app.get_install_dir(), self.app.get_data_dir(), USER_NAME)
