@@ -21,6 +21,7 @@ class OCConfig:
         self.log = logger.get_logger('nextcloud_config')
         
     def set_value(self, key, value):
+        self.log.info('setting value: {0} = {1}'.format(key, value))
         output = check_output('{0} {1} {2}'.format(
             self.oc_config_path,
             key,

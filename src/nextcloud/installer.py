@@ -4,15 +4,16 @@ import shutil
 import uuid
 from subprocess import check_output
 
+import logging
 from syncloud_app import logger
 
 from syncloud_platform.gaplib import fs, linux, gen
 from syncloud_platform.application import api
 
-from owncloud.postgres import Database
-from owncloud.cron import OwncloudCron
-from owncloud.octools import OCConsole, OCConfig
-from owncloud.webface import Setup
+from nextcloud.postgres import Database
+from nextcloud.cron import OwncloudCron
+from nextcloud.octools import OCConsole, OCConfig
+from nextcloud.webface import Setup
 
 APP_NAME = 'nextcloud'
 
@@ -48,6 +49,9 @@ def database_init(logger, app_install_dir, app_data_dir, user_name):
 
 class OwncloudInstaller:
     def __init__(self):
+        if not logger.factory_instance:
+            logger.init(logging.DEBUG, True)
+
         self.log = logger.get_logger('{0}_installer'.format(APP_NAME))
         self.app = api.get_app_setup(APP_NAME)
         self.database_path = join(self.app.get_data_dir(), 'database')
