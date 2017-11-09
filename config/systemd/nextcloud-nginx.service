@@ -7,6 +7,7 @@ After=nextcloud-php-fpm.service
 User=nextcloud
 Type=forking
 PIDFile={{ app_dir }}/nginx/logs/nginx.pid
+ExecStartPre=/bin/rm -f {{ app_data_dir }}/web.socket
 ExecStartPre={{ app_dir }}/nginx/sbin/nginx -t -c {{ app_data_dir }}/config/nginx.conf -p {{ app_dir }}/nginx
 ExecStart={{ app_dir }}/nginx/sbin/nginx -c {{ app_data_dir }}/config/nginx.conf -p {{ app_dir }}/nginx
 ExecReload={{ app_dir }}/nginx/sbin/nginx -c {{ app_data_dir }}/config/nginx.conf -s reload -p {{ app_dir }}/nginx
