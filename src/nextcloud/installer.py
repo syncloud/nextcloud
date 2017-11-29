@@ -187,6 +187,7 @@ class OwncloudInstaller:
         self.occ.run('ldap:set-config s01 ldapGroupDisplayName cn')
         self.occ.run('ldap:set-config s01 ldapBaseGroups ou=groups,dc=syncloud,dc=org')
         self.occ.run('ldap:set-config s01 ldapGroupFilter "(&(|(objectclass=posixGroup)))"')
+        self.occ.run('ldap:set-config s01 ldapGroupFilterGroups syncloud')
         self.occ.run('ldap:set-config s01 ldapGroupMemberAssocAttr memberUid')
 
         self.occ.run('ldap:set-config s01 ldapTLS 0')
