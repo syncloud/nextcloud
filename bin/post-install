@@ -2,7 +2,10 @@ from os.path import dirname, join, abspath, isdir
 from os import listdir
 import sys
 
-app_path = abspath(join(dirname(__file__), '..', '..', 'nextcloud'))
+if "SNAP" in os.environ:
+    app_path = os.environ['SNAP']
+else:
+    app_path = abspath(join(dirname(__file__), '..'))
 sys.path.append(join(app_path, 'src'))
 
 lib_path = join(app_path, 'lib')
