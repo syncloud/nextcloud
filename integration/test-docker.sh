@@ -64,7 +64,7 @@ sshpass -p syncloud scp -o StrictHostKeyChecking=no install-${INSTALLER}.sh root
 
 sshpass -p syncloud ssh -o StrictHostKeyChecking=no root@${DEVICE_HOST} /installer.sh ${RELEASE}
 
-pip2 install -r ${DIR}/../src/dev_requirements.txt
+pip2 install -r ${DIR}/dev_requirements.txt
 
 coin --to ${DIR} raw --subfolder geckodriver https://github.com/mozilla/geckodriver/releases/download/v${GECKODRIVER}/geckodriver-v${GECKODRIVER}-linux64.tar.gz
 coin --to ${DIR} raw https://ftp.mozilla.org/pub/firefox/releases/${FIREFOX}/linux-x86_64/en-US/firefox-${FIREFOX}.tar.bz2
