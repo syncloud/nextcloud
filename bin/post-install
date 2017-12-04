@@ -1,6 +1,7 @@
 from os.path import dirname, join, abspath, isdir
 from os import listdir
 import sys
+import os
 
 if "SNAP" in os.environ:
     app_path = os.environ['SNAP']
