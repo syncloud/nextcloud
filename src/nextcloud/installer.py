@@ -29,7 +29,6 @@ PSQL_PATH = 'postgresql/bin/psql'
 OCC_RUNNER_PATH = 'bin/occ-runner'
 OC_CONFIG_PATH = 'bin/{0}-config'.format(APP_NAME)
 OWNCLOUD_LOG_PATH = 'log/{0}.log'.format(APP_NAME)
-CRON_CMD = 'bin/{0}-cron'.format(APP_NAME)
 CRON_USER = APP_NAME
 APP_CONFIG_PATH = '{0}/config'.format(APP_NAME)
 PSQL_PORT = 5436
@@ -58,7 +57,8 @@ class OwncloudInstaller:
         self.occ = OCConsole(join(self.app.get_install_dir(), OCC_RUNNER_PATH))
         self.nextcloud_config_path = join(self.app.get_data_dir(), 'nextcloud', 'config')
         self.nextcloud_config_file = join(self.nextcloud_config_path, 'config.php')
-        
+        self.cron = OwncloudCron(self.app.get_install_dir(), self.app.get_data_dir(), APP_NAME, CRON_USER)
+
         environ['DATA_DIR'] = self.app.get_data_dir()
 
     def install(self):
@@ -111,9 +111,8 @@ class OwncloudInstaller:
         else:
             self.initialize()
 
-        cron = OwncloudCron(join(self.app.get_install_dir(), CRON_CMD), CRON_USER)
-        cron.remove()
-        cron.create()
+        self.cron.remove()
+        self.cron.create()
 
         oc_config = OCConfig(join(self.app.get_install_dir(), OC_CONFIG_PATH))
         oc_config.set_value('memcache.local', '\OC\Memcache\APCu')
@@ -127,12 +126,11 @@ class OwncloudInstaller:
 
     def remove(self):
 
-        cron = OwncloudCron(join(self.app.get_install_dir(), CRON_CMD), CRON_USER)
         self.app.remove_service(SYSTEMD_NGINX_NAME)
         self.app.remove_service(SYSTEMD_PHP_FPM_NAME)
         self.app.remove_service(SYSTEMD_POSTGRESQL)
 
-        cron.remove()
+        self.cron.remove()
 
         if isdir(self.app.get_install_dir()):
             shutil.rmtree(self.app.get_install_dir())
@@ -194,8 +192,7 @@ class OwncloudInstaller:
         self.occ.run('ldap:set-config s01 turnOffCertCheck 1')
         self.occ.run('ldap:set-config s01 ldapConfigurationActive 1')
 
-        cron = OwncloudCron(join(self.app.get_install_dir(), CRON_CMD), CRON_USER)
-        cron.run()
+        self.cron.run()
 
         db = Database(join(self.app.get_install_dir(), PSQL_PATH),
                       database=DB_NAME, user=DB_USER, database_path=self.database_path, port=PSQL_PORT)
