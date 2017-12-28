@@ -11,6 +11,7 @@ PIDFile={{ app_data_dir }}/database/postmaster.pid
 ExecStart={{ app_dir }}/postgresql/bin/pg_ctl -w -s -D {{ app_data_dir }}/database start
 ExecReload={{ app_dir }}/postgresql/bin/pg_ctl -s -D {{ app_data_dir }}/database reload
 ExecStop={{ app_dir }}/postgresql/bin/pg_ctl -s -D {{ app_data_dir }}/database stop -m fast
+Restart=always
 
 # Due to PostgreSQL's use of shared memory, OOM killer is often overzealous in
 # killing Postgres
