@@ -6,12 +6,11 @@ After=nextcloud-php-fpm.service
 [Service]
 User=nextcloud
 Type=forking
+Environment=SNAP_COMMON={{ app_data_dir }}
 PIDFile={{ app_dir }}/nginx/logs/nginx.pid
-ExecStartPre=/bin/rm -f {{ app_data_dir }}/web.socket
-ExecStartPre={{ app_dir }}/nginx/sbin/nginx -t -c {{ app_data_dir }}/config/nginx.conf -p {{ app_dir }}/nginx
-ExecStart={{ app_dir }}/nginx/sbin/nginx -c {{ app_data_dir }}/config/nginx.conf -p {{ app_dir }}/nginx
-ExecReload={{ app_dir }}/nginx/sbin/nginx -c {{ app_data_dir }}/config/nginx.conf -s reload -p {{ app_dir }}/nginx
-ExecStop={{ app_dir }}/nginx/sbin/nginx -c {{ app_data_dir }}/config/nginx.conf -s stop -p {{ app_dir }}/nginx
+ExecStartPre={{ app_dir }}/bin/service.nginx.sh pre-start
+ExecStart={{ app_dir }}/bin/service.nginx.sh start
+ExecStop={{ app_dir }}/bin/service.nginx.sh stop
 
 [Install]
 WantedBy=multi-user.target

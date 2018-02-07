@@ -1,20 +1,35 @@
 apps:
+  postgresql:
+    user: nextcloud
+    command: bin/service.postgresql.sh start
+    daemon: forking
+    plugs:
+    - network
+    - network-bind
+    restart-condition: always
+    post-start-command: bin/service.postgresql.sh post-start
+    before: [php-fpm]
+    
   nginx:
     command: bin/service.nginx.sh start
+    user: nextcloud
     daemon: simple
     plugs:
     - network
     - network-bind
     restart-condition: always
     stop-command: bin/service.nginx.sh stop
-    reload-command: bin/service.nginx.sh reload
-  uwsgi:
-    command: bin/service.uwsgi.sh files
-    daemon: notify
+  
+  php-fpm:
+    user: nextcloud
+    command: bin/service.php-fpm.sh start
+    daemon: simple
     plugs:
     - network
     - network-bind
     restart-condition: always
+    after: [postgresql]
+    
 confinement: strict
 description: Nextcloud
 grade: stable
