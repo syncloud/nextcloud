@@ -27,8 +27,6 @@ coin --to lib py https://pypi.python.org/packages/f3/94/67d781fb32afbee0fffa0ad9
 coin --to lib py https://pypi.python.org/packages/source/m/massedit/massedit-0.67.1.zip
 coin --to lib py https://pypi.python.org/packages/b1/f3/732948155aff67497d16966ed9ecadfc1103a37f2b7fb7e93c443a12510c/syncloud-lib-16.tar.gz#md5=7c555868248f977acb51eb4e9e520f4e
 
-cp -r ${DIR}/src lib/syncloud-${NAME}-${VERSION}
-
 rm -rf build
 BUILD_DIR=${DIR}/build/${NAME}
 mkdir -p ${BUILD_DIR}
@@ -46,7 +44,7 @@ mv ${BUILD_DIR}/php7 ${BUILD_DIR}/php
 cp -r bin ${BUILD_DIR}
 cp -r config ${BUILD_DIR}/config.templates
 cp -r lib ${BUILD_DIR}
-
+cp -r hooks ${BUILD_DIR}
 rm -rf ${BUILD_DIR}/${NAME}/config
 ls -la ${BUILD_DIR}/${NAME}/apps
 
