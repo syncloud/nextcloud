@@ -1,6 +1,7 @@
 from os.path import dirname, join, abspath, isdir
 from os import listdir
 import sys
+from cron import OwncloudCron
 
 app_path = abspath(join(dirname(__file__), '..'))
 
@@ -22,7 +23,6 @@ from syncloud_platform.gaplib import fs, linux, gen
 from syncloudlib.application import paths, urls, storage, users
 
 from postgres import Database
-from cron import OwncloudCron
 from octools import OCConsole, OCConfig
 from webface import Setup
 
