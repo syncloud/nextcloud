@@ -77,8 +77,7 @@ class NextcloudInstaller:
         self.nextcloud_config_path = join(self.app_data_dir, 'nextcloud', 'config')
         self.nextcloud_config_file = join(self.nextcloud_config_path, 'config.php')
         self.cron = OwncloudCron(self.app_dir, self.app_data_dir, APP_NAME, CRON_USER)
-        self.app_storage_dir = storage.init_storage(APP_NAME, USER_NAME)
-
+        
         environ['DATA_DIR'] = self.app_data_dir
 
     def install(self):
@@ -86,6 +85,7 @@ class NextcloudInstaller:
         linux.fix_locale()
 
         linux.useradd(USER_NAME)
+        storage.init_storage(APP_NAME, USER_NAME)
 
         templates_path = join(self.app_dir, 'config.templates')
         config_path = join(self.app_data_dir, 'config')
@@ -127,11 +127,12 @@ class NextcloudInstaller:
 
     def configure(self):
         self.prepare_storage()
+        app_storage_dir = storage.init_storage(APP_NAME, USER_NAME)
 
         if self.installed():
             self.upgrade()
         else:
-            self.initialize()
+            self.initialize(app_storage_dir)
 
         self.cron.remove()
         self.cron.create()
@@ -140,7 +141,7 @@ class NextcloudInstaller:
         oc_config.set_value('memcache.local', '\OC\Memcache\APCu')
         oc_config.set_value('loglevel', '2')
         oc_config.set_value('logfile', join(self.app_data_dir, OWNCLOUD_LOG_PATH))
-        oc_config.set_value('datadirectory', self.app_storage_dir)
+        oc_config.set_value('datadirectory', app_storage_dir)
 
         self.on_domain_change()
 
@@ -167,7 +168,7 @@ class NextcloudInstaller:
             self.occ.run('upgrade')
             self.occ.run('maintenance:mode --off')
 
-    def initialize(self):
+    def initialize(self, app_storage_dir):
 
         print("initialization")
 
@@ -179,7 +180,7 @@ class NextcloudInstaller:
         db_postgres.execute("ALTER USER {0} WITH PASSWORD '{1}';".format(DB_USER, DB_PASSWORD))
 
         web_setup = Setup(self.app_data_dir)
-        web_setup.finish(INSTALL_USER, unicode(uuid.uuid4().hex), self.app_storage_dir, self.database_path, PSQL_PORT)
+        web_setup.finish(INSTALL_USER, unicode(uuid.uuid4().hex), app_storage_dir, self.database_path, PSQL_PORT)
         #self.occ.run('maintenance:install  --database psql --database-name nextcloud --database-user {0} --database-pass {1} --admin-user {2} --admin-pass {3}'.format(DB_USER, DB_PASSWORD, INSTALL_USER, unicode(uuid.uuid4().hex)))
 
         self.occ.run('app:enable user_ldap')
