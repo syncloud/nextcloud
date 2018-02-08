@@ -242,7 +242,7 @@ class NextcloudInstaller:
         fs.chownpath(tmp_storage_path, USER_NAME)
 
     def on_domain_change(self):
-        app_domain = urls.get_app_domain_name()
+        app_domain = urls.get_app_domain_name(APP_NAME)
         local_ip = check_output(["hostname", "-I"]).split(" ")[0]
         domains = ['localhost', local_ip, app_domain]
         oc_config = OCConfig(join(self.app.get_install_dir(), OC_CONFIG_PATH))
