@@ -1,7 +1,7 @@
 from os.path import dirname, join, abspath, isdir
 from os import listdir
 import sys
-from cron import OwncloudCron
+#from cron import OwncloudCron
 
 app_path = abspath(join(dirname(__file__), '..'))
 
