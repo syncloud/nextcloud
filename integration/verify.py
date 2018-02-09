@@ -273,8 +273,8 @@ def __check_test_dir(nextcloud_session, test_dir, user_domain, device_host):
     assert test_dir in dirs, response.text
 
 
-def test_phpinfo(device_host, data_dir):
-    run_ssh(device_host, '/opt/app/nextcloud/bin/php-runner -i > /opt/data/nextcloud/log/phpinfo.log', password=DEVICE_PASSWORD, env_vars='DATA_DIR={0}'.format(data_dir))
+def test_phpinfo(device_host, app_dir, data_dir):
+    run_ssh(device_host, '{0}/bin/php-runner -i > {1}/log/phpinfo.log'.format(app_dir, data_dir), password=DEVICE_PASSWORD, env_vars='DATA_DIR={0}'.format(data_dir))
 
 
 def test_remove(syncloud_session, device_host):
@@ -284,6 +284,3 @@ def test_remove(syncloud_session, device_host):
 
 def test_reinstall(app_archive_path, device_host, installer):
     local_install(device_host, DEVICE_PASSWORD, app_archive_path, installer)
-
-
-
