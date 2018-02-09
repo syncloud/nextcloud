@@ -1,2 +1,2 @@
 from installer import NextcloudInstaller
-OwncloudInstaller().on_disk_change()
+NextcloudInstaller().on_disk_change()

@@ -1,2 +1,2 @@
 from installer import NextcloudInstaller
-OwncloudInstaller().on_domain_change()
+NextcloudInstaller().on_domain_change()

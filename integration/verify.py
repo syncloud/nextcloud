@@ -152,7 +152,7 @@ def test_resource(nextcloud_session_domain, user_domain, device_host):
 
 
 @pytest.mark.parametrize("megabytes", [1, 300])
-def test_sync(user_domain, megabytes, device_host, data_dir):
+def test_sync(user_domain, megabytes, device_host, app_dir, data_dir):
 
     sync_file = 'test.file-{0}'.format(megabytes)
     if os.path.isfile(sync_file):
@@ -167,7 +167,7 @@ def test_sync(user_domain, megabytes, device_host, data_dir):
 
     assert os.path.isfile(sync_file_download)
     run_ssh(device_host, 'rm /data/nextcloud/{0}/files/{1}'.format(DEVICE_USER, sync_file), password=DEVICE_PASSWORD)
-    files_scan(device_host, data_dir)
+    files_scan(device_host, app_dir, data_dir)
 
 
 def webdav_upload(user, password, file_from, file_to, user_domain):
@@ -178,12 +178,12 @@ def webdav_download(user, password, file_from, file_to, user_domain):
     return 'curl -o {3} http://{0}:{1}@{4}/remote.php/webdav/{2}'.format(user, password, file_from, file_to, user_domain)
 
 
-def files_scan(device_host, data_dir):
-    run_ssh(device_host, '/opt/app/nextcloud/bin/occ-runner files:scan --all', password=DEVICE_PASSWORD, env_vars='DATA_DIR={0}'.format(data_dir))
+def files_scan(device_host, app_dir, data_dir):
+    run_ssh(device_host, '{0}/bin/occ-runner files:scan --all'.format(app_dir), password=DEVICE_PASSWORD, env_vars='DATA_DIR={0}'.format(data_dir))
 
 
-def test_occ(device_host, data_dir):
-    run_ssh(device_host, '/opt/app/nextcloud/bin/occ-runner', password=DEVICE_PASSWORD, env_vars='DATA_DIR={0}'.format(data_dir))
+def test_occ(device_host, app_dir, data_dir):
+    run_ssh(device_host, '{0}/bin/occ-runner'.format(app_dir), password=DEVICE_PASSWORD, env_vars='DATA_DIR={0}'.format(data_dir))
 
 
 def test_visible_through_platform(user_domain, device_host):
@@ -214,22 +214,22 @@ def test_verification(nextcloud_session_domain, user_domain):
 #     assert not json.loads(response.text)['hasPassedCodeIntegrityCheck'], 'you can fix me now'
 
 
-def test_disk(syncloud_session, user_domain, device_host, data_dir):
+def test_disk(syncloud_session, user_domain, device_host, app_dir, data_dir):
 
     loop_device_cleanup(device_host, '/tmp/test0', DEVICE_PASSWORD)
     loop_device_cleanup(device_host, '/tmp/test1', DEVICE_PASSWORD)
 
     device0 = loop_device_add(device_host, 'ext4', '/tmp/test0', DEVICE_PASSWORD)
-    __activate_disk(syncloud_session, device0, device_host, data_dir)
+    __activate_disk(syncloud_session, device0, device_host, app_dir, data_dir)
     __create_test_dir('test0', user_domain, device_host)
     __check_test_dir(nextcloud_session_domain(user_domain, device_host), 'test0', user_domain, device_host)
 
     device1 = loop_device_add(device_host, 'ext2', '/tmp/test1', DEVICE_PASSWORD)
-    __activate_disk(syncloud_session, device1, device_host, data_dir)
+    __activate_disk(syncloud_session, device1, device_host, app_dir, data_dir)
     __create_test_dir('test1', user_domain, device_host)
     __check_test_dir(nextcloud_session_domain(user_domain, device_host), 'test1', user_domain, device_host)
 
-    __activate_disk(syncloud_session, device0, device_host, data_dir)
+    __activate_disk(syncloud_session, device0, device_host, app_dir, data_dir)
     __check_test_dir(nextcloud_session_domain(user_domain, device_host), 'test0', user_domain, device_host)
 
 
@@ -240,13 +240,13 @@ def __log_data_dir(device_host):
     run_ssh(device_host, 'ls -la /data/nextcloud', password=DEVICE_PASSWORD)
 
 
-def __activate_disk(syncloud_session, loop_device, device_host, data_dir):
+def __activate_disk(syncloud_session, loop_device, device_host, app_dir, data_dir):
 
     __log_data_dir(device_host)
     response = syncloud_session.get('http://{0}/rest/settings/disk_activate'.format(device_host),
                                     params={'device': loop_device}, allow_redirects=False)
     __log_data_dir(device_host)
-    files_scan(device_host, data_dir)
+    files_scan(device_host, app_dir, data_dir)
     assert response.status_code == 200, response.text
 
 
