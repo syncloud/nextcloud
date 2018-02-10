@@ -7,7 +7,7 @@ After=nextcloud-php-fpm.service
 User=nextcloud
 Type=forking
 Environment=SNAP_COMMON={{ app_data_dir }}
-PIDFile={{ app_data_dir }}/logs/nginx.pid
+PIDFile={{ app_data_dir }}/log/nginx.pid
 ExecStartPre={{ app_dir }}/bin/service.nginx.sh pre-start
 ExecStart={{ app_dir }}/bin/service.nginx.sh start
 ExecStop={{ app_dir }}/bin/service.nginx.sh stop
