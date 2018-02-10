@@ -111,10 +111,10 @@ class NextcloudInstaller:
         fs.chownpath(self.app_dir, USER_NAME, recursive=True)
 
         log_dir = join(self.app_data_dir, 'log')
-
         fs.makepath(log_dir)
         
-        fs.chownpath(self.app_data_dir, USER_NAME, recursive=True)
+        if 'SNAP' not in environ:
+            fs.chownpath(self.app_data_dir, USER_NAME, recursive=True)
 
         database_init(self.log, self.app_dir, self.app_data_dir, USER_NAME)
 
