@@ -84,7 +84,9 @@ class NextcloudInstaller:
 
         linux.fix_locale()
 
-        linux.useradd(USER_NAME)
+        home_folder = join('/home', USER_NAME)
+        linux.useradd(USER_NAME, home_folder=home_folder)
+
         storage.init_storage(APP_NAME, USER_NAME)
 
         templates_path = join(self.app_dir, 'config.templates')
