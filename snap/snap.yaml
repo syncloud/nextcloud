@@ -12,7 +12,7 @@ apps:
   nginx:
     command: bin/service.nginx.sh start
     user: nextcloud
-    daemon: simple
+    daemon: forking
     plugs:
     - network
     - network-bind
@@ -22,7 +22,7 @@ apps:
   php-fpm:
     user: nextcloud
     command: bin/service.php-fpm.sh start
-    daemon: simple
+    daemon: forking
     plugs:
     - network
     - network-bind
