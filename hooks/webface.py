@@ -1,3 +1,4 @@
+import requests
 import requests_unixsocket
 import re
 from bs4 import BeautifulSoup
