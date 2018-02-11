@@ -9,6 +9,17 @@ apps:
     restart-condition: always
     before: [php-fpm]
     
+  php-fpm:
+    user: nextcloud
+    command: bin/service.php-fpm.sh start
+    daemon: forking
+    plugs:
+    - network
+    - network-bind
+    restart-condition: always
+    post-start-command: bin/service.php-fpm.sh post-start
+    after: [postgresql]
+  
   nginx:
     command: bin/service.nginx.sh start
     user: nextcloud
@@ -19,17 +30,8 @@ apps:
     restart-condition: always
     stop-command: bin/service.nginx.sh stop
     post-start-command: bin/service.nginx.sh post-start
-  
-  php-fpm:
-    user: nextcloud
-    command: bin/service.php-fpm.sh start
-    daemon: forking
-    plugs:
-    - network
-    - network-bind
-    restart-condition: always
-    after: [postgresql]
-    
+    after: [php-fpm]
+
 confinement: strict
 description: Nextcloud
 grade: stable

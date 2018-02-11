@@ -9,6 +9,7 @@ Type=forking
 Environment=SNAP_COMMON={{ app_data_dir }}
 PIDFile={{ app_data_dir }}/php-fpm.pid
 ExecStart={{ app_dir }}/bin/service.php-fpm.sh start
+ExecStartPost={{ app_dir }}/bin/service.php-fpm.sh post-start
 RemainAfterExit=yes
 
 [Install]

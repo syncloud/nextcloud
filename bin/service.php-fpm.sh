@@ -13,6 +13,9 @@ case $1 in
 start)
     exec $DIR/php/sbin/php-fpm -y ${SNAP_COMMON}/config/php-fpm.conf -c ${SNAP_COMMON}/config/php.ini
     ;;
+post-start)
+    timeout 5 /bin/bash -c 'until [ -S '${SNAP_COMMON}'/log/php5-fpm.sock ]; do echo "waiting for ${SNAP_COMMON}/log/php5-fpm.sock"; sleep 1; done'
+    ;;
 *)
     echo "not valid command"
     exit 1
