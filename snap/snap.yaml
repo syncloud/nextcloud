@@ -19,6 +19,7 @@ apps:
     restart-condition: always
     post-start-command: bin/service.php-fpm.sh post-start
     after: [postgresql]
+    before: [nginx]
   
   nginx:
     command: bin/service.nginx.sh start
