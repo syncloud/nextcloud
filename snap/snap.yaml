@@ -31,7 +31,7 @@ apps:
     restart-condition: always
     stop-command: bin/service.nginx.sh stop
     post-start-command: bin/service.nginx.sh post-start
-    after: [php-fpm]
+    after: [php-fpm, postgresql]
 
 confinement: strict
 description: Nextcloud
