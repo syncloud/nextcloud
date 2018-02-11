@@ -115,7 +115,8 @@ class NextcloudInstaller:
 
         fs.makepath(join(self.app_data_dir, 'log'))
         fs.makepath(join(self.app_data_dir, 'nginx'))
-        
+        fs.makepath(join(self.app_data_dir, 'extra-apps'))
+
         fs.chownpath(self.app_data_dir, USER_NAME, recursive=True)
 
         database_init(self.log, self.app_dir, self.app_data_dir, USER_NAME)

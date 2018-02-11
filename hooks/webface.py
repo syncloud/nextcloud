@@ -19,14 +19,13 @@ class Setup:
         self.log.info("will finish setup using: {0}".format(self.index_url))
         session = requests_unixsocket.Session() 
         response = session.post(self.index_url,
-                                 data={
-                                     'install': 'true', 'adminlogin': login,
-                                     'adminpass': password, 'adminpass-clone': password,
-                                     'dbtype': 'pgsql', 'dbname': 'nextcloud',
-                                     'dbuser': 'nextcloud', 'dbpass': 'nextcloud',
-
-                                     'dbhost': '{0}:{1}'.format(database_path, port), 'directory': data_dir},
-                                 allow_redirects=False)
+                                data={
+                                    'install': 'true', 'adminlogin': login,
+                                    'adminpass': password, 'adminpass-clone': password,
+                                    'dbtype': 'pgsql', 'dbname': 'nextcloud',
+                                    'dbuser': 'nextcloud', 'dbpass': 'nextcloud',
+                                    'dbhost': '{0}:{1}'.format(database_path, port), 'directory': data_dir},
+                                allow_redirects=False)
 
         if response.status_code == 302:
             self.log.info("successful login redirect")
@@ -42,23 +41,24 @@ class Setup:
             errors = re.sub('( +)', ' ', errors)
             raise Exception(errors)
 
-    def is_finished(self,):
+    def is_finished(self):
 
         try:
             session = requests_unixsocket.Session() 
             response = session.get(self.index_url, verify=False)
             self.log.debug('{0} response'.format(self.index_url))
-            self.log.debug(response)
+            self.log.debug(response.text.encode("utf-8"))
+            self.log.debug(response.status_code)
             if response.status_code == 400:
                 raise Exception("nextcloud is not trusting you to access {}".format(self.index_url))
 
             if response.status_code != 200:
                 soup = BeautifulSoup(response.text, "html.parser")
-                error = soup.find('li', class_='error')
+                error = soup.find('div', class_='error')
                 self.log.error(error)
                 raise Exception("nextcloud is not available at {}".format(self.index_url))
 
             return "Finish setup" not in response.text
 
         except requests.ConnectionError:
-            raise Exception("nextcloud is not available at {}".format(self.index_url))
+            raise Exception("unable to connect to nextcloud at {}".format(self.index_url))
