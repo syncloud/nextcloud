@@ -1,5 +1,5 @@
 <?php
-require_once basename(__DIR__).'/../nextcloud/lib/base.php';
+require_once dirname(__FILE__).'/../nextcloud/lib/base.php';
 
 if ($argc > 2) {
     if ($argc == 3) {
