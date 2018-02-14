@@ -33,9 +33,9 @@ from os.path import join
 
 APP_NAME = 'nextcloud'
 
-SYSTEMD_NGINX_NAME = '{0}-nginx'.format(APP_NAME)
-SYSTEMD_PHP_FPM_NAME = '{0}-php-fpm'.format(APP_NAME)
-SYSTEMD_POSTGRESQL = '{0}-postgresql'.format(APP_NAME)
+SYSTEMD_NGINX_NAME = '{0}.nginx'.format(APP_NAME)
+SYSTEMD_PHP_FPM_NAME = '{0}.php-fpm'.format(APP_NAME)
+SYSTEMD_POSTGRESQL = '{0}.postgresql'.format(APP_NAME)
 INSTALL_USER = 'installer'
 USER_NAME = APP_NAME
 DB_NAME = APP_NAME

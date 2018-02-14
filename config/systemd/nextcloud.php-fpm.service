@@ -1,7 +1,7 @@
 [Unit]
 Description=nextcloud php fpm
-Requires=nextcloud-postgresql.service
-After=nextcloud-postgresql.service
+Requires=nextcloud.postgresql.service
+After=nextcloud.postgresql.service
 
 [Service]
 User=nextcloud

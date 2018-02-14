@@ -1,7 +1,7 @@
 [Unit]
 Description=nextcloud nginx
-Requires=nextcloud-php-fpm.service
-After=nextcloud-php-fpm.service
+Requires=nextcloud.php-fpm.service
+After=nextcloud.php-fpm.service
 
 [Service]
 User=nextcloud
