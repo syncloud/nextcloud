@@ -1,0 +1,16 @@
+[Unit]
+Description=nextcloud php fpm
+Requires=nextcloud.postgresql.service
+After=nextcloud.postgresql.service
+
+[Service]
+User=nextcloud
+Type=forking
+Environment=SNAP_COMMON={{ app_data_dir }}
+PIDFile={{ app_data_dir }}/php-fpm.pid
+ExecStart={{ app_dir }}/bin/service.php-fpm.sh start
+ExecStartPost={{ app_dir }}/bin/service.php-fpm.sh post-start
+RemainAfterExit=yes
+
+[Install]
+WantedBy=multi-user.target

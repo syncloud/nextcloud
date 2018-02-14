@@ -8,9 +8,10 @@ from subprocess import check_output
 import pytest
 import shutil
 
-from integration.util.loop import loop_device_add, loop_device_cleanup
-from integration.util.ssh import run_scp, run_ssh
-from integration.util.helper import local_install
+from syncloudlib.integration.loop import loop_device_add, loop_device_cleanup
+from syncloudlib.integration.ssh import run_scp, run_ssh
+from syncloudlib.integration.installer import local_install, wait_for_sam, wait_for_rest, local_remove, get_platform_data_dir, get_data_dir, get_app_dir, get_service_prefix, get_ssh_env_vars
+
 app_path = join(dirname(__file__), '..')
 sys.path.append(join(app_path, 'src'))
 
@@ -28,56 +29,32 @@ DEFAULT_DEVICE_PASSWORD = 'syncloud'
 LOGS_SSH_PASSWORD = DEFAULT_DEVICE_PASSWORD
 DIR = dirname(__file__)
 LOG_DIR = join(DIR, 'log')
+APP='nextcloud'
+TMP_DIR = '/tmp/syncloud'
 
-SAM_PLATFORM_DATA_DIR='/opt/data/platform'
-SNAPD_PLATFORM_DATA_DIR='/var/snap/platform/common'
-DATA_DIR=''
-
-SAM_DATA_DIR='/opt/data/nextcloud'
-SNAPD_DATA_DIR='/var/snap/nextcloud/common'
-DATA_DIR=''
-
-SAM_APP_DIR='/opt/app/nextcloud'
-SNAPD_APP_DIR='/snap/nextcloud/current'
-APP_DIR=''
 
 @pytest.fixture(scope="session")
 def platform_data_dir(installer):
-    if installer == 'sam':
-        return SAM_PLATFORM_DATA_DIR
-    else:
-        return SNAPD_PLATFORM_DATA_DIR
+    return get_platform_data_dir(installer)
         
 @pytest.fixture(scope="session")
 def data_dir(installer):
-    if installer == 'sam':
-        return SAM_DATA_DIR
-    else:
-        return SNAPD_DATA_DIR
-
+    return get_data_dir(installer, APP)
+         
 
 @pytest.fixture(scope="session")
 def app_dir(installer):
-    if installer == 'sam':
-        return SAM_APP_DIR
-    else:
-        return SNAPD_APP_DIR
+    return get_app_dir(installer, APP)
 
 
 @pytest.fixture(scope="session")
 def service_prefix(installer):
-    if installer == 'sam':
-        return ''
-    else:
-        return 'snap.'
+    return get_service_prefix(installer)
 
 
 @pytest.fixture(scope="session")
 def ssh_env_vars(installer):
-    if installer == 'sam':
-        return ''
-    if installer == 'snapd':
-        return 'SNAP_COMMON={0} '.format(SNAPD_DATA_DIR)
+    return get_ssh_env_vars(installer, APP)
 
 
 @pytest.fixture(scope="session")
@@ -88,22 +65,34 @@ def module_setup(request, device_host, data_dir, platform_data_dir, app_dir):
 def module_teardown(device_host, data_dir, platform_data_dir, app_dir):
     platform_log_dir = join(LOG_DIR, 'platform_log')
     os.mkdir(platform_log_dir)
-    run_ssh(device_host, 'ls -la {0}'.format(data_dir), password=LOGS_SSH_PASSWORD, throw=False)
-    run_ssh(device_host, 'ls -la {0}/nextcloud/config'.format(data_dir), password=LOGS_SSH_PASSWORD, throw=False)
-    run_ssh(device_host, 'ls -la /data/nextcloud', password=LOGS_SSH_PASSWORD, throw=False)
-    run_ssh(device_host, 'cat {0}/nextcloud/config/config.php'.format(data_dir), password=LOGS_SSH_PASSWORD, throw=False)
-    run_ssh(device_host, '{0}/bin/occ-runner'.format(app_dir), password=LOGS_SSH_PASSWORD, env_vars='DATA_DIR={0}'.format(data_dir), throw=False)
     run_scp('root@{0}:{1}/log/* {2}'.format(device_host, platform_data_dir, platform_log_dir), password=LOGS_SSH_PASSWORD, throw=False)
     
     run_scp('root@{0}:/var/log/sam.log {1}'.format(device_host, platform_log_dir), password=LOGS_SSH_PASSWORD, throw=False)
-
-    print('systemd logs')
-    run_ssh(device_host, 'journalctl | tail -200', password=LOGS_SSH_PASSWORD)
 
     app_log_dir  = join(LOG_DIR, 'nextcloud_log')
     os.mkdir(app_log_dir )
     run_scp('root@{0}:{1}/log/*.log {2}'.format(device_host, data_dir, app_log_dir), password=LOGS_SSH_PASSWORD, throw=False)
 
+    run_ssh(device_host, 'mkdir {0}'.format(TMP_DIR), password=LOGS_SSH_PASSWORD)
+    run_ssh(device_host, 'ls -la {0} > {1}/app.data.ls.log'.format(data_dir, TMP_DIR), password=LOGS_SSH_PASSWORD, throw=False)
+    run_ssh(device_host, 'ls -la {0}/nextcloud/config > {1}/config.ls.log'.format(data_dir, TMP_DIR), password=LOGS_SSH_PASSWORD, throw=False)
+    run_ssh(device_host, 'cp {0}/nextcloud/config/config.php {1}'.format(data_dir, TMP_DIR), password=LOGS_SSH_PASSWORD, throw=False)
+    run_ssh(device_host, '{0}/bin/occ-runner > {1}'.format(app_dir, TMP_DIR), password=LOGS_SSH_PASSWORD, env_vars='DATA_DIR={0}'.format(data_dir), throw=False)
+    run_ssh(device_host, 'top -bn 1 -w 500 -c > {0}/top.log'.format(TMP_DIR), password=LOGS_SSH_PASSWORD, throw=False)
+    run_ssh(device_host, 'ps auxfw > {0}/ps.log'.format(TMP_DIR), password=LOGS_SSH_PASSWORD, throw=False)
+    run_ssh(device_host, 'systemctl status {0}nextcloud.php-fpm > {1}/nextcloud.php-fpm.status.log'.format(service_prefix, TMP_DIR), password=LOGS_SSH_PASSWORD, throw=False)
+    run_ssh(device_host, 'netstat -nlp > {0}/netstat.log'.format(TMP_DIR), password=LOGS_SSH_PASSWORD, throw=False)
+    run_ssh(device_host, 'journalctl | tail -500 > {0}/journalctl.log'.format(TMP_DIR), password=LOGS_SSH_PASSWORD, throw=False)
+    run_ssh(device_host, 'tail -500 /var/log/syslog > {0}/syslog.log'.format(TMP_DIR), password=LOGS_SSH_PASSWORD, throw=False)
+    run_ssh(device_host, 'tail -500 /var/log/messages > {0}/messages.log'.format(TMP_DIR), password=LOGS_SSH_PASSWORD, throw=False)    
+    run_ssh(device_host, 'ls -la /snap > {0}/snap.ls.log'.format(TMP_DIR), password=LOGS_SSH_PASSWORD, throw=False)    
+    run_ssh(device_host, 'ls -la /snap/nextcloud > {0}/snap.nextcloud.ls.log'.format(TMP_DIR), password=LOGS_SSH_PASSWORD, throw=False)    
+    run_ssh(device_host, 'ls -la /var/snap > {0}/var.snap.ls.log'.format(TMP_DIR), password=LOGS_SSH_PASSWORD, throw=False)    
+    run_ssh(device_host, 'ls -la /var/snap/nextcloud > {0}/var.snap.nextcloud.ls.log'.format(TMP_DIR), password=LOGS_SSH_PASSWORD, throw=False)    
+    run_ssh(device_host, 'ls -la /var/snap/nextcloud/common > {0}/var.snap.nextclouds.common.ls.log'.format(TMP_DIR), password=LOGS_SSH_PASSWORD, throw=False)    
+    run_ssh(device_host, 'ls -la /data > {0}/data.ls.log'.format(TMP_DIR), password=LOGS_SSH_PASSWORD, throw=False)    
+    run_ssh(device_host, 'ls -la /data/nextcloud > {0}/data.nextcloud.ls.log'.format(TMP_DIR), password=LOGS_SSH_PASSWORD, throw=False)    
+    run_scp('root@{0}:{1}/*.log {2}'.format(device_host, TMP_DIR, app_log_dir), password=LOGS_SSH_PASSWORD, throw=False)
     
 
 @pytest.fixture(scope='function')
@@ -163,7 +152,7 @@ def test_resource(nextcloud_session_domain, user_domain, device_host):
 
 
 @pytest.mark.parametrize("megabytes", [1, 300])
-def test_sync(user_domain, megabytes, device_host, data_dir):
+def test_sync(user_domain, megabytes, device_host, app_dir, data_dir):
 
     sync_file = 'test.file-{0}'.format(megabytes)
     if os.path.isfile(sync_file):
@@ -178,7 +167,7 @@ def test_sync(user_domain, megabytes, device_host, data_dir):
 
     assert os.path.isfile(sync_file_download)
     run_ssh(device_host, 'rm /data/nextcloud/{0}/files/{1}'.format(DEVICE_USER, sync_file), password=DEVICE_PASSWORD)
-    files_scan(device_host, data_dir)
+    files_scan(device_host, app_dir, data_dir)
 
 
 def webdav_upload(user, password, file_from, file_to, user_domain):
@@ -189,12 +178,12 @@ def webdav_download(user, password, file_from, file_to, user_domain):
     return 'curl -o {3} http://{0}:{1}@{4}/remote.php/webdav/{2}'.format(user, password, file_from, file_to, user_domain)
 
 
-def files_scan(device_host, data_dir):
-    run_ssh(device_host, '/opt/app/nextcloud/bin/occ-runner files:scan --all', password=DEVICE_PASSWORD, env_vars='DATA_DIR={0}'.format(data_dir))
+def files_scan(device_host, app_dir, data_dir):
+    run_ssh(device_host, '{0}/bin/occ-runner files:scan --all'.format(app_dir), password=DEVICE_PASSWORD, env_vars='DATA_DIR={0}'.format(data_dir))
 
 
-def test_occ(device_host, data_dir):
-    run_ssh(device_host, '/opt/app/nextcloud/bin/occ-runner', password=DEVICE_PASSWORD, env_vars='DATA_DIR={0}'.format(data_dir))
+def test_occ(device_host, app_dir, data_dir):
+    run_ssh(device_host, '{0}/bin/occ-runner'.format(app_dir), password=DEVICE_PASSWORD, env_vars='DATA_DIR={0}'.format(data_dir))
 
 
 def test_visible_through_platform(user_domain, device_host):
@@ -225,22 +214,22 @@ def test_verification(nextcloud_session_domain, user_domain):
 #     assert not json.loads(response.text)['hasPassedCodeIntegrityCheck'], 'you can fix me now'
 
 
-def test_disk(syncloud_session, user_domain, device_host, data_dir):
+def test_disk(syncloud_session, user_domain, device_host, app_dir, data_dir):
 
     loop_device_cleanup(device_host, '/tmp/test0', DEVICE_PASSWORD)
     loop_device_cleanup(device_host, '/tmp/test1', DEVICE_PASSWORD)
 
     device0 = loop_device_add(device_host, 'ext4', '/tmp/test0', DEVICE_PASSWORD)
-    __activate_disk(syncloud_session, device0, device_host, data_dir)
+    __activate_disk(syncloud_session, device0, device_host, app_dir, data_dir)
     __create_test_dir('test0', user_domain, device_host)
     __check_test_dir(nextcloud_session_domain(user_domain, device_host), 'test0', user_domain, device_host)
 
     device1 = loop_device_add(device_host, 'ext2', '/tmp/test1', DEVICE_PASSWORD)
-    __activate_disk(syncloud_session, device1, device_host, data_dir)
+    __activate_disk(syncloud_session, device1, device_host, app_dir, data_dir)
     __create_test_dir('test1', user_domain, device_host)
     __check_test_dir(nextcloud_session_domain(user_domain, device_host), 'test1', user_domain, device_host)
 
-    __activate_disk(syncloud_session, device0, device_host, data_dir)
+    __activate_disk(syncloud_session, device0, device_host, app_dir, data_dir)
     __check_test_dir(nextcloud_session_domain(user_domain, device_host), 'test0', user_domain, device_host)
 
 
@@ -251,13 +240,13 @@ def __log_data_dir(device_host):
     run_ssh(device_host, 'ls -la /data/nextcloud', password=DEVICE_PASSWORD)
 
 
-def __activate_disk(syncloud_session, loop_device, device_host, data_dir):
+def __activate_disk(syncloud_session, loop_device, device_host, app_dir, data_dir):
 
     __log_data_dir(device_host)
     response = syncloud_session.get('http://{0}/rest/settings/disk_activate'.format(device_host),
                                     params={'device': loop_device}, allow_redirects=False)
     __log_data_dir(device_host)
-    files_scan(device_host, data_dir)
+    files_scan(device_host, app_dir, data_dir)
     assert response.status_code == 200, response.text
 
 
@@ -284,8 +273,8 @@ def __check_test_dir(nextcloud_session, test_dir, user_domain, device_host):
     assert test_dir in dirs, response.text
 
 
-def test_phpinfo(device_host, data_dir):
-    run_ssh(device_host, '/opt/app/nextcloud/bin/php-runner -i > /opt/data/nextcloud/log/phpinfo.log', password=DEVICE_PASSWORD, env_vars='DATA_DIR={0}'.format(data_dir))
+def test_phpinfo(device_host, app_dir, data_dir):
+    run_ssh(device_host, '{0}/bin/php-runner -i > {1}/log/phpinfo.log'.format(app_dir, data_dir), password=DEVICE_PASSWORD, env_vars='DATA_DIR={0}'.format(data_dir))
 
 
 def test_remove(syncloud_session, device_host):
@@ -295,6 +284,3 @@ def test_remove(syncloud_session, device_host):
 
 def test_reinstall(app_archive_path, device_host, installer):
     local_install(device_host, DEVICE_PASSWORD, app_archive_path, installer)
-
-
-

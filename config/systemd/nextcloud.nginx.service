@@ -1,0 +1,16 @@
+[Unit]
+Description=nextcloud nginx
+Requires=nextcloud.php-fpm.service
+After=nextcloud.php-fpm.service
+
+[Service]
+User=nextcloud
+Type=simple
+Environment=SNAP_COMMON={{ app_data_dir }}
+PIDFile={{ app_data_dir }}/log/nginx.pid
+ExecStartPre={{ app_dir }}/bin/service.nginx.sh pre-start
+ExecStart={{ app_dir }}/bin/service.nginx.sh start
+ExecStop={{ app_dir }}/bin/service.nginx.sh stop
+
+[Install]
+WantedBy=multi-user.target

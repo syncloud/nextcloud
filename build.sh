@@ -12,7 +12,7 @@ export TMPDIR=/tmp
 export TMP=/tmp
 
 NAME=nextcloud
-NEXTCLOUD_VERSION=12.0.3
+NEXTCLOUD_VERSION=13.0.0
 COIN_CACHE_DIR=${DIR}/coin.cache
 ARCH=$(uname -m)
 VERSION=$1
@@ -25,9 +25,7 @@ coin --to lib py https://pypi.python.org/packages/2.7/b/beautifulsoup4/beautiful
 coin --to lib py https://pypi.python.org/packages/ea/03/92d3278bf8287c5caa07dbd9ea139027d5a3592b0f4d14abf072f890fab2/requests-2.11.1-py2.py3-none-any.whl#md5=b4269c6fb64b9361288620ba028fd385
 coin --to lib py https://pypi.python.org/packages/f3/94/67d781fb32afbee0fffa0ad9e16ad0491f1a9c303e14790ae4e18f11be19/requests-unixsocket-0.1.5.tar.gz#md5=08453c8ef7dc03863ff4a30b901e7c20
 coin --to lib py https://pypi.python.org/packages/source/m/massedit/massedit-0.67.1.zip
-coin --to lib py https://pypi.python.org/packages/source/s/syncloud-lib/syncloud-lib-2.tar.gz
-
-cp -r ${DIR}/src lib/syncloud-${NAME}-${VERSION}
+coin --to lib py https://pypi.python.org/packages/04/0d/d0d8d984c74fa51f882e6925d5b8d28712f8650e40be719e02ff8cf28895/syncloud-lib-41.tar.gz#md5=b1b997987b88ea02045890ab1d185739
 
 rm -rf build
 BUILD_DIR=${DIR}/build/${NAME}
@@ -38,6 +36,7 @@ DOWNLOAD_URL=http://artifact.syncloud.org/3rdparty
 coin --to ${BUILD_DIR} raw ${DOWNLOAD_URL}/php7-${ARCH}.tar.gz
 coin --to ${BUILD_DIR} raw ${DOWNLOAD_URL}/nginx-${ARCH}.tar.gz
 coin --to ${BUILD_DIR} raw ${DOWNLOAD_URL}/postgresql-${ARCH}.tar.gz
+#coin --to ${BUILD_DIR} raw ${DOWNLOAD_URL}/python-${ARCH}.tar.gz
 
 coin --to ${BUILD_DIR} raw https://download.nextcloud.com/server/releases/${NAME}-${NEXTCLOUD_VERSION}.tar.bz2
 mv ${BUILD_DIR}/php7 ${BUILD_DIR}/php
@@ -45,7 +44,7 @@ mv ${BUILD_DIR}/php7 ${BUILD_DIR}/php
 cp -r bin ${BUILD_DIR}
 cp -r config ${BUILD_DIR}/config.templates
 cp -r lib ${BUILD_DIR}
-
+cp -r hooks ${BUILD_DIR}
 rm -rf ${BUILD_DIR}/${NAME}/config
 ls -la ${BUILD_DIR}/${NAME}/apps
 
