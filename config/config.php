@@ -1,7 +1,7 @@
 <?php
 $CONFIG = array (
  'datadirectory' => '{{ app_data_dir }}',
- 'log_type': 'syslog',
+ 'log_type' => 'syslog',
  'logfile' => '',
  'apps_paths' => array(
  	array(
