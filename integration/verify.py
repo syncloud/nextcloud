@@ -105,7 +105,7 @@ def syncloud_session(device_host):
 @pytest.fixture(scope='function')
 def nextcloud_session_domain(user_domain, device_host):
     session = requests.session()
-    response = session.get('http://{0}/index.php/login'.format(device_host), headers={"Host": user_domain}, allow_redirects=False)
+    response = session.get('https://{0}/index.php/login'.format(device_host), headers={"Host": user_domain}, allow_redirects=False)
     print(response.text)
     print(response.headers)
     soup = BeautifulSoup(response.text, "html.parser")
@@ -148,7 +148,7 @@ def test_install(app_archive_path, device_host, installer):
 
 def test_resource(nextcloud_session_domain, user_domain, device_host):
     session, _ = nextcloud_session_domain
-    response = session.get('http://{0}/core/img/loading.gif'.format(device_host), headers={"Host": user_domain})
+    response = session.get('https://{0}/core/img/loading.gif'.format(device_host), headers={"Host": user_domain})
     assert response.status_code == 200, response.text
 
 
@@ -172,11 +172,11 @@ def test_sync(user_domain, megabytes, device_host, app_dir, data_dir):
 
 
 def webdav_upload(user, password, file_from, file_to, user_domain):
-    return 'curl -T {2} http://{0}:{1}@{4}/remote.php/webdav/{3}'.format(user, password, file_from, file_to, user_domain)
+    return 'curl -T {2} https://{0}:{1}@{4}/remote.php/webdav/{3}'.format(user, password, file_from, file_to, user_domain)
 
 
 def webdav_download(user, password, file_from, file_to, user_domain):
-    return 'curl -o {3} http://{0}:{1}@{4}/remote.php/webdav/{2}'.format(user, password, file_from, file_to, user_domain)
+    return 'curl -o {3} https://{0}:{1}@{4}/remote.php/webdav/{2}'.format(user, password, file_from, file_to, user_domain)
 
 
 def files_scan(device_host, app_dir, data_dir):
@@ -194,13 +194,13 @@ def test_visible_through_platform(user_domain, device_host):
 
 def test_admin(nextcloud_session_domain, user_domain, device_host):
     session, _ = nextcloud_session_domain
-    response = session.get('http://{0}/index.php/settings/admin'.format(device_host), headers={"Host": user_domain}, allow_redirects=False)
+    response = session.get('https://{0}/index.php/settings/admin'.format(device_host), headers={"Host": user_domain}, allow_redirects=False)
     assert response.status_code == 200, response.text
 
 
 def test_verification(nextcloud_session_domain, user_domain):
     session, _ = nextcloud_session_domain
-    response = session.get('http://{0}/index.php/settings/integrity/failed'.format(user_domain), allow_redirects=False)
+    response = session.get('https://{0}/index.php/settings/integrity/failed'.format(user_domain), allow_redirects=False)
     print(response.text)
     assert response.status_code == 200, response.text
     assert 'INVALID_HASH' not in response.text
@@ -209,7 +209,7 @@ def test_verification(nextcloud_session_domain, user_domain):
 
 # def test_integrity(nextcloud_session_domain, user_domain):
 #     session, _ = nextcloud_session_domain
-#     response = session.get('http://{0}/index.php/settings/ajax/checksetup'.format(user_domain), allow_redirects=False)
+#     response = session.get('https://{0}/index.php/settings/ajax/checksetup'.format(user_domain), allow_redirects=False)
 #     print(response.text)
 #     assert response.status_code == 200, response.text
 #     assert not json.loads(response.text)['hasPassedCodeIntegrityCheck'], 'you can fix me now'
@@ -244,7 +244,7 @@ def __log_data_dir(device_host):
 def __activate_disk(syncloud_session, loop_device, device_host, app_dir, data_dir):
 
     __log_data_dir(device_host)
-    response = syncloud_session.get('http://{0}/rest/settings/disk_activate'.format(device_host),
+    response = syncloud_session.get('https://{0}/rest/settings/disk_activate'.format(device_host),
                                     params={'device': loop_device}, allow_redirects=False)
     __log_data_dir(device_host)
     files_scan(device_host, app_dir, data_dir)
@@ -252,7 +252,7 @@ def __activate_disk(syncloud_session, loop_device, device_host, app_dir, data_di
 
 
 def __create_test_dir(test_dir, user_domain, device_host):
-    response = requests.request('MKCOL', 'http://{0}:{1}@{2}/remote.php/webdav/{3}'.format(
+    response = requests.request('MKCOL', 'https://{0}:{1}@{2}/remote.php/webdav/{3}'.format(
         DEVICE_USER, DEVICE_PASSWORD, device_host, test_dir),
                                 headers={"Host": user_domain})
     print(response.text)
@@ -261,11 +261,11 @@ def __create_test_dir(test_dir, user_domain, device_host):
 
 def __check_test_dir(nextcloud_session, test_dir, user_domain, device_host):
 
-    response = requests.get('http://{0}'.format(device_host), headers={"Host": user_domain})
+    response = requests.get('https://{0}'.format(device_host), headers={"Host": user_domain})
     assert response.status_code == 200, BeautifulSoup(response.text, "html.parser").find('li', class_='error')
 
     nextcloud, _ = nextcloud_session
-    response = nextcloud.get('http://{0}/index.php/apps/files/ajax/list.php?dir=/'.format(device_host),
+    response = nextcloud.get('https://{0}/index.php/apps/files/ajax/list.php?dir=/'.format(device_host),
                              headers={"Host": user_domain},
                              allow_redirects=False)
     info = json.loads(response.text)
@@ -279,7 +279,7 @@ def test_phpinfo(device_host, app_dir, data_dir):
 
 
 def test_remove(syncloud_session, device_host):
-    response = syncloud_session.get('http://{0}/rest/remove?app_id=nextcloud'.format(device_host), allow_redirects=False)
+    response = syncloud_session.get('https://{0}/rest/remove?app_id=nextcloud'.format(device_host), allow_redirects=False)
     assert response.status_code == 200, response.text
 
 
