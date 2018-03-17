@@ -98,14 +98,14 @@ def module_teardown(device_host, data_dir, platform_data_dir, app_dir):
 @pytest.fixture(scope='function')
 def syncloud_session(device_host):
     session = requests.session()
-    session.post('http://{0}/rest/login'.format(device_host), data={'name': DEVICE_USER, 'password': DEVICE_PASSWORD})
+    session.post('https://{0}/rest/login'.format(device_host), data={'name': DEVICE_USER, 'password': DEVICE_PASSWORD}, verify=False)
     return session
 
 
 @pytest.fixture(scope='function')
 def nextcloud_session_domain(user_domain, device_host):
     session = requests.session()
-    response = session.get('https://{0}/index.php/login'.format(device_host), headers={"Host": user_domain}, allow_redirects=False)
+    response = session.get('https://{0}/index.php/login'.format(device_host), headers={"Host": user_domain}, allow_redirects=False, verify=False)
     print(response.text)
     print(response.headers)
     soup = BeautifulSoup(response.text, "html.parser")
@@ -113,7 +113,7 @@ def nextcloud_session_domain(user_domain, device_host):
     response = session.post('http://{0}/index.php/login'.format(device_host),
                             headers={"Host": user_domain},
                             data={'user': DEVICE_USER, 'password': DEVICE_PASSWORD, 'requesttoken': requesttoken},
-                            allow_redirects=False)
+                            allow_redirects=False, verify=False)
     assert response.status_code == 303, response.text
     return session, requesttoken
 
@@ -128,7 +128,7 @@ def test_activate_device(auth, device_host):
 
     response = requests.post('http://{0}:81/rest/activate'.format(device_host),
                              data={'main_domain': SYNCLOUD_INFO, 'redirect_email': email, 'redirect_password': password,
-                                   'user_domain': domain, 'device_username': DEVICE_USER, 'device_password': DEVICE_PASSWORD})
+                                   'user_domain': domain, 'device_username': DEVICE_USER, 'device_password': DEVICE_PASSWORD}, verify=False)
     assert response.status_code == 200, response.text
     global LOGS_SSH_PASSWORD
     LOGS_SSH_PASSWORD = DEVICE_PASSWORD
@@ -148,7 +148,7 @@ def test_install(app_archive_path, device_host, installer):
 
 def test_resource(nextcloud_session_domain, user_domain, device_host):
     session, _ = nextcloud_session_domain
-    response = session.get('https://{0}/core/img/loading.gif'.format(device_host), headers={"Host": user_domain})
+    response = session.get('https://{0}/core/img/loading.gif'.format(device_host), headers={"Host": user_domain}, verify=False)
     assert response.status_code == 200, response.text
 
 
@@ -188,19 +188,19 @@ def test_occ(device_host, app_dir, data_dir):
 
 
 def test_visible_through_platform(user_domain, device_host):
-    response = requests.get('http://{0}/index.php/login'.format(device_host), headers={"Host": user_domain}, allow_redirects=False)
+    response = requests.get('https://{0}/index.php/login'.format(device_host), headers={"Host": user_domain}, allow_redirects=False, verify=False)
     assert response.status_code == 200, response.text
 
 
 def test_admin(nextcloud_session_domain, user_domain, device_host):
     session, _ = nextcloud_session_domain
-    response = session.get('https://{0}/index.php/settings/admin'.format(device_host), headers={"Host": user_domain}, allow_redirects=False)
+    response = session.get('https://{0}/index.php/settings/admin'.format(device_host), headers={"Host": user_domain}, allow_redirects=False, verify=False)
     assert response.status_code == 200, response.text
 
 
 def test_verification(nextcloud_session_domain, user_domain):
     session, _ = nextcloud_session_domain
-    response = session.get('https://{0}/index.php/settings/integrity/failed'.format(user_domain), allow_redirects=False)
+    response = session.get('https://{0}/index.php/settings/integrity/failed'.format(user_domain), allow_redirects=False, verify=False)
     print(response.text)
     assert response.status_code == 200, response.text
     assert 'INVALID_HASH' not in response.text
@@ -254,14 +254,14 @@ def __activate_disk(syncloud_session, loop_device, device_host, app_dir, data_di
 def __create_test_dir(test_dir, user_domain, device_host):
     response = requests.request('MKCOL', 'https://{0}:{1}@{2}/remote.php/webdav/{3}'.format(
         DEVICE_USER, DEVICE_PASSWORD, device_host, test_dir),
-                                headers={"Host": user_domain})
+                                headers={"Host": user_domain}, verify=False)
     print(response.text)
     assert response.status_code == 201, response.text
 
 
 def __check_test_dir(nextcloud_session, test_dir, user_domain, device_host):
 
-    response = requests.get('https://{0}'.format(device_host), headers={"Host": user_domain})
+    response = requests.get('https://{0}'.format(device_host), headers={"Host": user_domain}, verify=False)
     assert response.status_code == 200, BeautifulSoup(response.text, "html.parser").find('li', class_='error')
 
     nextcloud, _ = nextcloud_session
@@ -279,7 +279,7 @@ def test_phpinfo(device_host, app_dir, data_dir):
 
 
 def test_remove(syncloud_session, device_host):
-    response = syncloud_session.get('https://{0}/rest/remove?app_id=nextcloud'.format(device_host), allow_redirects=False)
+    response = syncloud_session.get('https://{0}/rest/remove?app_id=nextcloud'.format(device_host), allow_redirects=False, verify=False)
     assert response.status_code == 200, response.text
 
 
