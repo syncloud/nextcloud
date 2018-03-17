@@ -172,11 +172,11 @@ def test_sync(user_domain, megabytes, device_host, app_dir, data_dir):
 
 
 def webdav_upload(user, password, file_from, file_to, user_domain):
-    return 'curl -T {2} https://{0}:{1}@{4}/remote.php/webdav/{3}'.format(user, password, file_from, file_to, user_domain)
+    return 'curl -k -T {2} https://{0}:{1}@{4}/remote.php/webdav/{3}'.format(user, password, file_from, file_to, user_domain)
 
 
 def webdav_download(user, password, file_from, file_to, user_domain):
-    return 'curl -o {3} https://{0}:{1}@{4}/remote.php/webdav/{2}'.format(user, password, file_from, file_to, user_domain)
+    return 'curl -k -o {3} https://{0}:{1}@{4}/remote.php/webdav/{2}'.format(user, password, file_from, file_to, user_domain)
 
 
 def files_scan(device_host, app_dir, data_dir):
