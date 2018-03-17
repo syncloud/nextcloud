@@ -106,11 +106,11 @@ def syncloud_session(device_host):
 def nextcloud_session_domain(user_domain, device_host):
     session = requests.session()
     response = session.get('https://{0}/index.php/login'.format(device_host), headers={"Host": user_domain}, allow_redirects=False, verify=False)
-    print(response.text)
+    print(response.text.encode("UTF-8"))
     print(response.headers)
     soup = BeautifulSoup(response.text, "html.parser")
     requesttoken = soup.find_all('input', {'name': 'requesttoken'})[0]['value']
-    response = session.post('http://{0}/index.php/login'.format(device_host),
+    response = session.post('https://{0}/index.php/login'.format(device_host),
                             headers={"Host": user_domain},
                             data={'user': DEVICE_USER, 'password': DEVICE_PASSWORD, 'requesttoken': requesttoken},
                             allow_redirects=False, verify=False)
