@@ -200,9 +200,12 @@ class NextcloudInstaller:
         self.occ.run('ldap:set-config s01 ldapBase dc=syncloud,dc=org')
         self.occ.run('ldap:set-config s01 ldapAgentPassword syncloud')
 
+        self.occ.run('ldap:set-config s01 hasMemberOfFilterSupport 0')
         self.occ.run('ldap:set-config s01 ldapLoginFilter "(&(|(objectclass=inetOrgPerson))(uid=%uid))"')
 
+        self.occ.run('ldap:set-config s01 ldapUserFilter "(|(objectclass=inetOrgPerson))"')
         self.occ.run('ldap:set-config s01 ldapUserFilterObjectclass inetOrgPerson')
+
         self.occ.run('ldap:set-config s01 ldapBaseUsers ou=users,dc=syncloud,dc=org')
         self.occ.run('ldap:set-config s01 ldapUserDisplayName cn')
         self.occ.run('ldap:set-config s01 ldapExpertUsernameAttr cn')

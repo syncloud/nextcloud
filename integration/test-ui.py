@@ -101,3 +101,9 @@ def test_settings_user(driver, user_domain):
     driver.get("https://{0}/index.php/settings/user".format(user_domain))
     time.sleep(10)
     driver.get_screenshot_as_file(join(screenshot_dir, 'user.png'))
+
+
+def test_settings_user(driver, user_domain):
+    driver.get("https://{0}/index.php/settings/admin/ldap".format(user_domain))
+    time.sleep(10)
+    driver.get_screenshot_as_file(join(screenshot_dir, 'admin-ldap.png'))
