@@ -60,50 +60,53 @@ def test_main(driver, user_domain):
     user.send_keys(DEVICE_USER)
     password = driver.find_element_by_id("password")
     password.send_keys(DEVICE_PASSWORD)
-    driver.get_screenshot_as_file(join(screenshot_dir, 'login.png'))
+    screenshots(driver, screenshot_dir, 'login')
     # print(driver.page_source.encode('utf-8'))
 
     password.send_keys(Keys.RETURN)
-    driver.get_screenshot_as_file(join(screenshot_dir, 'login_progress.png'))
-    #time.sleep(30)
-    #driver.get_screenshot_as_file(join(screenshot_dir, 'login_progress_2.png'))
-   
-    # try:
-    #     password.submit()
-    # except WebDriverException, e:
-    #     if 'submit is not a function' in e.msg:
-    #         print("https://github.com/SeleniumHQ/selenium/issues/3483")
-    #         print(e)
-    #         pass
-    #     else:
-    #         raise e
-    # time.sleep(5)
-    #
-    
+    screenshots(driver, screenshot_dir, 'login_progress')
+       
     wait_driver = WebDriverWait(driver, 120)
-    #wait_driver.until(EC.text_to_be_present_in_element((By.CSS_SELECTOR, '#header #expandDisplayName'), DEVICE_USER))
 
     wait_driver.until(EC.element_to_be_clickable((By.ID, 'closeWizard')))
     wizard_close_button = driver.find_element_by_id("closeWizard")
     wizard_close_button.click()
 
     time.sleep(2)
-    driver.get_screenshot_as_file(join(screenshot_dir, 'main.png'))
+    screenshots(driver, screenshot_dir, 'main')
 
 
 def test_settings(driver, user_domain):
     driver.get("https://{0}/index.php/settings/admin".format(user_domain))
     time.sleep(10)
-    driver.get_screenshot_as_file(join(screenshot_dir, 'admin.png'))
+    screenshots(driver, screenshot_dir, 'admin')
 
 
 def test_settings_user(driver, user_domain):
     driver.get("https://{0}/index.php/settings/user".format(user_domain))
     time.sleep(10)
-    driver.get_screenshot_as_file(join(screenshot_dir, 'user.png'))
+    screenshots(driver, screenshot_dir, 'user')
 
 
 def test_settings_user(driver, user_domain):
     driver.get("https://{0}/index.php/settings/admin/ldap".format(user_domain))
     time.sleep(10)
-    driver.get_screenshot_as_file(join(screenshot_dir, 'admin-ldap.png'))
+    screenshots(driver, screenshot_dir, 'admin-ldap')
+
+
+def screenshots(driver, dir, name):
+    desktop_w = 1280
+    desktop_h = 2000
+    driver.set_window_position(0, 0)
+    driver.set_window_size(desktop_w, desktop_h)
+
+    driver.get_screenshot_as_file(join(dir, '{}.png'.format(name)))
+
+    mobile_w = 400
+    mobile_h = 2000
+    driver.set_window_position(0, 0)
+    driver.set_window_size(mobile_w, mobile_h)
+    driver.get_screenshot_as_file(join(dir, '{}-mobile.png'.format(name)))
+    
+    driver.set_window_position(0, 0)
+    driver.set_window_size(desktop_w, desktop_h)
