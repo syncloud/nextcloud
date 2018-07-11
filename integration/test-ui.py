@@ -95,8 +95,8 @@ def test_settings_user(driver, user_domain):
 
 
 def screenshots(driver, dir, name):
-    desktop_w = 1280
-    desktop_h = 2000
+    desktop_w = 1024
+    desktop_h = 768
     driver.set_window_position(0, 0)
     driver.set_window_size(desktop_w, desktop_h)
 
