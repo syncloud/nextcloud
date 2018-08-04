@@ -58,11 +58,11 @@ def ssh_env_vars(installer):
 
 
 @pytest.fixture(scope="session")
-def module_setup(request, device_host, data_dir, platform_data_dir, app_dir):
-    request.addfinalizer(lambda: module_teardown(device_host, data_dir, platform_data_dir, app_dir))
+def module_setup(request, device_host, data_dir, platform_data_dir, app_dir, service_prefix):
+    request.addfinalizer(lambda: module_teardown(device_host, data_dir, platform_data_dir, app_dir, service_prefix))
 
 
-def module_teardown(device_host, data_dir, platform_data_dir, app_dir):
+def module_teardown(device_host, data_dir, platform_data_dir, app_dir, service_prefix):
     platform_log_dir = join(LOG_DIR, 'platform_log')
     os.mkdir(platform_log_dir)
     run_scp('root@{0}:{1}/log/* {2}'.format(device_host, platform_data_dir, platform_log_dir), password=LOGS_SSH_PASSWORD, throw=False)
@@ -239,12 +239,14 @@ def __activate_disk(syncloud_session, loop_device, device_host, app_dir, data_di
     files_scan(device_host, app_dir, data_dir)
     assert response.status_code == 200, response.text
 
+
 def __deactivate_disk(syncloud_session, device_host, app_dir, data_dir):
 
     response = syncloud_session.get('https://{0}/rest/settings/disk_deactivate'.format(device_host),
                                     allow_redirects=False)
     files_scan(device_host, app_dir, data_dir)
     assert response.status_code == 200, response.text
+
 
 def __create_test_dir(test_dir, user_domain, device_host):
     response = requests.request('MKCOL', 'https://{0}:{1}@{2}/remote.php/webdav/{3}'.format(
@@ -270,12 +272,15 @@ def __check_test_dir(nextcloud_session, test_dir, user_domain, device_host):
 
 
 def test_phpinfo(device_host, app_dir, data_dir):
-    run_ssh(device_host, '{0}/bin/php-runner -i > {1}/log/phpinfo.log'.format(app_dir, data_dir), password=DEVICE_PASSWORD, env_vars='DATA_DIR={0}'.format(data_dir))
+    run_ssh(device_host, '{0}/bin/php-runner -i > {1}/log/phpinfo.log'.format(app_dir, data_dir),
+            password=DEVICE_PASSWORD, env_vars='DATA_DIR={0}'.format(data_dir))
 
 
 def test_remove(syncloud_session, device_host):
-    response = syncloud_session.get('https://{0}/rest/remove?app_id=nextcloud'.format(device_host), allow_redirects=False, verify=False)
+    response = syncloud_session.get('https://{0}/rest/remove?app_id=nextcloud'.format(device_host),
+                                    allow_redirects=False, verify=False)
     assert response.status_code == 200, response.text
+    wait_for_sam(device_host, syncloud_session)
 
 
 def test_reinstall(app_archive_path, device_host, installer):
