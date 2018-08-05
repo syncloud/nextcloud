@@ -58,11 +58,11 @@ def ssh_env_vars(installer):
 
 
 @pytest.fixture(scope="session")
-def module_setup(request, device_host, data_dir, platform_data_dir, app_dir):
-    request.addfinalizer(lambda: module_teardown(device_host, data_dir, platform_data_dir, app_dir))
+def module_setup(request, device_host, data_dir, platform_data_dir, app_dir, service_prefix):
+    request.addfinalizer(lambda: module_teardown(device_host, data_dir, platform_data_dir, app_dir, service_prefix))
 
 
-def module_teardown(device_host, data_dir, platform_data_dir, app_dir):
+def module_teardown(device_host, data_dir, platform_data_dir, app_dir, service_prefix):
     platform_log_dir = join(LOG_DIR, 'platform_log')
     os.mkdir(platform_log_dir)
     run_scp('root@{0}:{1}/log/* {2}'.format(device_host, platform_data_dir, platform_log_dir), password=LOGS_SSH_PASSWORD, throw=False)
@@ -134,11 +134,6 @@ def test_activate_device(auth, device_host):
     LOGS_SSH_PASSWORD = DEVICE_PASSWORD
 
 
-# def test_enable_external_access(syncloud_session, device_host):
-#     response = syncloud_session.get('http://{0}/server/rest/settings/set_protocol'.format(device_host), params={'protocol': 'https'})
-#     assert '"success": true' in response.text
-#     assert response.status_code == 200
-
 #def test_occ(device_host, app_dir, data_dir):
 #    run_ssh(device_host, '{0}/bin/occ-runner help maintenance:install'.format(app_dir), password=LOGS_SSH_PASSWORD, env_vars='DATA_DIR={0}'.format(data_dir))
 
@@ -207,14 +202,6 @@ def test_verification(nextcloud_session_domain, user_domain):
     assert 'EXCEPTION' not in response.text
 
 
-# def test_integrity(nextcloud_session_domain, user_domain):
-#     session, _ = nextcloud_session_domain
-#     response = session.get('https://{0}/index.php/settings/ajax/checksetup'.format(user_domain), allow_redirects=False)
-#     print(response.text)
-#     assert response.status_code == 200, response.text
-#     assert not json.loads(response.text)['hasPassedCodeIntegrityCheck'], 'you can fix me now'
-
-
 def test_disk(syncloud_session, user_domain, device_host, app_dir, data_dir):
 
     loop_device_cleanup(device_host, '/tmp/test0', DEVICE_PASSWORD)
@@ -233,6 +220,8 @@ def test_disk(syncloud_session, user_domain, device_host, app_dir, data_dir):
     __activate_disk(syncloud_session, device0, device_host, app_dir, data_dir)
     __check_test_dir(nextcloud_session_domain(user_domain, device_host), 'test0', user_domain, device_host)
 
+    __deactivate_disk(syncloud_session, device_host, app_dir, data_dir)
+  
 
 def __log_data_dir(device_host):
     run_ssh(device_host, 'ls -la /data', password=DEVICE_PASSWORD)
@@ -247,6 +236,14 @@ def __activate_disk(syncloud_session, loop_device, device_host, app_dir, data_di
     response = syncloud_session.get('https://{0}/rest/settings/disk_activate'.format(device_host),
                                     params={'device': loop_device}, allow_redirects=False)
     __log_data_dir(device_host)
+    files_scan(device_host, app_dir, data_dir)
+    assert response.status_code == 200, response.text
+
+
+def __deactivate_disk(syncloud_session, device_host, app_dir, data_dir):
+
+    response = syncloud_session.get('https://{0}/rest/settings/disk_deactivate'.format(device_host),
+                                    allow_redirects=False)
     files_scan(device_host, app_dir, data_dir)
     assert response.status_code == 200, response.text
 
@@ -275,12 +272,15 @@ def __check_test_dir(nextcloud_session, test_dir, user_domain, device_host):
 
 
 def test_phpinfo(device_host, app_dir, data_dir):
-    run_ssh(device_host, '{0}/bin/php-runner -i > {1}/log/phpinfo.log'.format(app_dir, data_dir), password=DEVICE_PASSWORD, env_vars='DATA_DIR={0}'.format(data_dir))
+    run_ssh(device_host, '{0}/bin/php-runner -i > {1}/log/phpinfo.log'.format(app_dir, data_dir),
+            password=DEVICE_PASSWORD, env_vars='DATA_DIR={0}'.format(data_dir))
 
 
 def test_remove(syncloud_session, device_host):
-    response = syncloud_session.get('https://{0}/rest/remove?app_id=nextcloud'.format(device_host), allow_redirects=False, verify=False)
+    response = syncloud_session.get('https://{0}/rest/remove?app_id=nextcloud'.format(device_host),
+                                    allow_redirects=False, verify=False)
     assert response.status_code == 200, response.text
+    wait_for_sam(device_host, syncloud_session)
 
 
 def test_reinstall(app_archive_path, device_host, installer):

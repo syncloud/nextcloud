@@ -3,5 +3,5 @@
 import os, sys
 sys.path.append(os.path.join(os.environ['SNAP'], 'hooks'))
 
-from installer import NextcloudInstaller
+from nextcloud_hooks import NextcloudInstaller
 NextcloudInstaller().install()
