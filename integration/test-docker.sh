@@ -7,16 +7,16 @@ if [ "$#" -lt 7 ]; then
     exit 1
 fi
 
-DOMAIN=$3
+ARCH=$(uname -m)
 VERSION=$4
 RELEASE=$5
 INSTALLER=$6
+DOMAIN=$3-${ARCH}-${DRONE_BRANCH}
 DEVICE_HOST=$7
 
 APP=nextcloud
 GECKODRIVER=0.14.0
 FIREFOX=52.0
-ARCH=$(uname -m)
 
 if [ $ARCH == "x86_64" ]; then
     SNAP_ARCH=amd64
@@ -24,11 +24,7 @@ else
     SNAP_ARCH=armhf
 fi
 
-if [ $INSTALLER == "snapd" ]; then
     ARCHIVE=${APP}_${VERSION}_${SNAP_ARCH}.snap
-else
-    ARCHIVE=${APP}-${VERSION}-${ARCH}.tar.gz
-fi
 APP_ARCHIVE_PATH=$(realpath "$ARCHIVE")
 
 cd ${DIR}
@@ -72,6 +68,7 @@ curl https://raw.githubusercontent.com/mguillem/JSErrorCollector/master/dist/JSE
 
 #fix dns
 device_ip=$(getent hosts ${DEVICE_HOST} | awk '{ print $1 }')
+echo "$device_ip $DOMAIN.syncloud.info" >> /etc/hosts
 echo "$device_ip $APP.$DOMAIN.syncloud.info" >> /etc/hosts
 
 cat /etc/hosts
