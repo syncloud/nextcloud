@@ -15,8 +15,6 @@ DOMAIN=$3-${ARCH}-${DRONE_BRANCH}
 DEVICE_HOST=$7
 
 APP=nextcloud
-GECKODRIVER=0.14.0
-FIREFOX=52.0
 
 if [ $ARCH == "x86_64" ]; then
     TEST_SUITE="verify.py test-ui.py"
