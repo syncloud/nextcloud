@@ -5,7 +5,6 @@ DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
 app=nextcloud
 branch=$1
 build_number=$2
-installer=$3
 bucket=apps.syncloud.org
 
 mkdir -p /opt/app
