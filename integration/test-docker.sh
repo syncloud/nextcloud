@@ -15,27 +15,21 @@ DOMAIN=$3-${ARCH}-${DRONE_BRANCH}
 DEVICE_HOST=$7
 
 APP=nextcloud
-GECKODRIVER=0.14.0
-FIREFOX=52.0
 
 if [ $ARCH == "x86_64" ]; then
+    TEST_SUITE="verify.py test-ui.py"
     SNAP_ARCH=amd64
 else
+    TEST_SUITE=verify.py
     SNAP_ARCH=armhf
 fi
 
-    ARCHIVE=${APP}_${VERSION}_${SNAP_ARCH}.snap
+ARCHIVE=${APP}_${VERSION}_${SNAP_ARCH}.snap
 APP_ARCHIVE_PATH=$(realpath "$ARCHIVE")
 
 cd ${DIR}
 
 echo ${APP_ARCHIVE_PATH}
-
-if [ "$ARCH" == "x86_64" ]; then
-    TEST_SUITE="verify.py test-ui.py"
-else
-    TEST_SUITE=verify.py
-fi
 
 cd ${DIR}
 
