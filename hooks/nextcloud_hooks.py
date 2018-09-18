@@ -184,7 +184,7 @@ class NextcloudInstaller:
 
         #web_setup = Setup(self.app_data_dir)
         #web_setup.finish(INSTALL_USER, unicode(uuid.uuid4().hex), app_storage_dir, self.database_path, PSQL_PORT)
-        self.occ.run('maintenance:install  --database psql --database-name nextcloud --database-user {0} --database-pass {1} --admin-user {2} --admin-pass {3} --data-dir {4}'.format(DB_USER, DB_PASSWORD, INSTALL_USER, unicode(uuid.uuid4().hex), app_storage_dir))
+        self.occ.run('maintenance:install  --database pgsql --database-name nextcloud --database-user {0} --database-pass {1} --admin-user {2} --admin-pass {3} --data-dir {4}'.format(DB_USER, DB_PASSWORD, INSTALL_USER, unicode(uuid.uuid4().hex), app_storage_dir))
 
         self.occ.run('app:enable user_ldap')
 
