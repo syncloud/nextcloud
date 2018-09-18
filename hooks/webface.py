@@ -20,11 +20,16 @@ class Setup:
         session = requests_unixsocket.Session() 
         response = session.post(self.index_url,
                                 data={
-                                    'install': 'true', 'adminlogin': login,
-                                    'adminpass': password, 'adminpass-clone': password,
-                                    'dbtype': 'pgsql', 'dbname': 'nextcloud',
-                                    'dbuser': 'nextcloud', 'dbpass': 'nextcloud',
-                                    'dbhost': '{0}:{1}'.format(database_path, port), 'directory': data_dir},
+                                    'install': 'true',
+                                    'adminlogin': login,
+                                    'adminpass': password,
+                                    'adminpass-clone': password,
+                                    'dbtype': 'pgsql',
+                                    'dbname': 'nextcloud',
+                                    'dbuser': 'nextcloud',
+                                    'dbpass': 'nextcloud',
+                                    'dbhost': '{0}:{1}'.format(database_path, port),
+                                    'directory': data_dir},
                                 allow_redirects=False)
 
         if response.status_code == 302:
