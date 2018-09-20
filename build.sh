@@ -55,7 +55,7 @@ mkdir build/${NAME}/META
 echo ${NAME} >> build/${NAME}/META/app
 echo ${VERSION} >> build/${NAME}/META/version
 
-sed -i 's/allowSymlinks = false/allowSymlinks = trus/g' {BUILD_DIR}/${NAME}/lib/private/Files/Storage/Local.php
+sed -i 's/allowSymlinks = false/allowSymlinks = true/g' ${BUILD_DIR}/${NAME}/lib/private/Files/Storage/Local.php
 
 echo "snapping"
 SNAP_DIR=${DIR}/build/snap
