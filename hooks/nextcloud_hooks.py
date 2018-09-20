@@ -23,7 +23,6 @@ from syncloudlib.application import paths, urls, storage, users
 
 from postgres import Database
 from octools import OCConsole, OCConfig
-from webface import Setup
 
 from crontab import CronTab
 from subprocess import check_output
@@ -182,8 +181,6 @@ class NextcloudInstaller:
             database='postgres', user=DB_USER, database_path=self.database_path, port=PSQL_PORT)
         db_postgres.execute("ALTER USER {0} WITH PASSWORD '{1}';".format(DB_USER, DB_PASSWORD))
 
-        #web_setup = Setup(self.app_data_dir)
-        #web_setup.finish(INSTALL_USER, unicode(uuid.uuid4().hex), app_storage_dir, self.database_path, PSQL_PORT)
         self.occ.run('maintenance:install  --database pgsql --database-host {0}:{1} --database-name nextcloud --database-user {2} --database-pass {3} --admin-user {4} --admin-pass {5} --data-dir {6}'.format(self.database_path, PSQL_PORT, DB_USER, DB_PASSWORD, INSTALL_USER, unicode(uuid.uuid4().hex), app_storage_dir))
 
         self.occ.run('app:enable user_ldap')
