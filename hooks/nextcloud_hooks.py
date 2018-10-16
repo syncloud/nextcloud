@@ -169,6 +169,7 @@ class NextcloudInstaller:
             self.occ.run('maintenance:mode --on')
             self.occ.run('upgrade')
             self.occ.run('maintenance:mode --off')
+            self.occ.run('db:add-missing-indices')
 
     def initialize(self, app_storage_dir):
 
@@ -226,6 +227,7 @@ class NextcloudInstaller:
         db.execute("update oc_ldap_group_members set owncloudname = 'admin';")
 
         self.occ.run('user:delete {0}'.format(INSTALL_USER))
+        self.occ.run('db:add-missing-indices')
 
     def on_disk_change(self):
         app = api.get_app_setup(APP_NAME)
