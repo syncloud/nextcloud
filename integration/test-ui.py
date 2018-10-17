@@ -94,6 +94,10 @@ def test_settings_user(driver, user_domain):
     time.sleep(10)
     screenshots(driver, screenshot_dir, 'admin-ldap')
 
+def test_settings_security(driver, user_domain):
+    driver.get("https://{0}/index.php/settings/admin/overview#security-warning".format(user_domain))
+    time.sleep(10)
+    screenshots(driver, screenshot_dir, 'admin-security')
 
 def screenshots(driver, dir, name):
     desktop_w = 1024
