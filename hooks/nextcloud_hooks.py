@@ -32,9 +32,6 @@ from os.path import join
 
 APP_NAME = 'nextcloud'
 
-SYSTEMD_NGINX_NAME = '{0}.nginx'.format(APP_NAME)
-SYSTEMD_PHP_FPM_NAME = '{0}.php-fpm'.format(APP_NAME)
-SYSTEMD_POSTGRESQL = '{0}.postgresql'.format(APP_NAME)
 INSTALL_USER = 'installer'
 USER_NAME = APP_NAME
 DB_NAME = APP_NAME
@@ -79,7 +76,7 @@ class NextcloudInstaller:
         
         environ['DATA_DIR'] = self.app_data_dir
 
-    def install(self):
+    def install_config(self):
 
         linux.fix_locale()
 
@@ -92,12 +89,7 @@ class NextcloudInstaller:
         config_path = join(self.app_data_dir, 'config')
         
         fs.makepath(self.nextcloud_config_path)
-        
-        # TODO: remove after 17.10
-        old_nextcloud_config_file = join(config_path, 'config.php')
-        if isfile(old_nextcloud_config_file) and not isfile(self.nextcloud_config_file):
-            shutil.copy(old_nextcloud_config_file, self.nextcloud_config_file)
-       
+              
         variables = {
             'app_dir': self.app_dir,
             'app_data_dir': self.app_data_dir,
@@ -109,24 +101,19 @@ class NextcloudInstaller:
         if not isfile(self.nextcloud_config_file):
             shutil.copy(default_config_file, self.nextcloud_config_file)
       
-        if 'SNAP' not in environ:
-            fs.chownpath(self.app_dir, USER_NAME, recursive=True)
-
         fs.makepath(join(self.app_data_dir, 'log'))
         fs.makepath(join(self.app_data_dir, 'nginx'))
         fs.makepath(join(self.app_data_dir, 'extra-apps'))
 
         fs.chownpath(self.app_data_dir, USER_NAME, recursive=True)
 
+    def install(self):
+        self.install_config()
         database_init(self.log, self.app_dir, self.app_data_dir, USER_NAME)
 
-    def start(self):
-        print("setup systemd")
-        app = api.get_app_setup(APP_NAME)
-        app.add_service(SYSTEMD_POSTGRESQL)
-        app.add_service(SYSTEMD_PHP_FPM_NAME)
-        app.add_service(SYSTEMD_NGINX_NAME)
-
+    def post_refresh(self):
+        self.install_config()
+        
     def configure(self):
         self.prepare_storage()
         app_storage_dir = storage.init_storage(APP_NAME, USER_NAME)
@@ -136,6 +123,7 @@ class NextcloudInstaller:
         else:
             self.initialize(app_storage_dir)
 
+        # migrate to systemd cron units
         self.cron.remove()
         self.cron.create()
 
@@ -148,17 +136,6 @@ class NextcloudInstaller:
         self.on_domain_change()
 
         fs.chownpath(self.app_data_dir, USER_NAME, recursive=True)
-
-    def remove(self):
-        app = api.get_app_setup(APP_NAME)
-        app.remove_service(SYSTEMD_NGINX_NAME)
-        app.remove_service(SYSTEMD_PHP_FPM_NAME)
-        app.remove_service(SYSTEMD_POSTGRESQL)
-
-        self.cron.remove()
-
-        if isdir(self.app_dir):
-            shutil.rmtree(self.app_dir)
 
     def installed(self):
         return 'installed' in open(self.nextcloud_config_file).read().strip()
