@@ -45,6 +45,9 @@ CRON_USER = APP_NAME
 APP_CONFIG_PATH = '{0}/config'.format(APP_NAME)
 PSQL_PORT = 5436
 
+SYSTEMD_NGINX_NAME = '{0}.nginx'.format(APP_NAME)
+SYSTEMD_PHP_FPM_NAME = '{0}.php-fpm'.format(APP_NAME) 
+
 
 def database_init(logger, app_install_dir, app_data_dir, user_name):
     database_path = join(app_data_dir, 'database')
