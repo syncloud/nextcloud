@@ -12,7 +12,7 @@ export TMPDIR=/tmp
 export TMP=/tmp
 
 NAME=nextcloud
-NEXTCLOUD_VERSION=14.0.0
+NEXTCLOUD_VERSION=14.0.3
 COIN_CACHE_DIR=${DIR}/coin.cache
 ARCH=$(uname -m)
 VERSION=$1
