@@ -135,6 +135,13 @@ class NextcloudInstaller:
         oc_config.set_value('loglevel', '2')
         oc_config.set_value('logfile', join(self.app_data_dir, OWNCLOUD_LOG_PATH))
         oc_config.set_value('datadirectory', app_storage_dir)
+        oc_config.set_value('integrity.check.disabled', 'true')
+        oc_config.set_value('mail_smtpmode', 'smtp')
+        oc_config.set_value('mail_smtphost', 'localhost:25')
+        oc_config.set_value('mail_smtpsecure', '')
+        oc_config.set_value('mail_smtpauth', 'false')
+        oc_config.set_value('mail_smtpname', '')
+        oc_config.set_value('mail_smtppassword', '')
 
         self.on_domain_change()
 
