@@ -31,7 +31,7 @@ DIR = dirname(__file__)
 LOG_DIR = join(DIR, 'log')
 APP='nextcloud'
 TMP_DIR = '/tmp/syncloud'
-
+app_log_dir = join(LOG_DIR, 'nextcloud_log')
 
 @pytest.fixture(scope="session")
 def platform_data_dir(installer):
@@ -61,16 +61,12 @@ def ssh_env_vars(installer):
 def module_setup(request, device_host, data_dir, platform_data_dir, app_dir, service_prefix):
     request.addfinalizer(lambda: module_teardown(device_host, data_dir, platform_data_dir, app_dir, service_prefix))
 
-
 def module_teardown(device_host, data_dir, platform_data_dir, app_dir, service_prefix):
     platform_log_dir = join(LOG_DIR, 'platform_log')
     os.mkdir(platform_log_dir)
     run_scp('root@{0}:{1}/log/* {2}'.format(device_host, platform_data_dir, platform_log_dir), password=LOGS_SSH_PASSWORD, throw=False)
     
-    run_scp('root@{0}:/var/log/sam.log {1}'.format(device_host, platform_log_dir), password=LOGS_SSH_PASSWORD, throw=False)
-
-    app_log_dir  = join(LOG_DIR, 'nextcloud_log')
-    os.mkdir(app_log_dir )
+    run_scp('root@{0}:/var/log/sam.log {1}'.format(device_host, platform_log_dir), password=LOGS_SSH_PASSWORD, throw=False) 
     run_scp('root@{0}:{1}/log/*.log {2}'.format(device_host, data_dir, app_log_dir), password=LOGS_SSH_PASSWORD, throw=False)
 
     run_ssh(device_host, 'mkdir {0}'.format(TMP_DIR), password=LOGS_SSH_PASSWORD)
@@ -121,7 +117,7 @@ def nextcloud_session_domain(user_domain, device_host):
 def test_start(module_setup):
     shutil.rmtree(LOG_DIR, ignore_errors=True)
     os.mkdir(LOG_DIR)
-
+    os.mkdir(app_log_dir)
 
 def test_activate_device(auth, device_host):
     email, password, domain, release = auth
@@ -196,7 +192,8 @@ def test_admin(nextcloud_session_domain, user_domain, device_host):
 def test_verification(nextcloud_session_domain, user_domain):
     session, _ = nextcloud_session_domain
     response = session.get('https://{0}/index.php/settings/integrity/failed'.format(user_domain), allow_redirects=False, verify=False)
-    print(response.text)
+    with open(join(app_log_dir, 'integrity.failed.log'), 'w') as f:
+       f.write(response.text)
     assert response.status_code == 200, response.text
     assert 'INVALID_HASH' not in response.text
     assert 'EXCEPTION' not in response.text
