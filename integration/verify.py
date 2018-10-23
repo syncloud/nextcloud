@@ -183,6 +183,16 @@ def test_visible_through_platform(user_domain, device_host):
     assert response.status_code == 200, response.text
 
 
+def test_carddav(user_domain, device_host):
+    response = requests.get('https://{0}/.well-known/carddav'.format(device_host), headers={"Host": user_domain}, allow_redirects=False, verify=False)
+    assert response.status_code == 301, response.text
+
+
+def test_caldav(user_domain, device_host):
+    response = requests.get('https://{0}/.well-known/caldav'.format(device_host), headers={"Host": user_domain}, allow_redirects=False, verify=False)
+    assert response.status_code == 301, response.text
+
+
 def test_admin(nextcloud_session_domain, user_domain, device_host):
     session, _ = nextcloud_session_domain
     response = session.get('https://{0}/index.php/settings/admin'.format(device_host), headers={"Host": user_domain}, allow_redirects=False, verify=False)
