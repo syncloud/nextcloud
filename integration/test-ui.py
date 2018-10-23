@@ -99,6 +99,11 @@ def test_settings_security(driver, user_domain):
     time.sleep(10)
     screenshots(driver, screenshot_dir, 'admin-security')
 
+def test_settings_additional(driver, user_domain):
+    driver.get("https://{0}/index.php/settings/admin/additional".format(user_domain))
+    time.sleep(10)
+    screenshots(driver, screenshot_dir, 'admin-additional')
+    
 def screenshots(driver, dir, name):
     desktop_w = 1024
     desktop_h = 768
