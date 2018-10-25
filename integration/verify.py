@@ -145,7 +145,7 @@ def test_index(nextcloud_session_domain, user_domain):
     session, _ = nextcloud_session_domain
     response = session.get('https://{0}'.format(user_domain), verify=False)
     with open(join(app_log_dir, 'index.log'), 'w') as f:
-        f.write(response.text)
+        f.write(response.text.encode("UTF-8"))
     assert response.status_code == 200, response.text
 
 @pytest.mark.parametrize("megabytes", [1, 300])
