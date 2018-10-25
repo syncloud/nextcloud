@@ -101,13 +101,12 @@ def syncloud_session(device_host):
 @pytest.fixture(scope='function')
 def nextcloud_session_domain(user_domain, device_host):
     session = requests.session()
-    response = session.get('https://{0}/index.php/login'.format(device_host), headers={"Host": user_domain}, allow_redirects=False, verify=False)
+    response = session.get('https://{0}/index.php/login'.format(user_domain), allow_redirects=False, verify=False)
     print(response.text.encode("UTF-8"))
     print(response.headers)
     soup = BeautifulSoup(response.text, "html.parser")
     requesttoken = soup.find_all('input', {'name': 'requesttoken'})[0]['value']
-    response = session.post('https://{0}/index.php/login'.format(device_host),
-                            headers={"Host": user_domain},
+    response = session.post('https://{0}/index.php/login'.format(user_domain),
                             data={'user': DEVICE_USER, 'password': DEVICE_PASSWORD, 'requesttoken': requesttoken},
                             allow_redirects=False, verify=False)
     assert response.status_code == 303, response.text
@@ -137,11 +136,17 @@ def test_install(app_archive_path, device_host, installer):
     local_install(device_host, DEVICE_PASSWORD, app_archive_path, installer)
 
 
-def test_resource(nextcloud_session_domain, user_domain, device_host):
+def test_resource(nextcloud_session_domain, user_domain):
     session, _ = nextcloud_session_domain
-    response = session.get('https://{0}/core/img/loading.gif'.format(device_host), headers={"Host": user_domain}, verify=False)
+    response = session.get('https://{0}/core/img/loading.gif'.format(user_domain), verify=False)
     assert response.status_code == 200, response.text
 
+def test_index(nextcloud_session_domain, user_domain):
+    session, _ = nextcloud_session_domain
+    response = session.get('https://{0}'.format(user_domain), verify=False)
+    with open(join(app_log_dir, 'index.log'), 'w') as f:
+        f.write(response.text)
+    assert response.status_code == 200, response.text
 
 @pytest.mark.parametrize("megabytes", [1, 300])
 def test_sync(user_domain, megabytes, device_host, app_dir, data_dir):
@@ -183,13 +188,15 @@ def test_visible_through_platform(user_domain, device_host):
     assert response.status_code == 200, response.text
 
 
-def test_carddav(user_domain, device_host):
-    response = requests.get('https://{0}/.well-known/carddav'.format(device_host), headers={"Host": user_domain}, allow_redirects=False, verify=False)
+def test_carddav(nextcloud_session_domain, user_domain):
+    session, _ = nextcloud_session_domain
+    response = session.get('https://{0}/.well-known/carddav'.format(user_domain), allow_redirects=False, verify=False)
     assert response.status_code == 301, response.text
 
 
-def test_caldav(user_domain, device_host):
-    response = requests.get('https://{0}/.well-known/caldav'.format(device_host), headers={"Host": user_domain}, allow_redirects=False, verify=False)
+def test_caldav(nextcloud_session_domain, user_domain):
+    session, _ = nextcloud_session_domain
+    response = session.get('https://{0}/.well-known/caldav'.format(user_domain), allow_redirects=False, verify=False)
     assert response.status_code == 301, response.text
 
 
