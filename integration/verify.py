@@ -202,7 +202,9 @@ def test_caldav(nextcloud_session_domain, user_domain):
 
 def test_admin(nextcloud_session_domain, user_domain, device_host):
     session, _ = nextcloud_session_domain
-    response = session.get('https://{0}/index.php/settings/admin'.format(device_host), headers={"Host": user_domain}, allow_redirects=False, verify=False)
+    response = session.get('https://{0}/index.php/settings/admin'.format(user_domain), allow_redirects=False, verify=False)
+    with open(join(app_log_dir, 'admin.log'), 'w') as f:
+        f.write(response.text.encode("UTF-8"))
     assert response.status_code == 200, response.text
 
 
