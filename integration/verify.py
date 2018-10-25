@@ -224,15 +224,15 @@ def test_disk(syncloud_session, user_domain, device_host, app_dir, data_dir):
     device0 = loop_device_add(device_host, 'ext4', '/tmp/test0', DEVICE_PASSWORD)
     __activate_disk(syncloud_session, device0, device_host, app_dir, data_dir)
     __create_test_dir('test0', user_domain, device_host)
-    __check_test_dir(nextcloud_session_domain(user_domain, device_host), 'test0', user_domain, device_host)
+    __check_test_dir(nextcloud_session_domain(user_domain, device_host), 'test0', user_domain)
 
     device1 = loop_device_add(device_host, 'ext2', '/tmp/test1', DEVICE_PASSWORD)
     __activate_disk(syncloud_session, device1, device_host, app_dir, data_dir)
     __create_test_dir('test1', user_domain, device_host)
-    __check_test_dir(nextcloud_session_domain(user_domain, device_host), 'test1', user_domain, device_host)
+    __check_test_dir(nextcloud_session_domain(user_domain, device_host), 'test1', user_domain)
 
     __activate_disk(syncloud_session, device0, device_host, app_dir, data_dir)
-    __check_test_dir(nextcloud_session_domain(user_domain, device_host), 'test0', user_domain, device_host)
+    __check_test_dir(nextcloud_session_domain(user_domain, device_host), 'test0', user_domain)
 
     __deactivate_disk(syncloud_session, device_host, app_dir, data_dir)
   
@@ -270,14 +270,14 @@ def __create_test_dir(test_dir, user_domain, device_host):
     assert response.status_code == 201, response.text
 
 
-def __check_test_dir(nextcloud_session, test_dir, user_domain, device_host):
+def __check_test_dir(nextcloud_session, test_dir, user_domain):
 
-    response = requests.get('https://{0}'.format(device_host), headers={"Host": user_domain}, verify=False)
+    response = requests.get('https://{0}'.format(user_domain), verify=False)
     assert response.status_code == 200, BeautifulSoup(response.text, "html.parser").find('li', class_='error')
 
     nextcloud, _ = nextcloud_session
-    response = nextcloud.get('https://{0}/index.php/apps/files/ajax/list.php?dir=/'.format(device_host),
-                             headers={"Host": user_domain},
+    response = nextcloud.get('https://{0}/index.php/apps/files/ajax/list.php?dir=/'.format(user_domain),
+                             verify=False,
                              allow_redirects=False)
     info = json.loads(response.text)
     print(response.text)
