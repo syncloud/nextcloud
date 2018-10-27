@@ -183,14 +183,14 @@ def test_occ(device_host, app_dir, data_dir):
     run_ssh(device_host, '{0}/bin/occ-runner'.format(app_dir), password=DEVICE_PASSWORD, env_vars='DATA_DIR={0}'.format(data_dir))
 
 
-def test_visible_through_platform(user_domain, device_host):
-    response = requests.get('https://{0}/index.php/login'.format(device_host), headers={"Host": user_domain}, allow_redirects=False, verify=False)
+def test_visible_through_platform(user_domain):
+    response = requests.get('https://{0}/index.php/login'.format(user_domain), allow_redirects=False, verify=False)
     assert response.status_code == 200, response.text
 
 
 def test_carddav(nextcloud_session_domain, user_domain):
     session, _ = nextcloud_session_domain
-    response = session.get('https://{0}/.well-known/carddav'.format(user_domain), allow_redirects=False, verify=False)
+    response = session.get('https://{0}/.well-known/carddav'.format(user_domain), allow_redirects=True, verify=False)
     with open(join(app_log_dir, 'well-known.carddav.headers.log'), 'w') as f:
         f.write(str(response.headers))
     assert response.status_code == 301, response.text
@@ -198,10 +198,10 @@ def test_carddav(nextcloud_session_domain, user_domain):
 
 def test_caldav(nextcloud_session_domain, user_domain):
     session, _ = nextcloud_session_domain
-    response = session.get('https://{0}/.well-known/caldav'.format(user_domain), allow_redirects=False, verify=False)
+    response = session.get('https://{0}/.well-known/caldav'.format(user_domain), allow_redirects=True, verify=False)
     with open(join(app_log_dir, 'well-known.caldav.headers.log'), 'w') as f:
         f.write(str(response.headers))
-    assert response.status_code == 301, response.text
+    assert response.status_code == 207, response.text
 
 
 def test_admin(nextcloud_session_domain, user_domain, device_host):
