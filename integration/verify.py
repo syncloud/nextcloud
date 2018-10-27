@@ -192,15 +192,15 @@ def test_carddav(nextcloud_session_domain, user_domain):
     session, _ = nextcloud_session_domain
     response = session.get('https://{0}/.well-known/carddav'.format(user_domain), allow_redirects=True, verify=False)
     with open(join(app_log_dir, 'well-known.carddav.headers.log'), 'w') as f:
-        f.write(str(response.headers))
-    assert response.status_code == 301, response.text
+        f.write(str(response.headers).replace(',', '\n'))
+    assert response.status_code == 207, response.text
 
 
 def test_caldav(nextcloud_session_domain, user_domain):
     session, _ = nextcloud_session_domain
     response = session.get('https://{0}/.well-known/caldav'.format(user_domain), allow_redirects=True, verify=False)
     with open(join(app_log_dir, 'well-known.caldav.headers.log'), 'w') as f:
-        f.write(str(response.headers))
+        f.write(str(response.headers).replace(',', '\n'))
     assert response.status_code == 207, response.text
 
 
