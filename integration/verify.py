@@ -99,7 +99,7 @@ def syncloud_session(device_host):
 
 
 @pytest.fixture(scope='function')
-def nextcloud_session_domain(user_domain, device_host):
+def nextcloud_session_domain(user_domain):
     session = requests.session()
     response = session.get('https://{0}/index.php/login'.format(user_domain), allow_redirects=False, verify=False)
     print(response.text.encode("UTF-8"))
@@ -230,15 +230,15 @@ def test_disk(syncloud_session, user_domain, device_host, app_dir, data_dir):
     device0 = loop_device_add(device_host, 'ext4', '/tmp/test0', DEVICE_PASSWORD)
     __activate_disk(syncloud_session, device0, device_host, app_dir, data_dir)
     __create_test_dir('test0', user_domain, device_host)
-    __check_test_dir(nextcloud_session_domain(user_domain, device_host), 'test0', user_domain)
+    __check_test_dir(nextcloud_session_domain(user_domain), 'test0', user_domain)
 
     device1 = loop_device_add(device_host, 'ext2', '/tmp/test1', DEVICE_PASSWORD)
     __activate_disk(syncloud_session, device1, device_host, app_dir, data_dir)
     __create_test_dir('test1', user_domain, device_host)
-    __check_test_dir(nextcloud_session_domain(user_domain, device_host), 'test1', user_domain)
+    __check_test_dir(nextcloud_session_domain(user_domain), 'test1', user_domain)
 
     __activate_disk(syncloud_session, device0, device_host, app_dir, data_dir)
-    __check_test_dir(nextcloud_session_domain(user_domain, device_host), 'test0', user_domain)
+    __check_test_dir(nextcloud_session_domain(user_domain), 'test0', user_domain)
 
     __deactivate_disk(syncloud_session, device_host, app_dir, data_dir)
   
