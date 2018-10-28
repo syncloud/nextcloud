@@ -12,7 +12,7 @@ export TMPDIR=/tmp
 export TMP=/tmp
 
 NAME=nextcloud
-NEXTCLOUD_VERSION=14.0.0
+NEXTCLOUD_VERSION=14.0.3
 COIN_CACHE_DIR=${DIR}/coin.cache
 ARCH=$(uname -m)
 VERSION=$1
@@ -56,7 +56,9 @@ echo ${NAME} >> build/${NAME}/META/app
 echo ${VERSION} >> build/${NAME}/META/version
 
 sed -i 's/allowSymlinks = false/allowSymlinks = true/g' ${BUILD_DIR}/${NAME}/lib/private/Files/Storage/Local.php
-
+cat ${BUILD_DIR}/${NAME}/.user.ini
+sed -i 's/upload_max_filesize=.*/upload_max_filesize=10G/g' ${BUILD_DIR}/${NAME}/.user.ini
+sed -i 's/post_max_size=.*/post_max_size=10G/g' ${BUILD_DIR}/${NAME}/.user.ini
 echo "snapping"
 SNAP_DIR=${DIR}/build/snap
 ARCH=$(dpkg-architecture -q DEB_HOST_ARCH)

@@ -31,7 +31,7 @@ DIR = dirname(__file__)
 LOG_DIR = join(DIR, 'log')
 APP='nextcloud'
 TMP_DIR = '/tmp/syncloud'
-
+app_log_dir = join(LOG_DIR, 'nextcloud_log')
 
 @pytest.fixture(scope="session")
 def platform_data_dir(installer):
@@ -61,16 +61,12 @@ def ssh_env_vars(installer):
 def module_setup(request, device_host, data_dir, platform_data_dir, app_dir, service_prefix):
     request.addfinalizer(lambda: module_teardown(device_host, data_dir, platform_data_dir, app_dir, service_prefix))
 
-
 def module_teardown(device_host, data_dir, platform_data_dir, app_dir, service_prefix):
     platform_log_dir = join(LOG_DIR, 'platform_log')
     os.mkdir(platform_log_dir)
     run_scp('root@{0}:{1}/log/* {2}'.format(device_host, platform_data_dir, platform_log_dir), password=LOGS_SSH_PASSWORD, throw=False)
     
-    run_scp('root@{0}:/var/log/sam.log {1}'.format(device_host, platform_log_dir), password=LOGS_SSH_PASSWORD, throw=False)
-
-    app_log_dir  = join(LOG_DIR, 'nextcloud_log')
-    os.mkdir(app_log_dir )
+    run_scp('root@{0}:/var/log/sam.log {1}'.format(device_host, platform_log_dir), password=LOGS_SSH_PASSWORD, throw=False) 
     run_scp('root@{0}:{1}/log/*.log {2}'.format(device_host, data_dir, app_log_dir), password=LOGS_SSH_PASSWORD, throw=False)
 
     run_ssh(device_host, 'mkdir {0}'.format(TMP_DIR), password=LOGS_SSH_PASSWORD)
@@ -103,15 +99,14 @@ def syncloud_session(device_host):
 
 
 @pytest.fixture(scope='function')
-def nextcloud_session_domain(user_domain, device_host):
+def nextcloud_session_domain(user_domain):
     session = requests.session()
-    response = session.get('https://{0}/index.php/login'.format(device_host), headers={"Host": user_domain}, allow_redirects=False, verify=False)
+    response = session.get('https://{0}/index.php/login'.format(user_domain), allow_redirects=False, verify=False)
     print(response.text.encode("UTF-8"))
     print(response.headers)
     soup = BeautifulSoup(response.text, "html.parser")
     requesttoken = soup.find_all('input', {'name': 'requesttoken'})[0]['value']
-    response = session.post('https://{0}/index.php/login'.format(device_host),
-                            headers={"Host": user_domain},
+    response = session.post('https://{0}/index.php/login'.format(user_domain),
                             data={'user': DEVICE_USER, 'password': DEVICE_PASSWORD, 'requesttoken': requesttoken},
                             allow_redirects=False, verify=False)
     assert response.status_code == 303, response.text
@@ -121,7 +116,7 @@ def nextcloud_session_domain(user_domain, device_host):
 def test_start(module_setup):
     shutil.rmtree(LOG_DIR, ignore_errors=True)
     os.mkdir(LOG_DIR)
-
+    os.mkdir(app_log_dir)
 
 def test_activate_device(auth, device_host):
     email, password, domain, release = auth
@@ -141,11 +136,17 @@ def test_install(app_archive_path, device_host, installer):
     local_install(device_host, DEVICE_PASSWORD, app_archive_path, installer)
 
 
-def test_resource(nextcloud_session_domain, user_domain, device_host):
+def test_resource(nextcloud_session_domain, user_domain):
     session, _ = nextcloud_session_domain
-    response = session.get('https://{0}/core/img/loading.gif'.format(device_host), headers={"Host": user_domain}, verify=False)
+    response = session.get('https://{0}/core/img/loading.gif'.format(user_domain), verify=False)
     assert response.status_code == 200, response.text
 
+def test_index(nextcloud_session_domain, user_domain):
+    session, _ = nextcloud_session_domain
+    response = session.get('https://{0}'.format(user_domain), verify=False)
+    with open(join(app_log_dir, 'index.log'), 'w') as f:
+        f.write(response.text.encode("UTF-8"))
+    assert response.status_code == 200, response.text
 
 @pytest.mark.parametrize("megabytes", [1, 300])
 def test_sync(user_domain, megabytes, device_host, app_dir, data_dir):
@@ -182,21 +183,40 @@ def test_occ(device_host, app_dir, data_dir):
     run_ssh(device_host, '{0}/bin/occ-runner'.format(app_dir), password=DEVICE_PASSWORD, env_vars='DATA_DIR={0}'.format(data_dir))
 
 
-def test_visible_through_platform(user_domain, device_host):
-    response = requests.get('https://{0}/index.php/login'.format(device_host), headers={"Host": user_domain}, allow_redirects=False, verify=False)
+def test_visible_through_platform(user_domain):
+    response = requests.get('https://{0}/index.php/login'.format(user_domain), allow_redirects=False, verify=False)
     assert response.status_code == 200, response.text
+
+
+def test_carddav(nextcloud_session_domain, user_domain):
+    session, _ = nextcloud_session_domain
+    response = session.request('PROPFIND', 'https://{0}/.well-known/carddav'.format(user_domain), allow_redirects=True, verify=False)
+    with open(join(app_log_dir, 'well-known.carddav.headers.log'), 'w') as f:
+        f.write(str(response.headers).replace(',', '\n'))
+    #assert response.status_code == 207, response.text
+
+
+def test_caldav(nextcloud_session_domain, user_domain):
+    session, _ = nextcloud_session_domain
+    response = session.request('PROPFIND', 'https://{0}/.well-known/caldav'.format(user_domain), allow_redirects=True, verify=False)
+    with open(join(app_log_dir, 'well-known.caldav.headers.log'), 'w') as f:
+        f.write(str(response.headers).replace(',', '\n'))
+    #assert response.status_code == 207, response.text
 
 
 def test_admin(nextcloud_session_domain, user_domain, device_host):
     session, _ = nextcloud_session_domain
-    response = session.get('https://{0}/index.php/settings/admin'.format(device_host), headers={"Host": user_domain}, allow_redirects=False, verify=False)
+    response = session.get('https://{0}/index.php/settings/admin'.format(user_domain), allow_redirects=False, verify=False)
+    with open(join(app_log_dir, 'admin.log'), 'w') as f:
+        f.write(response.text.encode("UTF-8"))
     assert response.status_code == 200, response.text
 
 
 def test_verification(nextcloud_session_domain, user_domain):
     session, _ = nextcloud_session_domain
     response = session.get('https://{0}/index.php/settings/integrity/failed'.format(user_domain), allow_redirects=False, verify=False)
-    print(response.text)
+    with open(join(app_log_dir, 'integrity.failed.log'), 'w') as f:
+       f.write(response.text)
     assert response.status_code == 200, response.text
     assert 'INVALID_HASH' not in response.text
     assert 'EXCEPTION' not in response.text
@@ -210,15 +230,15 @@ def test_disk(syncloud_session, user_domain, device_host, app_dir, data_dir):
     device0 = loop_device_add(device_host, 'ext4', '/tmp/test0', DEVICE_PASSWORD)
     __activate_disk(syncloud_session, device0, device_host, app_dir, data_dir)
     __create_test_dir('test0', user_domain, device_host)
-    __check_test_dir(nextcloud_session_domain(user_domain, device_host), 'test0', user_domain, device_host)
+    __check_test_dir(nextcloud_session_domain(user_domain), 'test0', user_domain)
 
     device1 = loop_device_add(device_host, 'ext2', '/tmp/test1', DEVICE_PASSWORD)
     __activate_disk(syncloud_session, device1, device_host, app_dir, data_dir)
     __create_test_dir('test1', user_domain, device_host)
-    __check_test_dir(nextcloud_session_domain(user_domain, device_host), 'test1', user_domain, device_host)
+    __check_test_dir(nextcloud_session_domain(user_domain), 'test1', user_domain)
 
     __activate_disk(syncloud_session, device0, device_host, app_dir, data_dir)
-    __check_test_dir(nextcloud_session_domain(user_domain, device_host), 'test0', user_domain, device_host)
+    __check_test_dir(nextcloud_session_domain(user_domain), 'test0', user_domain)
 
     __deactivate_disk(syncloud_session, device_host, app_dir, data_dir)
   
@@ -256,14 +276,14 @@ def __create_test_dir(test_dir, user_domain, device_host):
     assert response.status_code == 201, response.text
 
 
-def __check_test_dir(nextcloud_session, test_dir, user_domain, device_host):
+def __check_test_dir(nextcloud_session, test_dir, user_domain):
 
-    response = requests.get('https://{0}'.format(device_host), headers={"Host": user_domain}, verify=False)
+    response = requests.get('https://{0}'.format(user_domain), verify=False)
     assert response.status_code == 200, BeautifulSoup(response.text, "html.parser").find('li', class_='error')
 
     nextcloud, _ = nextcloud_session
-    response = nextcloud.get('https://{0}/index.php/apps/files/ajax/list.php?dir=/'.format(device_host),
-                             headers={"Host": user_domain},
+    response = nextcloud.get('https://{0}/index.php/apps/files/ajax/list.php?dir=/'.format(user_domain),
+                             verify=False,
                              allow_redirects=False)
     info = json.loads(response.text)
     print(response.text)

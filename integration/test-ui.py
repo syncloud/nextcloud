@@ -67,7 +67,7 @@ def test_main(driver, user_domain):
     password.send_keys(Keys.RETURN)
     screenshots(driver, screenshot_dir, 'login_progress')
        
-    wait_driver = WebDriverWait(driver, 120)
+    wait_driver = WebDriverWait(driver, 220)
 
     wait_driver.until(EC.element_to_be_clickable((By.ID, 'closeWizard')))
     wizard_close_button = driver.find_element_by_id("closeWizard")
@@ -94,7 +94,16 @@ def test_settings_user(driver, user_domain):
     time.sleep(10)
     screenshots(driver, screenshot_dir, 'admin-ldap')
 
+def test_settings_security(driver, user_domain):
+    driver.get("https://{0}/index.php/settings/admin/overview#security-warning".format(user_domain))
+    time.sleep(10)
+    screenshots(driver, screenshot_dir, 'admin-security')
 
+def test_settings_additional(driver, user_domain):
+    driver.get("https://{0}/index.php/settings/admin/additional".format(user_domain))
+    time.sleep(10)
+    screenshots(driver, screenshot_dir, 'admin-additional')
+    
 def screenshots(driver, dir, name):
     desktop_w = 1024
     desktop_h = 768

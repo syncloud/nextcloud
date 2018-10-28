@@ -1,0 +1,7 @@
+#!/snap/platform/current/python/bin/python
+
+import os, sys
+sys.path.append(os.path.join(os.environ['SNAP'], 'hooks'))
+
+from nextcloud_hooks import NextcloudInstaller
+NextcloudInstaller().post_refresh()
