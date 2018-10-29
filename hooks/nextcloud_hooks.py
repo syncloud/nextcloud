@@ -1,4 +1,4 @@
-from os.path import dirname, join, abspath, isdir
+from os.path import dirname, join, abspath, isdir, realpath
 from os import listdir
 import sys
 
@@ -232,7 +232,7 @@ class NextcloudInstaller:
         tmp_storage_path = join(app_storage_dir, 'tmp')
         fs.makepath(tmp_storage_path)
         fs.chownpath(tmp_storage_path, USER_NAME)
-        real_app_storage_dir = os.path.realpath(app_storage_dir)
+        real_app_storage_dir = realpath(app_storage_dir)
         self.occ.run('config:system:set datadirectory {0}'.format(real_app_storage_dir))
 
     def on_domain_change(self):
