@@ -168,8 +168,8 @@ class NextcloudInstaller:
             join(self.app_dir, PSQL_PATH),
             database='postgres', user=DB_USER, database_path=self.database_path, port=PSQL_PORT)
         db_postgres.execute("ALTER USER {0} WITH PASSWORD '{1}';".format(DB_USER, DB_PASSWORD))
-
-        self.occ.run('maintenance:install  --database pgsql --database-host {0}:{1} --database-name nextcloud --database-user {2} --database-pass {3} --admin-user {4} --admin-pass {5} --data-dir {6}'.format(self.database_path, PSQL_PORT, DB_USER, DB_PASSWORD, INSTALL_USER, unicode(uuid.uuid4().hex), app_storage_dir))
+        real_app_storage_dir = realpath(app_storage_dir)
+        self.occ.run('maintenance:install  --database pgsql --database-host {0}:{1} --database-name nextcloud --database-user {2} --database-pass {3} --admin-user {4} --admin-pass {5} --data-dir {6}'.format(self.database_path, PSQL_PORT, DB_USER, DB_PASSWORD, INSTALL_USER, unicode(uuid.uuid4().hex), real_app_storage_dir))
 
         self.occ.run('app:enable user_ldap')
 
@@ -233,9 +233,7 @@ class NextcloudInstaller:
         fs.makepath(tmp_storage_path)
         fs.chownpath(tmp_storage_path, USER_NAME)
         real_app_storage_dir = realpath(app_storage_dir)
-        oc_config = OCConfig(join(self.app_dir, OC_CONFIG_PATH))
-        oc_config.set_value('datadirectory', real_app_storage_dir)
-        #self.occ.run('config:system:set datadirectory {0}'.format(real_app_storage_dir))
+        self.occ.run('config:system:set datadirectory {0}'.format(real_app_storage_dir))
 
     def on_domain_change(self):
         app_domain = urls.get_app_domain_name(APP_NAME)
