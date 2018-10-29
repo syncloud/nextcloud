@@ -234,7 +234,8 @@ class NextcloudInstaller:
         fs.makepath(tmp_storage_path)
         fs.chownpath(tmp_storage_path, USER_NAME)
         real_app_storage_dir = realpath(app_storage_dir)
-        self.occ.run('config:system:set datadirectory {0}'.format(real_app_storage_dir))
+        oc_config = OCConfig(join(self.app_dir, OC_CONFIG_PATH))
+        oc_config.set_value('datadirectory', real_app_storage_dir)
 
     def on_domain_change(self):
         app_domain = urls.get_app_domain_name(APP_NAME)
