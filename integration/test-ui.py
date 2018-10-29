@@ -67,7 +67,7 @@ def test_main(driver, user_domain):
     password.send_keys(Keys.RETURN)
     screenshots(driver, screenshot_dir, 'login_progress')
        
-    wait_driver = WebDriverWait(driver, 220)
+    wait_driver = WebDriverWait(driver, 300)
 
     wait_driver.until(EC.element_to_be_clickable((By.ID, 'closeWizard')))
     wizard_close_button = driver.find_element_by_id("closeWizard")

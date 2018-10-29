@@ -134,8 +134,8 @@ class NextcloudInstaller:
         oc_config.set_value('memcache.local', '\OC\Memcache\APCu')
         oc_config.set_value('loglevel', '2')
         oc_config.set_value('logfile', join(self.app_data_dir, OWNCLOUD_LOG_PATH))
-        oc_config.set_value('datadirectory', app_storage_dir)
-        oc_config.set_value('integrity.check.disabled', 'true')
+        #oc_config.set_value('datadirectory', app_storage_dir)
+        #oc_config.set_value('integrity.check.disabled', 'true')
         oc_config.set_value('mail_smtpmode', 'smtp')
         oc_config.set_value('mail_smtphost', 'localhost:25')
         #oc_config.set_value('mail_smtpsecure', '')
@@ -232,6 +232,8 @@ class NextcloudInstaller:
         tmp_storage_path = join(app_storage_dir, 'tmp')
         fs.makepath(tmp_storage_path)
         fs.chownpath(tmp_storage_path, USER_NAME)
+        real_app_storage_dir = os.path.realpath(app_storage_dir)
+        self.occ.run('config:system:set datadirectory {0}'.format(real_app_storage_dir))
 
     def on_domain_change(self):
         app_domain = urls.get_app_domain_name(APP_NAME)
