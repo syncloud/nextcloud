@@ -10,7 +10,7 @@ import shutil
 
 from syncloudlib.integration.loop import loop_device_add, loop_device_cleanup
 from syncloudlib.integration.ssh import run_scp, run_ssh
-from syncloudlib.integration.installer import local_install, wait_for_sam, wait_for_rest, local_remove, get_platform_data_dir, get_data_dir, get_app_dir, get_service_prefix, get_ssh_env_vars
+from syncloudlib.integration.installer import local_install, wait_for_sam, wait_for_rest, local_remove, get_data_dir, get_app_dir, get_service_prefix, get_ssh_env_vars
 
 app_path = join(dirname(__file__), '..')
 sys.path.append(join(app_path, 'src'))
