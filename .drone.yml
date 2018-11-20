@@ -17,11 +17,19 @@ pipeline:
       - VERSION=$(cat version)
       - ./build.sh $VERSION
 
-  integration:
+  test:
     image: syncloud/build-deps-${arch}
     commands:
       - VERSION=$(cat version)
-      - ./integration/test-docker.sh build-$(uname -m)-$DRONE_BRANCH $VERSION device
+      - ./integration/test-docker.sh build-$(uname -m)-$DRONE_BRANCH device $(cat package.name) verify.py
+
+  test-ui:
+    image: syncloud/build-deps-${arch}
+    commands:
+      - VERSION=$(cat version)
+      - ./integration/test-docker.sh build-$(uname -m)-$DRONE_BRANCH device $(cat package.name) test-ui.py
+    when:
+      arch: amd64
 
   upload:
     image: syncloud/build-deps-${arch}
