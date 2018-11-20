@@ -37,7 +37,7 @@ app_log_dir = join(LOG_DIR, 'nextcloud_log')
 
 @pytest.fixture(scope="session")
 def platform_data_dir():
-    return get_platform_data_dir()
+    return get_data_dir('platform')
         
 @pytest.fixture(scope="session")
 def data_dir():
