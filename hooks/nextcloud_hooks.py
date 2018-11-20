@@ -2,13 +2,6 @@ from os.path import dirname, join, abspath, isdir, realpath
 from os import listdir
 import sys
 
-app_path = abspath(join(dirname(__file__), '..'))
-
-lib_path = join(app_path, 'lib')
-libs = [join(lib_path, item) for item in listdir(lib_path) if isdir(join(lib_path, item))]
-map(lambda l: sys.path.insert(0, l), libs)
-
-
 from os import environ
 from os.path import isfile
 import shutil
@@ -17,9 +10,9 @@ from subprocess import check_output
 
 import logging
 from syncloud_app import logger
-from syncloud_platform.application import api
-from syncloud_platform.gaplib import fs, linux, gen
-from syncloudlib.application import paths, urls, storage, users
+
+from syncloudlib import fs, linux, gen
+from syncloudlib.application import paths, urls, storage, users, service
 
 from postgres import Database
 from octools import OCConsole, OCConfig
@@ -67,7 +60,6 @@ class NextcloudInstaller:
             logger.init(logging.DEBUG, True)
 
         self.log = logger.get_logger('{0}_installer'.format(APP_NAME))
-        # self.app = api.get_app_setup(APP_NAME)
         self.app_dir = paths.get_app_dir(APP_NAME)
         self.app_data_dir = paths.get_data_dir(APP_NAME)
 
@@ -218,11 +210,11 @@ class NextcloudInstaller:
         self.occ.run('db:add-missing-indices')
 
     def on_disk_change(self):
-        app = api.get_app_setup(APP_NAME)
+        
         self.prepare_storage()
         self.occ.run('config:system:delete instanceid')
-        app.restart_service(SYSTEMD_PHP_FPM_NAME)
-        app.restart_service(SYSTEMD_NGINX_NAME)
+        service.restart(SYSTEMD_PHP_FPM_NAME)
+        service.restart(SYSTEMD_NGINX_NAME)
 
     def prepare_storage(self):
         app_storage_dir = storage.init_storage(APP_NAME, USER_NAME)
