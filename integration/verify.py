@@ -136,11 +136,8 @@ def test_activate_device(main_domain, domain, device_host):
     LOGS_SSH_PASSWORD = DEVICE_PASSWORD
 
 
-#def test_occ(device_host, app_dir, data_dir):
-#    run_ssh(device_host, '{0}/bin/occ-runner help maintenance:install'.format(app_dir), password=LOGS_SSH_PASSWORD, env_vars='DATA_DIR={0}'.format(data_dir))
-
-def test_install(app_archive_path, device_host, installer):
-    local_install(device_host, DEVICE_PASSWORD, app_archive_path, installer)
+def test_install(app_archive_path, device_host):
+    local_install(device_host, DEVICE_PASSWORD, app_archive_path)
 
 
 def test_resource(nextcloud_session_domain, app_domain):
@@ -310,5 +307,5 @@ def test_remove(syncloud_session, device_host):
     wait_for_sam(syncloud_session, device_host)
 
 
-def test_reinstall(app_archive_path, device_host, installer):
-    local_install(device_host, DEVICE_PASSWORD, app_archive_path, installer)
+def test_reinstall(app_archive_path, device_host):
+    local_install(device_host, DEVICE_PASSWORD, app_archive_path)
