@@ -73,8 +73,6 @@ class NextcloudInstaller:
 
     def install_config(self):
 
-        linux.fix_locale()
-
         home_folder = join('/home', USER_NAME)
         linux.useradd(USER_NAME, home_folder=home_folder)
 
