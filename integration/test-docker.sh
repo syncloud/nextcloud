@@ -3,11 +3,10 @@
 DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
 
 if [ "$#" -lt 4 ]; then
-    echo "usage $0 domain device_host package"
+    echo "usage $0 domain device_host package suite"
     exit 1
 fi
 
-ARCH=$(uname -m)
 DOMAIN=$1
 DEVICE_HOST=$2
 PACKAGE=$3
