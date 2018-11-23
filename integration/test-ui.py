@@ -48,14 +48,14 @@ def driver():
     return driver
 
 
-def test_login(driver, user_domain):
+def test_login(driver, app_domain):
 
-    driver.get("https://{0}".format(user_domain))
+    driver.get("https://{0}".format(app_domain))
     time.sleep(10)
     print(driver.execute_script('return window.JSErrorCollector_errors ? window.JSErrorCollector_errors.pump() : []'))
 
 
-def test_main(driver, user_domain):
+def test_main(driver, app_domain):
 
     user = driver.find_element_by_id("user")
     user.send_keys(DEVICE_USER)
@@ -77,30 +77,30 @@ def test_main(driver, user_domain):
     screenshots(driver, screenshot_dir, 'main')
 
 
-def test_settings(driver, user_domain):
-    driver.get("https://{0}/index.php/settings/admin".format(user_domain))
+def test_settings(driver, app_domain):
+    driver.get("https://{0}/index.php/settings/admin".format(app_domain))
     time.sleep(10)
     screenshots(driver, screenshot_dir, 'admin')
 
 
-def test_settings_user(driver, user_domain):
-    driver.get("https://{0}/index.php/settings/user".format(user_domain))
+def test_settings_user(driver, app_domain):
+    driver.get("https://{0}/index.php/settings/user".format(app_domain))
     time.sleep(10)
     screenshots(driver, screenshot_dir, 'user')
 
 
-def test_settings_user(driver, user_domain):
-    driver.get("https://{0}/index.php/settings/admin/ldap".format(user_domain))
+def test_settings_user(driver, app_domain):
+    driver.get("https://{0}/index.php/settings/admin/ldap".format(app_domain))
     time.sleep(10)
     screenshots(driver, screenshot_dir, 'admin-ldap')
 
-def test_settings_security(driver, user_domain):
-    driver.get("https://{0}/index.php/settings/admin/overview#security-warning".format(user_domain))
+def test_settings_security(driver, app_domain):
+    driver.get("https://{0}/index.php/settings/admin/overview#security-warning".format(app_domain))
     time.sleep(10)
     screenshots(driver, screenshot_dir, 'admin-security')
 
-def test_settings_additional(driver, user_domain):
-    driver.get("https://{0}/index.php/settings/admin/additional".format(user_domain))
+def test_settings_additional(driver, app_domain):
+    driver.get("https://{0}/index.php/settings/admin/additional".format(app_domain))
     time.sleep(10)
     screenshots(driver, screenshot_dir, 'admin-additional')
     
