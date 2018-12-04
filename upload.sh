@@ -7,8 +7,6 @@ branch=$1
 build_number=$2
 bucket=apps.syncloud.org
 
-mkdir -p /opt/app
-
 ARCH=$(dpkg-architecture -q DEB_HOST_ARCH)
 FILE_NAME=${app}_${build_number}_${ARCH}.snap
 
