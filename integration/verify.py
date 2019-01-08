@@ -175,25 +175,25 @@ def test_verification(nextcloud_session_domain, app_domain, log_dir):
     assert 'EXCEPTION' not in response.text
 
 
-def test_disk(syncloud_session, app_domain, device_host, app_dir, data_dir, device_password):
+def test_disk(device_session, app_domain, device_host, app_dir, data_dir, device_password):
 
     loop_device_cleanup(device_host, '/tmp/test0', device_password)
     loop_device_cleanup(device_host, '/tmp/test1', device_password)
 
     device0 = loop_device_add(device_host, 'ext4', '/tmp/test0', device_password)
-    __activate_disk(syncloud_session, device0, device_host, app_dir, data_dir)
+    __activate_disk(device_session, device0, device_host, app_dir, data_dir)
     __create_test_dir('test0', app_domain, device_host)
     __check_test_dir(nextcloud_session_domain(app_domain), 'test0', app_domain)
 
     device1 = loop_device_add(device_host, 'ext2', '/tmp/test1', device_password)
-    __activate_disk(syncloud_session, device1, device_host, app_dir, data_dir)
+    __activate_disk(device_session, device1, device_host, app_dir, data_dir)
     __create_test_dir('test1', app_domain, device_host)
     __check_test_dir(nextcloud_session_domain(app_domain), 'test1', app_domain)
 
-    __activate_disk(syncloud_session, device0, device_host, app_dir, data_dir)
+    __activate_disk(device_session, device0, device_host, app_dir, data_dir)
     __check_test_dir(nextcloud_session_domain(app_domain), 'test0', app_domain)
 
-    __deactivate_disk(syncloud_session, device_host, app_dir, data_dir)
+    __deactivate_disk(device_session, device_host, app_dir, data_dir)
   
 
 def __log_data_dir(device_host, device_password):
@@ -203,19 +203,19 @@ def __log_data_dir(device_host, device_password):
     run_ssh(device_host, 'ls -la /data/nextcloud', password=device_password)
 
 
-def __activate_disk(syncloud_session, loop_device, device_host, app_dir, data_dir):
+def __activate_disk(device_session, loop_device, device_host, app_dir, data_dir):
 
     __log_data_dir(device_host)
-    response = syncloud_session.get('https://{0}/rest/settings/disk_activate'.format(device_host),
+    response = device_session.get('https://{0}/rest/settings/disk_activate'.format(device_host),
                                     params={'device': loop_device}, allow_redirects=False)
     __log_data_dir(device_host)
     files_scan(device_host, app_dir, data_dir)
     assert response.status_code == 200, response.text
 
 
-def __deactivate_disk(syncloud_session, device_host, app_dir, data_dir):
+def __deactivate_disk(device_session, device_host, app_dir, data_dir):
 
-    response = syncloud_session.get('https://{0}/rest/settings/disk_deactivate'.format(device_host),
+    response = device_session.get('https://{0}/rest/settings/disk_deactivate'.format(device_host),
                                     allow_redirects=False)
     files_scan(device_host, app_dir, data_dir)
     assert response.status_code == 200, response.text
