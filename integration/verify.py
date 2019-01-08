@@ -15,7 +15,7 @@ from syncloudlib.integration.installer import local_install, wait_for_rest, loca
 import requests
 from bs4 import BeautifulSoup
 
-
+DEFAULT_DEVICE_PASSWORD = 'syncloud'
 LOGS_SSH_PASSWORD = DEFAULT_DEVICE_PASSWORD
 TMP_DIR = '/tmp/syncloud'
 
