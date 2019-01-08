@@ -141,7 +141,7 @@ def test_visible_through_platform(app_domain):
     assert response.status_code == 200, response.text
 
 
-def test_carddav(nextcloud_session_domain, app_domain):
+def test_carddav(nextcloud_session_domain, app_domain, log_dir):
     session, _ = nextcloud_session_domain
     response = session.request('PROPFIND', 'https://{0}/.well-known/carddav'.format(app_domain), allow_redirects=True, verify=False)
     with open(join(log_dir, 'well-known.carddav.headers.log'), 'w') as f:
@@ -149,7 +149,7 @@ def test_carddav(nextcloud_session_domain, app_domain):
     #assert response.status_code == 207, response.text
 
 
-def test_caldav(nextcloud_session_domain, app_domain):
+def test_caldav(nextcloud_session_domain, app_domain, log_dir):
     session, _ = nextcloud_session_domain
     response = session.request('PROPFIND', 'https://{0}/.well-known/caldav'.format(app_domain), allow_redirects=True, verify=False)
     with open(join(log_dir, 'well-known.caldav.headers.log'), 'w') as f:
@@ -157,7 +157,7 @@ def test_caldav(nextcloud_session_domain, app_domain):
     #assert response.status_code == 207, response.text
 
 
-def test_admin(nextcloud_session_domain, app_domain, device_host):
+def test_admin(nextcloud_session_domain, app_domain, device_host, log_dir):
     session, _ = nextcloud_session_domain
     response = session.get('https://{0}/index.php/settings/admin'.format(app_domain), allow_redirects=False, verify=False)
     with open(join(log_dir, 'admin.log'), 'w') as f:
@@ -165,7 +165,7 @@ def test_admin(nextcloud_session_domain, app_domain, device_host):
     assert response.status_code == 200, response.text
 
 
-def test_verification(nextcloud_session_domain, app_domain):
+def test_verification(nextcloud_session_domain, app_domain, log_dir):
     session, _ = nextcloud_session_domain
     response = session.get('https://{0}/index.php/settings/integrity/failed'.format(app_domain), allow_redirects=False, verify=False)
     with open(join(log_dir, 'integrity.failed.log'), 'w') as f:
