@@ -6,7 +6,7 @@ from subprocess import check_output
 import pytest
 import requests
 from bs4 import BeautifulSoup
-from syncloudlib.integration.installer import local_install
+from syncloudlib.integration.installer import local_install, wait_for_installer
 from syncloudlib.integration.loop import loop_device_add, loop_device_cleanup
 from syncloudlib.integration.ssh import run_scp, run_ssh
 
@@ -270,6 +270,7 @@ def test_remove(device_session, device_host):
     response = device_session.get('https://{0}/rest/remove?app_id=nextcloud'.format(device_host),
                                   allow_redirects=False, verify=False)
     assert response.status_code == 200, response.text
+    wait_for_installer(device_session, device_host)
 
 
 def test_reinstall(app_archive_path, device_host, device_password):
