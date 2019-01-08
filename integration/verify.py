@@ -85,8 +85,8 @@ def test_activate_device(device, device_password):
     LOGS_SSH_PASSWORD = device_password
 
 
-def test_install(app_archive_path, device_host):
-    local_install(device_host, DEVICE_PASSWORD, app_archive_path)
+def test_install(app_archive_path, device_host, device_password):
+    local_install(device_host, device_password, app_archive_path)
 
 
 def test_resource(nextcloud_session_domain, app_domain):
@@ -255,5 +255,5 @@ def test_remove(device_session, device_host):
     assert response.status_code == 200, response.text
 
 
-def test_reinstall(app_archive_path, device_host):
-    local_install(device_host, DEVICE_PASSWORD, app_archive_path)
+def test_reinstall(app_archive_path, device_host, device_password):
+    local_install(device_host, device_password, app_archive_path)
