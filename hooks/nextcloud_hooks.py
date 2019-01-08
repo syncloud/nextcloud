@@ -238,7 +238,7 @@ class NextcloudInstaller:
 class OwncloudCron:
 
     def __init__(self, app_dir, data_dir, app_name, cron_user):
-        self.cron_cmd = 'DATA_DIR={0} {1}'.format(data_dir, join(app_dir, 'bin/{0}-cron'.format(app_name)))
+        self.cron_cmd = 'SNAP_COMMON={0} {1}'.format(data_dir, join(app_dir, 'bin/{0}-cron'.format(app_name)))
         self.cron_user = cron_user
         self.log = logger.get_logger('cron')
 
@@ -258,4 +258,4 @@ class OwncloudCron:
 
     def run(self):
         self.log.info("running: {0}".format(self.cron_cmd))
-        self.log.info(check_output('sudo -E -H -u {0} {1}'.format(self.cron_user, self.cron_cmd), shell=True))
+        self.log.info(check_output(self.cron_cmd, shell=True))

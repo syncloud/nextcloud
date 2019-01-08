@@ -34,6 +34,9 @@ apps:
     post-start-command: bin/service.nginx.sh post-start
     after: [php-fpm, postgresql]
 
+  occ:
+    command: bin/occ-runner
+
 confinement: strict
 description: Nextcloud
 grade: stable

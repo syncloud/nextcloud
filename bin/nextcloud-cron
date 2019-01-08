@@ -1,9 +1,9 @@
 #!/bin/bash
 
-if [ -z "$DATA_DIR" ]; then
-  echo "DATA_DIR environment variable must be set"
+if [ -z "SNAP_COMMON" ]; then
+  echo "SNAP_COMMON environment variable must be set"
   exit 1
 fi
 
-APP_DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && cd .. && pwd )
-${APP_DIR}/bin/php-runner -f ${APP_DIR}/nextcloud/cron.php
+DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && cd .. && pwd )
+sudo -H -E -u nextcloud ${DIR}/bin/php-runner -f ${DIR}/nextcloud/cron.php
