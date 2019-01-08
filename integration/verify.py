@@ -12,64 +12,25 @@ from syncloudlib.integration.loop import loop_device_add, loop_device_cleanup
 from syncloudlib.integration.ssh import run_scp, run_ssh
 from syncloudlib.integration.installer import local_install, wait_for_sam, wait_for_rest, local_remove, get_data_dir, get_app_dir, get_service_prefix, get_ssh_env_vars
 
-app_path = join(dirname(__file__), '..')
-sys.path.append(join(app_path, 'src'))
-
-lib_path = join(app_path, 'lib')
-libs = [abspath(join(lib_path, item)) for item in listdir(lib_path) if isdir(join(lib_path, item))]
-map(lambda x: sys.path.append(x), libs)
-
 import requests
 from bs4 import BeautifulSoup
 
 
-DEVICE_USER = 'user'
-DEVICE_PASSWORD = 'password'
-DEFAULT_DEVICE_PASSWORD = 'syncloud'
 LOGS_SSH_PASSWORD = DEFAULT_DEVICE_PASSWORD
-DIR = dirname(__file__)
-LOG_DIR = join(DIR, 'log')
-APP='nextcloud'
-REDIRECT_USER = "teamcity@syncloud.it"
-REDIRECT_PASSWORD = "password"
 TMP_DIR = '/tmp/syncloud'
-app_log_dir = join(LOG_DIR, 'nextcloud_log')
-
-@pytest.fixture(scope="session")
-def platform_data_dir():
-    return get_data_dir('platform')
-        
-@pytest.fixture(scope="session")
-def data_dir():
-    return get_data_dir(APP)
-         
-
-@pytest.fixture(scope="session")
-def app_dir():
-    return get_app_dir(APP)
-
-
-@pytest.fixture(scope="session")
-def service_prefix():
-    return get_service_prefix()
-
-
-@pytest.fixture(scope="session")
-def ssh_env_vars():
-    return get_ssh_env_vars(APP)
 
 
 @pytest.fixture(scope="session")
 def module_setup(request, device_host, data_dir, platform_data_dir, app_dir, service_prefix):
     request.addfinalizer(lambda: module_teardown(device_host, data_dir, platform_data_dir, app_dir, service_prefix))
 
-def module_teardown(device_host, data_dir, platform_data_dir, app_dir, service_prefix):
+def module_teardown(device_host, data_dir, platform_data_dir, app_dir, service_prefix, log_dir):
     platform_log_dir = join(LOG_DIR, 'platform_log')
     os.mkdir(platform_log_dir)
     run_scp('root@{0}:{1}/log/* {2}'.format(device_host, platform_data_dir, platform_log_dir), password=LOGS_SSH_PASSWORD, throw=False)
     
     run_scp('root@{0}:/var/log/sam.log {1}'.format(device_host, platform_log_dir), password=LOGS_SSH_PASSWORD, throw=False) 
-    run_scp('root@{0}:{1}/log/*.log {2}'.format(device_host, data_dir, app_log_dir), password=LOGS_SSH_PASSWORD, throw=False)
+    run_scp('root@{0}:{1}/log/*.log {2}'.format(device_host, data_dir, log_dir), password=LOGS_SSH_PASSWORD, throw=False)
 
     run_ssh(device_host, 'mkdir {0}'.format(TMP_DIR), password=LOGS_SSH_PASSWORD)
     run_ssh(device_host, 'ls -la {0} > {1}/app.data.ls.log'.format(data_dir, TMP_DIR), password=LOGS_SSH_PASSWORD, throw=False)
@@ -90,15 +51,8 @@ def module_teardown(device_host, data_dir, platform_data_dir, app_dir, service_p
     run_ssh(device_host, 'ls -la /var/snap/nextcloud/common > {0}/var.snap.nextclouds.common.ls.log'.format(TMP_DIR), password=LOGS_SSH_PASSWORD, throw=False)    
     run_ssh(device_host, 'ls -la /data > {0}/data.ls.log'.format(TMP_DIR), password=LOGS_SSH_PASSWORD, throw=False)    
     run_ssh(device_host, 'ls -la /data/nextcloud > {0}/data.nextcloud.ls.log'.format(TMP_DIR), password=LOGS_SSH_PASSWORD, throw=False)    
-    run_scp('root@{0}:{1}/*.log {2}'.format(device_host, TMP_DIR, app_log_dir), password=LOGS_SSH_PASSWORD, throw=False)
+    run_scp('root@{0}:{1}/*.log {2}'.format(device_host, TMP_DIR, log_dir), password=LOGS_SSH_PASSWORD, throw=False)
     
-
-@pytest.fixture(scope='function')
-def syncloud_session(device_host):
-    session = requests.session()
-    session.post('https://{0}/rest/login'.format(device_host), data={'name': DEVICE_USER, 'password': DEVICE_PASSWORD}, verify=False)
-    return session
-
 
 @pytest.fixture(scope='function')
 def nextcloud_session_domain(app_domain):
@@ -115,25 +69,17 @@ def nextcloud_session_domain(app_domain):
     return session, requesttoken
 
 
-def test_start(module_setup, device_host):
-    shutil.rmtree(LOG_DIR, ignore_errors=True)
-    os.mkdir(LOG_DIR)
-    os.mkdir(app_log_dir)
+def test_start(module_setup, device_host, log_dir):
+    os.mkdir(log_dir)
     run_ssh(device_host, 'date', retries=100)
+    
 
+def test_activate_device(device, device_password):
 
-def test_activate_device(main_domain, domain, device_host):
-
-    response = requests.post('http://{0}:81/rest/activate'.format(device_host),
-                             data={'main_domain': main_domain,
-                                   'redirect_email': REDIRECT_USER,
-                                   'redirect_password': REDIRECT_PASSWORD,
-                                   'user_domain': domain,
-                                   'device_username': DEVICE_USER,
-                                   'device_password': DEVICE_PASSWORD}, verify=False)
+    response = device.activate()
     assert response.status_code == 200, response.text
     global LOGS_SSH_PASSWORD
-    LOGS_SSH_PASSWORD = DEVICE_PASSWORD
+    LOGS_SSH_PASSWORD = device_password
 
 
 def test_install(app_archive_path, device_host):
@@ -145,10 +91,10 @@ def test_resource(nextcloud_session_domain, app_domain):
     response = session.get('https://{0}/core/img/loading.gif'.format(app_domain), verify=False)
     assert response.status_code == 200, response.text
 
-def test_index(nextcloud_session_domain, app_domain):
+def test_index(nextcloud_session_domain, app_domain, log_dir):
     session, _ = nextcloud_session_domain
     response = session.get('https://{0}'.format(app_domain), verify=False)
-    with open(join(app_log_dir, 'index.log'), 'w') as f:
+    with open(join(log_dir, 'index.log'), 'w') as f:
         f.write(response.text.encode("UTF-8"))
     assert response.status_code == 200, response.text
 
@@ -195,7 +141,7 @@ def test_visible_through_platform(app_domain):
 def test_carddav(nextcloud_session_domain, app_domain):
     session, _ = nextcloud_session_domain
     response = session.request('PROPFIND', 'https://{0}/.well-known/carddav'.format(app_domain), allow_redirects=True, verify=False)
-    with open(join(app_log_dir, 'well-known.carddav.headers.log'), 'w') as f:
+    with open(join(log_dir, 'well-known.carddav.headers.log'), 'w') as f:
         f.write(str(response.headers).replace(',', '\n'))
     #assert response.status_code == 207, response.text
 
@@ -203,7 +149,7 @@ def test_carddav(nextcloud_session_domain, app_domain):
 def test_caldav(nextcloud_session_domain, app_domain):
     session, _ = nextcloud_session_domain
     response = session.request('PROPFIND', 'https://{0}/.well-known/caldav'.format(app_domain), allow_redirects=True, verify=False)
-    with open(join(app_log_dir, 'well-known.caldav.headers.log'), 'w') as f:
+    with open(join(log_dir, 'well-known.caldav.headers.log'), 'w') as f:
         f.write(str(response.headers).replace(',', '\n'))
     #assert response.status_code == 207, response.text
 
@@ -211,7 +157,7 @@ def test_caldav(nextcloud_session_domain, app_domain):
 def test_admin(nextcloud_session_domain, app_domain, device_host):
     session, _ = nextcloud_session_domain
     response = session.get('https://{0}/index.php/settings/admin'.format(app_domain), allow_redirects=False, verify=False)
-    with open(join(app_log_dir, 'admin.log'), 'w') as f:
+    with open(join(log_dir, 'admin.log'), 'w') as f:
         f.write(response.text.encode("UTF-8"))
     assert response.status_code == 200, response.text
 
@@ -219,7 +165,7 @@ def test_admin(nextcloud_session_domain, app_domain, device_host):
 def test_verification(nextcloud_session_domain, app_domain):
     session, _ = nextcloud_session_domain
     response = session.get('https://{0}/index.php/settings/integrity/failed'.format(app_domain), allow_redirects=False, verify=False)
-    with open(join(app_log_dir, 'integrity.failed.log'), 'w') as f:
+    with open(join(log_dir, 'integrity.failed.log'), 'w') as f:
        f.write(response.text)
     assert response.status_code == 200, response.text
     assert 'INVALID_HASH' not in response.text
