@@ -181,16 +181,16 @@ def test_disk(device_session, app_domain, device_host, app_dir, data_dir, device
     loop_device_cleanup(device_host, '/tmp/test1', device_password)
 
     device0 = loop_device_add(device_host, 'ext4', '/tmp/test0', device_password)
-    __activate_disk(device_session, device0, device_host, app_dir, data_dir)
+    __activate_disk(device_session, device0, device_host, app_dir, data_dir, device_password)
     __create_test_dir('test0', app_domain, device_host)
     __check_test_dir(nextcloud_session_domain(app_domain), 'test0', app_domain)
 
     device1 = loop_device_add(device_host, 'ext2', '/tmp/test1', device_password)
-    __activate_disk(device_session, device1, device_host, app_dir, data_dir)
+    __activate_disk(device_session, device1, device_host, app_dir, data_dir, device_password)
     __create_test_dir('test1', app_domain, device_host)
     __check_test_dir(nextcloud_session_domain(app_domain), 'test1', app_domain)
 
-    __activate_disk(device_session, device0, device_host, app_dir, data_dir)
+    __activate_disk(device_session, device0, device_host, app_dir, data_dir, device_password)
     __check_test_dir(nextcloud_session_domain(app_domain), 'test0', app_domain)
 
     __deactivate_disk(device_session, device_host, app_dir, data_dir)
