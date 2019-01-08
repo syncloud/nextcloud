@@ -39,7 +39,7 @@ def module_teardown(device_host, data_dir, platform_data_dir, app_dir, service_p
             password=LOGS_SSH_PASSWORD, throw=False)
     run_ssh(device_host, 'cp {0}/nextcloud/config/config.php {1}'.format(data_dir, TMP_DIR), password=LOGS_SSH_PASSWORD,
             throw=False)
-    run_ssh(device_host, 'snap exec nextcloud.occ > {1}/occ.help.log'.format(app_dir, TMP_DIR), password=LOGS_SSH_PASSWORD,
+    run_ssh(device_host, 'snap run nextcloud.occ > {1}/occ.help.log'.format(app_dir, TMP_DIR), password=LOGS_SSH_PASSWORD,
             throw=False)
     run_ssh(device_host, 'top -bn 1 -w 500 -c > {0}/top.log'.format(TMP_DIR), password=LOGS_SSH_PASSWORD, throw=False)
     run_ssh(device_host, 'ps auxfw > {0}/ps.log'.format(TMP_DIR), password=LOGS_SSH_PASSWORD, throw=False)
@@ -146,11 +146,11 @@ def webdav_download(user, password, file_from, file_to, app_domain):
 
 
 def files_scan(device_host, app_dir, data_dir, device_password):
-    run_ssh(device_host, 'snap exec nextcloud.occ files:scan --all'.format(app_dir), password=device_password)
+    run_ssh(device_host, 'snap run nextcloud.occ files:scan --all'.format(app_dir), password=device_password)
 
 
 def test_occ(device_host, app_dir, data_dir, device_password):
-    run_ssh(device_host, 'snap exec nextcloud.occ', password=device_password)
+    run_ssh(device_host, 'snap run nextcloud.occ', password=device_password)
 
 
 def test_visible_through_platform(app_domain):
