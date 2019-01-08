@@ -108,7 +108,7 @@ def test_sync(app_domain, megabytes, device_host, app_dir, data_dir, device_user
     if os.path.isfile(sync_file):
         os.remove(sync_file)
     print(check_output('dd if=/dev/zero of={0} count={1} bs=1M'.format(sync_file, megabytes), shell=True))
-    print(check_output(webdav_upload(DEVICE_USER, DEVICE_PASSWORD, sync_file, sync_file, app_domain), shell=True))
+    print(check_output(webdav_upload(device_user, device_password, sync_file, sync_file, app_domain), shell=True))
 
     sync_file_download = 'test.file.download'
     if os.path.isfile(sync_file_download):
@@ -116,7 +116,7 @@ def test_sync(app_domain, megabytes, device_host, app_dir, data_dir, device_user
     print(check_output(webdav_download(device_user, device_password, sync_file, sync_file_download, app_domain), shell=True))
 
     assert os.path.isfile(sync_file_download)
-    run_ssh(device_host, 'rm /data/nextcloud/{0}/files/{1}'.format(DEVICE_USER, sync_file), password=DEVICE_PASSWORD)
+    run_ssh(device_host, 'rm /data/nextcloud/{0}/files/{1}'.format(device_user, sync_file), password=device_password)
     files_scan(device_host, app_dir, data_dir)
 
 
@@ -244,9 +244,9 @@ def __check_test_dir(nextcloud_session, test_dir, app_domain):
     assert test_dir in dirs, response.text
 
 
-def test_phpinfo(device_host, app_dir, data_dir):
+def test_phpinfo(device_host, app_dir, data_dir, device_password):
     run_ssh(device_host, '{0}/bin/php-runner -i > {1}/log/phpinfo.log'.format(app_dir, data_dir),
-            password=DEVICE_PASSWORD, env_vars='DATA_DIR={0}'.format(data_dir))
+            password=device_password, env_vars='DATA_DIR={0}'.format(data_dir))
 
 
 def test_remove(device_session, device_host):
