@@ -10,7 +10,7 @@ import shutil
 
 from syncloudlib.integration.loop import loop_device_add, loop_device_cleanup
 from syncloudlib.integration.ssh import run_scp, run_ssh
-from syncloudlib.integration.installer import local_install, wait_for_sam, wait_for_rest, local_remove, get_data_dir, get_app_dir, get_service_prefix, get_ssh_env_vars
+from syncloudlib.integration.installer import local_install, wait_for_rest, local_remove, get_data_dir, get_app_dir, get_service_prefix, get_ssh_env_vars
 
 import requests
 from bs4 import BeautifulSoup
@@ -246,11 +246,10 @@ def test_phpinfo(device_host, app_dir, data_dir):
             password=DEVICE_PASSWORD, env_vars='DATA_DIR={0}'.format(data_dir))
 
 
-def test_remove(syncloud_session, device_host):
-    response = syncloud_session.get('https://{0}/rest/remove?app_id=nextcloud'.format(device_host),
+def test_remove(device_session, device_host):
+    response = device_session.get('https://{0}/rest/remove?app_id=nextcloud'.format(device_host),
                                     allow_redirects=False, verify=False)
     assert response.status_code == 200, response.text
-    wait_for_sam(syncloud_session, device_host)
 
 
 def test_reinstall(app_archive_path, device_host):
