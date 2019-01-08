@@ -203,12 +203,12 @@ def __log_data_dir(device_host, device_password):
     run_ssh(device_host, 'ls -la /data/nextcloud', password=device_password)
 
 
-def __activate_disk(device_session, loop_device, device_host, app_dir, data_dir):
+def __activate_disk(device_session, loop_device, device_host, app_dir, data_dir, device_password):
 
-    __log_data_dir(device_host)
+    __log_data_dir(device_host, device_password)
     response = device_session.get('https://{0}/rest/settings/disk_activate'.format(device_host),
                                     params={'device': loop_device}, allow_redirects=False)
-    __log_data_dir(device_host)
+    __log_data_dir(device_host, device_password)
     files_scan(device_host, app_dir, data_dir)
     assert response.status_code == 200, response.text
 
