@@ -1,4 +1,4 @@
 beautifulsoup4==4.4.0
 selenium==3.3.1
 requests==2.11.1
-syncloud-lib==89
+syncloud-lib==90
