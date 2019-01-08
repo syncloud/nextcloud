@@ -21,11 +21,11 @@ TMP_DIR = '/tmp/syncloud'
 
 
 @pytest.fixture(scope="session")
-def module_setup(request, device_host, data_dir, platform_data_dir, app_dir, service_prefix):
-    request.addfinalizer(lambda: module_teardown(device_host, data_dir, platform_data_dir, app_dir, service_prefix))
+def module_setup(request, device_host, data_dir, platform_data_dir, app_dir, service_prefix, log_dir):
+    request.addfinalizer(lambda: module_teardown(device_host, data_dir, platform_data_dir, app_dir, service_prefix, log_dir))
 
 def module_teardown(device_host, data_dir, platform_data_dir, app_dir, service_prefix, log_dir):
-    platform_log_dir = join(LOG_DIR, 'platform_log')
+    platform_log_dir = join(log_dir, 'platform_log')
     os.mkdir(platform_log_dir)
     run_scp('root@{0}:{1}/log/* {2}'.format(device_host, platform_data_dir, platform_log_dir), password=LOGS_SSH_PASSWORD, throw=False)
     
@@ -50,8 +50,11 @@ def module_teardown(device_host, data_dir, platform_data_dir, app_dir, service_p
     run_ssh(device_host, 'ls -la /var/snap/nextcloud > {0}/var.snap.nextcloud.ls.log'.format(TMP_DIR), password=LOGS_SSH_PASSWORD, throw=False)    
     run_ssh(device_host, 'ls -la /var/snap/nextcloud/common > {0}/var.snap.nextclouds.common.ls.log'.format(TMP_DIR), password=LOGS_SSH_PASSWORD, throw=False)    
     run_ssh(device_host, 'ls -la /data > {0}/data.ls.log'.format(TMP_DIR), password=LOGS_SSH_PASSWORD, throw=False)    
-    run_ssh(device_host, 'ls -la /data/nextcloud > {0}/data.nextcloud.ls.log'.format(TMP_DIR), password=LOGS_SSH_PASSWORD, throw=False)    
-    run_scp('root@{0}:{1}/*.log {2}'.format(device_host, TMP_DIR, log_dir), password=LOGS_SSH_PASSWORD, throw=False)
+    run_ssh(device_host, 'ls -la /data/nextcloud > {0}/data.nextcloud.ls.log'.format(TMP_DIR), password=LOGS_SSH_PASSWORD, throw=False)   
+   
+    app_log_dir  = join(log_dir, 'log')
+    os.mkdir(app_log_dir)
+    run_scp('root@{0}:{1}/*.log {2}'.format(device_host, TMP_DIR, app_log_dir), password=LOGS_SSH_PASSWORD, throw=False)
     
 
 @pytest.fixture(scope='function')
