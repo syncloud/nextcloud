@@ -117,7 +117,7 @@ def test_sync(app_domain, megabytes, device_host, app_dir, data_dir, device_user
 
     assert os.path.isfile(sync_file_download)
     run_ssh(device_host, 'rm /data/nextcloud/{0}/files/{1}'.format(device_user, sync_file), password=device_password)
-    files_scan(device_host, app_dir, data_dir)
+    files_scan(device_host, app_dir, data_dir, device_password)
 
 
 def webdav_upload(user, password, file_from, file_to, app_domain):
