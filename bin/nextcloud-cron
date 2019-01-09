@@ -7,7 +7,7 @@ if [ -z "SNAP_COMMON" ]; then
   exit 1
 fi
 
-if [[ $USER == "nextcloud" ]]; then
+if [[ ${USER} == "nextcloud" ]]; then
     ${DIR}/bin/php-runner -f ${DIR}/nextcloud/cron.php
 else
     sudo -H -E -u nextcloud ${DIR}/bin/php-runner -f ${DIR}/nextcloud/cron.php

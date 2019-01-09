@@ -1,11 +1,12 @@
 #!/usr/bin/env bash
-APP_DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && cd .. && pwd )
+
+DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && cd .. && pwd )
 
 if [ -z "SNAP_COMMON" ]; then
   echo "SNAP_COMMON environment variable must be set"
   exit 1
 fi
 
-export LD_LIBRARY_PATH=${APP_DIR}/php/lib:${APP_DIR}/postgresql/lib
+export LD_LIBRARY_PATH=${DIR}/php/lib:${DIR}/postgresql/lib
 export NEXTCLOUD_CONFIG_DIR=${SNAP_COMMON}/nextcloud/config
-${APP_DIR}/php/bin/php -c ${SNAP_COMMON}/config/php.ini $@
+${DIR}/php/bin/php -c ${SNAP_COMMON}/config/php.ini $@
