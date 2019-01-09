@@ -37,6 +37,9 @@ apps:
   occ:
     command: bin/occ-runner
 
+  psql:
+    command: bin/psql.sh
+    
 confinement: strict
 description: Nextcloud
 grade: stable
