@@ -54,7 +54,7 @@ def database_init(logger, app_install_dir, app_data_dir, user_name):
         logger.info('Database path "{0}" already exists'.format(database_path))
 
 
-class NextcloudInstaller:
+class Installer:
     def __init__(self):
         if not logger.factory_instance:
             logger.init(logging.DEBUG, True)
@@ -67,7 +67,7 @@ class NextcloudInstaller:
         self.occ = OCConsole(join(self.app_dir, OCC_RUNNER_PATH))
         self.nextcloud_config_path = join(self.app_data_dir, 'nextcloud', 'config')
         self.nextcloud_config_file = join(self.nextcloud_config_path, 'config.php')
-        self.cron = OwncloudCron(self.app_dir, self.app_data_dir, APP_NAME, CRON_USER)
+        self.cron = Cron(CRON_USER)
         
         
     def install_config(self):
@@ -231,7 +231,7 @@ class NextcloudInstaller:
         oc_config.set_value('trusted_domains', " ".join(domains))
 
 
-class OwncloudCron:
+class Cron:
 
     def __init__(self, cron_user):
         self.cron_cmd = 'snap run nextcloud.cron'
