@@ -1,4 +1,4 @@
 #!/snap/nextcloud/current/python/bin/python
 
-from install import Installer
+from installer import Installer
 Installer().on_domain_change()
