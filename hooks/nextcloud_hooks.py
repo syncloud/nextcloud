@@ -69,8 +69,7 @@ class NextcloudInstaller:
         self.nextcloud_config_file = join(self.nextcloud_config_path, 'config.php')
         self.cron = OwncloudCron(self.app_dir, self.app_data_dir, APP_NAME, CRON_USER)
         
-        environ['DATA_DIR'] = self.app_data_dir
-
+        
     def install_config(self):
 
         home_folder = join('/home', USER_NAME)
@@ -155,9 +154,7 @@ class NextcloudInstaller:
 
         print("creating database files")
 
-        db_postgres = Database(
-            join(self.app_dir, PSQL_PATH),
-            database='postgres', user=DB_USER, database_path=self.database_path, port=PSQL_PORT)
+        db_postgres = Database(database='postgres', user=DB_USER)
         db_postgres.execute("ALTER USER {0} WITH PASSWORD '{1}';".format(DB_USER, DB_PASSWORD))
         real_app_storage_dir = realpath(app_storage_dir)
         self.occ.run('maintenance:install  --database pgsql --database-host {0}:{1} --database-name nextcloud --database-user {2} --database-pass {3} --admin-user {4} --admin-pass {5} --data-dir {6}'.format(self.database_path, PSQL_PORT, DB_USER, DB_PASSWORD, INSTALL_USER, unicode(uuid.uuid4().hex), real_app_storage_dir))
@@ -199,8 +196,7 @@ class NextcloudInstaller:
 
         self.cron.run()
 
-        db = Database(join(self.app_dir, PSQL_PATH),
-                      database=DB_NAME, user=DB_USER, database_path=self.database_path, port=PSQL_PORT)
+        db = Database(database=DB_NAME, user=DB_USER)
         db.execute("update oc_ldap_group_mapping set owncloud_name = 'admin';")
         db.execute("update oc_ldap_group_members set owncloudname = 'admin';")
 
@@ -237,8 +233,8 @@ class NextcloudInstaller:
 
 class OwncloudCron:
 
-    def __init__(self, app_dir, data_dir, app_name, cron_user):
-        self.cron_cmd = 'SNAP_COMMON={0} {1}'.format(data_dir, join(app_dir, 'bin/{0}-cron'.format(app_name)))
+    def __init__(self, cron_user):
+        self.cron_cmd = 'snap run nextcloud.cron'
         self.cron_user = cron_user
         self.log = logger.get_logger('cron')
 
