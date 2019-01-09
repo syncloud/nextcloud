@@ -1,27 +1,18 @@
-from os.path import dirname, join, abspath, isdir, realpath
-from os import listdir
-import sys
-
-from os import environ
-from os.path import isfile
+import logging
 import shutil
 import uuid
+from os.path import isdir, realpath
+from os.path import isfile
+from os.path import join
 from subprocess import check_output
-
-import logging
-from syncloud_app import logger
-
-from syncloudlib import fs, linux, gen
-from syncloudlib.application import paths, urls, storage, users, service
-
-from postgres import Database
-from octools import OCConsole, OCConfig
 
 from crontab import CronTab
-from subprocess import check_output
 from syncloud_app import logger
-from os.path import join
+from syncloudlib import fs, linux, gen
+from syncloudlib.application import paths, urls, storage, service
 
+from octools import OCConsole, OCConfig
+from postgres import Database
 
 APP_NAME = 'nextcloud'
 

@@ -11,6 +11,6 @@ class Database:
     def execute(self, sql):
         log = logger.get_logger('psql')
         log.info("executing: {0}".format(sql))
-        log.info(check_output('snap run -U {0} -d {1} -c "{2}"'.format(
+        log.info(check_output('snap run psql -U {0} -d {1} -c "{2}"'.format(
             self.user, self.database, sql,
         ), shell=True))
