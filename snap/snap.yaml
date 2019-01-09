@@ -41,7 +41,7 @@ apps:
     command: bin/psql.sh
   
   cron:
-    command: bin/nextcloud-cron.sh
+    command: bin/nextcloud-cron
     
 confinement: strict
 description: Nextcloud
