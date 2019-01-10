@@ -42,6 +42,9 @@ apps:
   
   cron:
     command: bin/nextcloud-cron
+  
+  php:
+    command: bin/php-runner
     
 confinement: strict
 description: Nextcloud
