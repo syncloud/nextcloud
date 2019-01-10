@@ -264,7 +264,7 @@ def __check_test_dir(nextcloud_session, test_dir, app_domain):
 
 
 def test_phpinfo(device_host, app_dir, data_dir, device_password):
-    run_ssh(device_host, 'snap run nextcloud.php -i > {0}/log/phpinfo.log'.format(adata_dir),
+    run_ssh(device_host, 'snap run nextcloud.php -i > {0}/log/phpinfo.log'.format(data_dir),
             password=device_password)
 
 
