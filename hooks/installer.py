@@ -225,7 +225,7 @@ class Installer:
 class Cron:
 
     def __init__(self, cron_user):
-        self.cron_cmd = 'snap run nextcloud.cron'
+        self.cron_cmd = '/usr/bin/snap run nextcloud.cron'
         self.cron_user = cron_user
         self.log = logger.get_logger('cron')
 
