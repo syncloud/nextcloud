@@ -13,5 +13,5 @@ export NEXTCLOUD_CONFIG_DIR=${SNAP_COMMON}/nextcloud/config
 if [[ "$(whoami)" == "nextcloud" ]]; then
     ${DIR}/php/bin/php -c ${SNAP_COMMON}/config/php.ini $@
 else
-    sudo -H -E -u nextcloud ${DIR}/php/bin/php -c ${SNAP_COMMON}/config/php.ini $@
+    sudo -H -E -u nextcloud LD_LIBRARY_PATH=$LD_LIBRARY_PATH ${DIR}/php/bin/php -c ${SNAP_COMMON}/config/php.ini $@
 fi
