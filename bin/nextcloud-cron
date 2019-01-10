@@ -1,14 +1,4 @@
-#!/bin/bash
+#!/bin/bash -e
 
 DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && cd .. && pwd )
-
-if [ -z "SNAP_COMMON" ]; then
-  echo "SNAP_COMMON environment variable must be set"
-  exit 1
-fi
-
-if [[ "$(whoami)" == "nextcloud" ]]; then
-    ${DIR}/bin/php-runner -f ${DIR}/nextcloud/cron.php
-else
-    sudo -H -E -u nextcloud ${DIR}/bin/php-runner -f ${DIR}/nextcloud/cron.php
-fi
+${DIR}/bin/php-runner -f ${DIR}/nextcloud/cron.php

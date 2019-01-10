@@ -1,9 +1,4 @@
-#!/bin/bash
-
-if [[ -z "SNAP_COMMON" ]]; then
-  echo "SNAP_COMMON environment variable must be set"
-  exit 1
-fi
+#!/bin/bash -e
 
 DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && cd .. && pwd )
-sudo -H -E -u nextcloud "${DIR}/bin/php-runner" "${DIR}/nextcloud/occ $@"
+${DIR}/bin/php-runner "${DIR}/nextcloud/occ $@"

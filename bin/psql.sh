@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/bin/bash -e
 
 DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && cd .. && pwd )
 
@@ -9,4 +9,8 @@ fi
 
 . ${SNAP_COMMON}/config/env
 
-sudo -E -H -u nextcloud ${DIR}/postgresql/bin/psql -p $PSQL_PORT -h ${SNAP_COMMON}/database "$@"
+if [[ "$(whoami)" == "nextcloud" ]]; then
+    ${DIR}/postgresql/bin/psql -p $PSQL_PORT -h ${SNAP_COMMON}/database "$@"
+else
+    sudo -E -H -u nextcloud ${DIR}/postgresql/bin/psql -p $PSQL_PORT -h ${SNAP_COMMON}/database "$@"
+fi

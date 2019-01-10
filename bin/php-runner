@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/bin/bash -e
 
 DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && cd .. && pwd )
 
@@ -9,4 +9,9 @@ fi
 
 export LD_LIBRARY_PATH=${DIR}/php/lib:${DIR}/postgresql/lib
 export NEXTCLOUD_CONFIG_DIR=${SNAP_COMMON}/nextcloud/config
-${DIR}/php/bin/php -c ${SNAP_COMMON}/config/php.ini $@
+
+if [[ "$(whoami)" == "nextcloud" ]]; then
+    ${DIR}/php/bin/php -c ${SNAP_COMMON}/config/php.ini $@
+else
+    sudo -H -E -u nextcloud ${DIR}/php/bin/php -c ${SNAP_COMMON}/config/php.ini $@
+fi
