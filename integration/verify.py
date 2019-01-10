@@ -32,7 +32,6 @@ def module_teardown(device_host, data_dir, platform_data_dir, app_dir, service_p
     run_scp('root@{0}:{1}/log/*.log {2}'.format(device_host, data_dir, log_dir), password=LOGS_SSH_PASSWORD,
             throw=False)
 
-    run_ssh(device_host, 'mkdir {0}'.format(TMP_DIR), password=LOGS_SSH_PASSWORD)
     run_ssh(device_host, 'ls -la {0} > {1}/app.data.ls.log'.format(data_dir, TMP_DIR), password=LOGS_SSH_PASSWORD,
             throw=False)
     run_ssh(device_host, 'ls -la {0}/nextcloud/config > {1}/config.ls.log'.format(data_dir, TMP_DIR),
@@ -89,6 +88,8 @@ def nextcloud_session_domain(app_domain, device_user, device_password):
 def test_start(module_setup, device_host, log_dir):
     os.mkdir(log_dir)
     run_ssh(device_host, 'date', retries=100)
+    run_ssh(device_host, 'mkdir {0}'.format(TMP_DIR))
+
 
 
 def test_activate_device(device, device_password):
@@ -264,7 +265,7 @@ def __check_test_dir(nextcloud_session, test_dir, app_domain):
 
 
 def test_phpinfo(device_host, app_dir, data_dir, device_password):
-    run_ssh(device_host, 'snap run nextcloud.php -i > {0}/log/phpinfo.log'.format(data_dir),
+    run_ssh(device_host, 'snap run nextcloud.php -i > {0}/phpinfo.log'.format(TMP_DIR),
             password=device_password)
 
 
