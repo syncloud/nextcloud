@@ -184,6 +184,8 @@ class Installer:
         self.occ.run('ldap:set-config s01 ldapTLS 0')
         self.occ.run('ldap:set-config s01 turnOffCertCheck 1')
         self.occ.run('ldap:set-config s01 ldapConfigurationActive 1')
+        
+        self.occ.run('db:convert-filecache-bigint')
 
         self.cron.run()
 
