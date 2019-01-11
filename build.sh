@@ -3,20 +3,18 @@
 DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
 cd ${DIR}
 
-if [[ -z "$1" ]]; then
-    echo "usage $0 version"
+if [[ -z "$2" ]]; then
+    echo "usage $0 name version"
     exit 1
 fi
 
 export TMPDIR=/tmp
 export TMP=/tmp
 
-NAME=nextcloud
-NEXTCLOUD_VERSION=14.0.3
-COIN_CACHE_DIR=${DIR}/coin.cache
+NAME=$1
+NEXTCLOUD_VERSION=15.0.0
 ARCH=$(uname -m)
-VERSION=$1
-INSTALLER=$2
+VERSION=$2
 
 rm -rf ${DIR}/lib
 mkdir ${DIR}/lib
@@ -51,7 +49,6 @@ mkdir build/${NAME}/META
 echo ${NAME} >> build/${NAME}/META/app
 echo ${VERSION} >> build/${NAME}/META/version
 
-#sed -i 's/allowSymlinks = false/allowSymlinks = true/g' ${BUILD_DIR}/${NAME}/lib/private/Files/Storage/Local.php
 cat ${BUILD_DIR}/${NAME}/.user.ini
 sed -i 's/upload_max_filesize=.*/upload_max_filesize=10G/g' ${BUILD_DIR}/${NAME}/.user.ini
 sed -i 's/post_max_size=.*/post_max_size=10G/g' ${BUILD_DIR}/${NAME}/.user.ini

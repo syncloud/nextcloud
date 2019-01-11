@@ -1,4 +1,4 @@
 #!/snap/nextcloud/current/python/bin/python
 
-from nextcloud_hooks import NextcloudInstaller
-NextcloudInstaller().on_domain_change()
+from installer import Installer
+Installer().on_domain_change()

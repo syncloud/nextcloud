@@ -1,27 +1,18 @@
-from os.path import dirname, join, abspath, isdir, realpath
-from os import listdir
-import sys
-
-from os import environ
-from os.path import isfile
+import logging
 import shutil
 import uuid
+from os.path import isdir, realpath
+from os.path import isfile
+from os.path import join
 from subprocess import check_output
-
-import logging
-from syncloud_app import logger
-
-from syncloudlib import fs, linux, gen
-from syncloudlib.application import paths, urls, storage, users, service
-
-from postgres import Database
-from octools import OCConsole, OCConfig
 
 from crontab import CronTab
-from subprocess import check_output
 from syncloud_app import logger
-from os.path import join
+from syncloudlib import fs, linux, gen
+from syncloudlib.application import paths, urls, storage, service
 
+from octools import OCConsole, OCConfig
+from postgres import Database
 
 APP_NAME = 'nextcloud'
 
@@ -54,7 +45,7 @@ def database_init(logger, app_install_dir, app_data_dir, user_name):
         logger.info('Database path "{0}" already exists'.format(database_path))
 
 
-class NextcloudInstaller:
+class Installer:
     def __init__(self):
         if not logger.factory_instance:
             logger.init(logging.DEBUG, True)
@@ -67,10 +58,9 @@ class NextcloudInstaller:
         self.occ = OCConsole(join(self.app_dir, OCC_RUNNER_PATH))
         self.nextcloud_config_path = join(self.app_data_dir, 'nextcloud', 'config')
         self.nextcloud_config_file = join(self.nextcloud_config_path, 'config.php')
-        self.cron = OwncloudCron(self.app_dir, self.app_data_dir, APP_NAME, CRON_USER)
+        self.cron = Cron(CRON_USER)
         
-        environ['DATA_DIR'] = self.app_data_dir
-
+        
     def install_config(self):
 
         home_folder = join('/home', USER_NAME)
@@ -155,9 +145,7 @@ class NextcloudInstaller:
 
         print("creating database files")
 
-        db_postgres = Database(
-            join(self.app_dir, PSQL_PATH),
-            database='postgres', user=DB_USER, database_path=self.database_path, port=PSQL_PORT)
+        db_postgres = Database(database='postgres', user=DB_USER)
         db_postgres.execute("ALTER USER {0} WITH PASSWORD '{1}';".format(DB_USER, DB_PASSWORD))
         real_app_storage_dir = realpath(app_storage_dir)
         self.occ.run('maintenance:install  --database pgsql --database-host {0}:{1} --database-name nextcloud --database-user {2} --database-pass {3} --admin-user {4} --admin-pass {5} --data-dir {6}'.format(self.database_path, PSQL_PORT, DB_USER, DB_PASSWORD, INSTALL_USER, unicode(uuid.uuid4().hex), real_app_storage_dir))
@@ -196,11 +184,12 @@ class NextcloudInstaller:
         self.occ.run('ldap:set-config s01 ldapTLS 0')
         self.occ.run('ldap:set-config s01 turnOffCertCheck 1')
         self.occ.run('ldap:set-config s01 ldapConfigurationActive 1')
+        
+        self.occ.run('db:convert-filecache-bigint')
 
         self.cron.run()
 
-        db = Database(join(self.app_dir, PSQL_PATH),
-                      database=DB_NAME, user=DB_USER, database_path=self.database_path, port=PSQL_PORT)
+        db = Database(database=DB_NAME, user=DB_USER)
         db.execute("update oc_ldap_group_mapping set owncloud_name = 'admin';")
         db.execute("update oc_ldap_group_members set owncloudname = 'admin';")
 
@@ -235,10 +224,10 @@ class NextcloudInstaller:
         oc_config.set_value('trusted_domains', " ".join(domains))
 
 
-class OwncloudCron:
+class Cron:
 
-    def __init__(self, app_dir, data_dir, app_name, cron_user):
-        self.cron_cmd = 'DATA_DIR={0} {1}'.format(data_dir, join(app_dir, 'bin/{0}-cron'.format(app_name)))
+    def __init__(self, cron_user):
+        self.cron_cmd = '/usr/bin/snap run nextcloud.cron'
         self.cron_user = cron_user
         self.log = logger.get_logger('cron')
 
@@ -258,4 +247,4 @@ class OwncloudCron:
 
     def run(self):
         self.log.info("running: {0}".format(self.cron_cmd))
-        self.log.info(check_output('sudo -E -H -u {0} {1}'.format(self.cron_user, self.cron_cmd), shell=True))
+        self.log.info(check_output(self.cron_cmd, shell=True))

@@ -1,3 +1,4 @@
-#!/usr/bin/env bash
-APP_DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && cd .. && pwd )
-sudo -H -E -u nextcloud "${APP_DIR}/bin/php-runner" "${APP_DIR}/nextcloud/occ $@"
+#!/bin/bash -e
+
+DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && cd .. && pwd )
+${DIR}/bin/php-runner "${DIR}/nextcloud/occ $@"
