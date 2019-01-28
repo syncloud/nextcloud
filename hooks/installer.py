@@ -4,8 +4,7 @@ import uuid
 from os.path import isdir, realpath
 from os.path import isfile
 from os.path import join
-from subprocess import check_output
-
+from subprocess import check_output, CalledProcessError
 from crontab import CronTab
 from syncloud_app import logger
 from syncloudlib import fs, linux, gen
