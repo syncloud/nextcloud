@@ -135,7 +135,13 @@ class Installer:
 
         if 'require upgrade' in self.occ.run('status'):
             self.occ.run('maintenance:mode --on')
-            self.occ.run('upgrade')
+            
+            try:
+                self.occ.run('upgrade')
+            except CalledProcessError, e:
+                self.log.warn('unable to upgrade')
+                self.log.warn(e.output)
+            
             self.occ.run('maintenance:mode --off')
             self.occ.run('db:add-missing-indices')
 
