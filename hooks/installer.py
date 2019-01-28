@@ -4,8 +4,7 @@ import uuid
 from os.path import isdir, realpath
 from os.path import isfile
 from os.path import join
-from subprocess import check_output
-
+from subprocess import check_output, CalledProcessError
 from crontab import CronTab
 from syncloud_app import logger
 from syncloudlib import fs, linux, gen
@@ -135,7 +134,13 @@ class Installer:
 
         if 'require upgrade' in self.occ.run('status'):
             self.occ.run('maintenance:mode --on')
-            self.occ.run('upgrade')
+            
+            try:
+                self.occ.run('upgrade')
+            except CalledProcessError, e:
+                self.log.warn('unable to upgrade')
+                self.log.warn(e.output)
+            
             self.occ.run('maintenance:mode --off')
             self.occ.run('db:add-missing-indices')
 

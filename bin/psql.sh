@@ -10,7 +10,7 @@ fi
 . ${SNAP_COMMON}/config/env
 
 if [[ "$(whoami)" == "nextcloud" ]]; then
-    ${DIR}/postgresql/bin/psql -p $PSQL_PORT -h ${SNAP_COMMON}/database "$@"
+    ${DIR}/postgresql/bin/psql -p $PSQL_PORT -h ${PSQL_DATABASE} "$@"
 else
-    sudo -E -H -u nextcloud ${DIR}/postgresql/bin/psql -p $PSQL_PORT -h ${SNAP_COMMON}/database "$@"
+    sudo -E -H -u nextcloud ${DIR}/postgresql/bin/psql -p $PSQL_PORT -h ${PSQL_DATABASE} "$@"
 fi
