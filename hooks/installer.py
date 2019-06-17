@@ -23,7 +23,7 @@ DB_PASSWORD = APP_NAME
 PSQL_PATH = 'postgresql/bin/psql'
 OCC_RUNNER_PATH = 'bin/occ-runner'
 OC_CONFIG_PATH = 'bin/{0}-config'.format(APP_NAME)
-OWNCLOUD_LOG_PATH = 'log/{0}.log'.format(APP_NAME)
+LOG_PATH = 'log/{0}.log'.format(APP_NAME)
 CRON_USER = APP_NAME
 APP_CONFIG_PATH = '{0}/config'.format(APP_NAME)
 PSQL_PORT = 5436
@@ -112,7 +112,7 @@ class Installer:
         oc_config = OCConfig(join(self.app_dir, OC_CONFIG_PATH))
         oc_config.set_value('memcache.local', '\OC\Memcache\APCu')
         oc_config.set_value('loglevel', '2')
-        oc_config.set_value('logfile', join(self.app_data_dir, OWNCLOUD_LOG_PATH))
+        oc_config.set_value('logfile', join(self.app_data_dir, LOG_PATH))
         real_app_storage_dir = realpath(app_storage_dir)
         oc_config.set_value('datadirectory', real_app_storage_dir)
         #oc_config.set_value('integrity.check.disabled', 'true')
