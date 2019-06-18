@@ -59,13 +59,14 @@ def test_main(driver, app_domain, device_user, device_password):
     # print(driver.page_source.encode('utf-8'))
 
     password.send_keys(Keys.RETURN)
-    time.sleep(10)
+    #time.sleep(10)
     screenshots(driver, screenshot_dir, 'login_progress')
        
     wait_driver = WebDriverWait(driver, 300)
 
     wait_driver.until(EC.element_to_be_clickable((By.ID, 'closeWizard')))
     wizard_close_button = driver.find_element_by_id("closeWizard")
+    screenshots(driver, screenshot_dir, 'main_first_time')
     wizard_close_button.click()
 
     time.sleep(2)
