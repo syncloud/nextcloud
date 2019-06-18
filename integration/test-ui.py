@@ -64,8 +64,8 @@ def test_main(driver, app_domain, device_user, device_password):
        
     wait_driver = WebDriverWait(driver, 300)
 
-    wait_driver.until(EC.element_to_be_clickable((By.ID, 'closeWizard')))
-    wizard_close_button = driver.find_element_by_id("closeWizard")
+    wait_driver.until(EC.element_to_be_clickable((By.ID, 'cboxClose')))
+    wizard_close_button = driver.find_element_by_id("cboxClose")
     screenshots(driver, screenshot_dir, 'main_first_time')
     wizard_close_button.click()
 
