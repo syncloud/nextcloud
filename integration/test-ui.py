@@ -20,6 +20,25 @@ from selenium.webdriver.support.ui import WebDriverWait
 DIR = dirname(__file__)
 screenshot_dir = join(DIR, 'screenshot')
 
+@pytest.fixture(scope="session")
+def module_setup(request, device, log_dir, ui_mode):
+    request.addfinalizer(lambda: module_teardown(device, log_dir, ui_mode))
+
+
+def module_teardown(device, log_dir, ui_mode):
+    device.activated()
+    device.run_ssh('mkdir -p {0}'.format(TMP_DIR), throw=False)
+    device.run_ssh('journalctl > {0}/journalctl.ui.{1} log'.format(TMP_DIR, ui_mode), throw=False)
+    device.run_ssh('cp /var/log/syslog {0}/syslog.ui.{1}.log'.format(TMP_DIR, ui_mode), throw=False)
+      
+    device.scp_from_device('{0}/*'.format(TMP_DIR), join(log_dir, 'log'))
+
+
+def test_start(module_setup, app, device_host):
+    if not exists(screenshot_dir):
+        os.mkdir(screenshot_dir)
+
+    add_host_alias(app, device_host)
 
 def test_login(driver, app_domain):
 
