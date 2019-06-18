@@ -19,6 +19,8 @@ from selenium.webdriver.support.ui import WebDriverWait
 
 DIR = dirname(__file__)
 screenshot_dir = join(DIR, 'screenshot')
+TMP_DIR = '/tmp/syncloud/ui'
+
 
 @pytest.fixture(scope="session")
 def module_setup(request, device, log_dir, ui_mode):
