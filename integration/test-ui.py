@@ -65,6 +65,7 @@ def test_main(driver, app_domain):
     # print(driver.page_source.encode('utf-8'))
 
     password.send_keys(Keys.RETURN)
+    time.sleep(10)
     screenshots(driver, screenshot_dir, 'login_progress')
        
     wait_driver = WebDriverWait(driver, 300)
