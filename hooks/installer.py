@@ -191,15 +191,14 @@ class Installer:
         self.occ.run('ldap:set-config s01 turnOffCertCheck 1')
         self.occ.run('ldap:set-config s01 ldapConfigurationActive 1')
      
-        db = Database(database=DB_NAME, user=DB_USER)
-        db.execute("update oc_ldap_group_mapping set owncloud_name = 'admin';")
-        db.execute("update oc_ldap_group_members set owncloudname = 'admin';")
-
         self.occ.run('db:convert-filecache-bigint')
 
         self.cron.run()
 
- 
+        db = Database(database=DB_NAME, user=DB_USER)
+        db.execute("update oc_ldap_group_mapping set owncloud_name = 'admin';")
+        db.execute("update oc_ldap_group_members set owncloudname = 'admin';")
+
         self.occ.run('user:delete {0}'.format(INSTALL_USER))
         self.occ.run('db:add-missing-indices')
 
