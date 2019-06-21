@@ -123,37 +123,7 @@ class Installer:
         #oc_config.set_value('mail_smtpname', '')
         #oc_config.set_value('mail_smtppassword', '')
 
-        self.occ.run('ldap:set-config s01 ldapHost ldap://localhost')
-        self.occ.run('ldap:set-config s01 ldapPort 389')
-        self.occ.run('ldap:set-config s01 ldapAgentName dc=syncloud,dc=org')
-        self.occ.run('ldap:set-config s01 ldapBase dc=syncloud,dc=org')
-        self.occ.run('ldap:set-config s01 ldapAgentPassword syncloud')
-
-        self.occ.run('ldap:set-config s01 hasMemberOfFilterSupport 0')
-        self.occ.run('ldap:set-config s01 ldapLoginFilter "(&(|(objectclass=inetOrgPerson))(uid=%uid))"')
-
-        self.occ.run('ldap:set-config s01 ldapUserFilter "(|(objectclass=inetOrgPerson))"')
-        self.occ.run('ldap:set-config s01 ldapUserFilterObjectclass inetOrgPerson')
-
-        self.occ.run('ldap:set-config s01 ldapBaseUsers ou=users,dc=syncloud,dc=org')
-        self.occ.run('ldap:set-config s01 ldapUserDisplayName cn')
-        self.occ.run('ldap:set-config s01 ldapExpertUsernameAttr cn')
-
-        self.occ.run('ldap:set-config s01 ldapGroupFilterObjectclass posixGroup')
-        self.occ.run('ldap:set-config s01 ldapGroupDisplayName cn')
-        self.occ.run('ldap:set-config s01 ldapBaseGroups ou=groups,dc=syncloud,dc=org')
-        self.occ.run('ldap:set-config s01 ldapGroupFilter "(&(|(objectclass=posixGroup)))"')
-        self.occ.run('ldap:set-config s01 ldapGroupFilterGroups syncloud')
-        self.occ.run('ldap:set-config s01 ldapGroupMemberAssocAttr memberUid')
-
-        self.occ.run('ldap:set-config s01 ldapTLS 0')
-        self.occ.run('ldap:set-config s01 turnOffCertCheck 1')
-        self.occ.run('ldap:set-config s01 ldapConfigurationActive 1')
-     
-        db = Database(database=DB_NAME, user=DB_USER)
-        db.execute("update oc_ldap_group_mapping set owncloud_name = 'admin';")
-        db.execute("update oc_ldap_group_members set owncloudname = 'admin';")
-
+        
         self.on_domain_change()
 
         fs.chownpath(self.app_data_dir, USER_NAME, recursive=True)
@@ -194,7 +164,37 @@ class Installer:
         self.occ.run('ldap:create-empty-config')
         self.occ.run('ldap:create-empty-config')
 
-        
+        self.occ.run('ldap:set-config s01 ldapHost ldap://localhost')
+        self.occ.run('ldap:set-config s01 ldapPort 389')
+        self.occ.run('ldap:set-config s01 ldapAgentName dc=syncloud,dc=org')
+        self.occ.run('ldap:set-config s01 ldapBase dc=syncloud,dc=org')
+        self.occ.run('ldap:set-config s01 ldapAgentPassword syncloud')
+
+        self.occ.run('ldap:set-config s01 hasMemberOfFilterSupport 0')
+        self.occ.run('ldap:set-config s01 ldapLoginFilter "(&(|(objectclass=inetOrgPerson))(uid=%uid))"')
+
+        self.occ.run('ldap:set-config s01 ldapUserFilter "(|(objectclass=inetOrgPerson))"')
+        self.occ.run('ldap:set-config s01 ldapUserFilterObjectclass inetOrgPerson')
+
+        self.occ.run('ldap:set-config s01 ldapBaseUsers ou=users,dc=syncloud,dc=org')
+        self.occ.run('ldap:set-config s01 ldapUserDisplayName cn')
+        self.occ.run('ldap:set-config s01 ldapExpertUsernameAttr cn')
+
+        self.occ.run('ldap:set-config s01 ldapGroupFilterObjectclass posixGroup')
+        self.occ.run('ldap:set-config s01 ldapGroupDisplayName cn')
+        self.occ.run('ldap:set-config s01 ldapBaseGroups ou=groups,dc=syncloud,dc=org')
+        self.occ.run('ldap:set-config s01 ldapGroupFilter "(&(|(objectclass=posixGroup)))"')
+        self.occ.run('ldap:set-config s01 ldapGroupFilterGroups syncloud')
+        self.occ.run('ldap:set-config s01 ldapGroupMemberAssocAttr memberUid')
+
+        self.occ.run('ldap:set-config s01 ldapTLS 0')
+        self.occ.run('ldap:set-config s01 turnOffCertCheck 1')
+        self.occ.run('ldap:set-config s01 ldapConfigurationActive 1')
+     
+        db = Database(database=DB_NAME, user=DB_USER)
+        db.execute("update oc_ldap_group_mapping set owncloud_name = 'admin';")
+        db.execute("update oc_ldap_group_members set owncloudname = 'admin';")
+
         self.occ.run('db:convert-filecache-bigint')
 
         self.cron.run()
