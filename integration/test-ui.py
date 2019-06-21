@@ -85,7 +85,7 @@ def test_settings_user(driver, app_domain):
     screenshots(driver, screenshot_dir, 'user')
 
 
-def test_settings_user(driver, app_domain):
+def test_settings_ldap(driver, app_domain):
     driver.get("https://{0}/index.php/settings/admin/ldap".format(app_domain))
     time.sleep(10)
     screenshots(driver, screenshot_dir, 'admin-ldap')

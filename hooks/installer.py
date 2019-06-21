@@ -104,7 +104,9 @@ class Installer:
             self.upgrade()
         else:
             self.initialize(app_storage_dir)
-
+        
+        self.occ.run('ldap:set-config s01 ldapEmailAttribute mail')
+   
         # migrate to systemd cron units
         self.cron.remove()
         self.cron.create()
@@ -190,7 +192,7 @@ class Installer:
         self.occ.run('ldap:set-config s01 ldapTLS 0')
         self.occ.run('ldap:set-config s01 turnOffCertCheck 1')
         self.occ.run('ldap:set-config s01 ldapConfigurationActive 1')
-     
+        
         self.occ.run('db:convert-filecache-bigint')
 
         self.cron.run()
