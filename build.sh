@@ -12,7 +12,7 @@ export TMPDIR=/tmp
 export TMP=/tmp
 
 NAME=$1
-NEXTCLOUD_VERSION=16.0.1
+NEXTCLOUD_VERSION=15.0.0
 ARCH=$(uname -m)
 VERSION=$2
 
