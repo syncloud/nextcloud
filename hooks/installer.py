@@ -195,8 +195,7 @@ class Installer:
         
         self.occ.run('db:convert-filecache-bigint')
 
-        # Too slow on big storage, breaks install
-        # self.cron.run()
+        self.cron.run()
 
         db = Database(database=DB_NAME, user=DB_USER)
         db.execute("update oc_ldap_group_mapping set owncloud_name = 'admin';")
