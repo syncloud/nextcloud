@@ -91,7 +91,6 @@ def test_start(module_setup, device_host, log_dir):
     run_ssh(device_host, 'mkdir {0}'.format(TMP_DIR))
 
 
-
 def test_activate_device(device, device_password):
     response = device.activate()
     assert response.status_code == 200, response.text
@@ -118,7 +117,7 @@ def test_index(nextcloud_session_domain, app_domain, log_dir):
 
 
 @pytest.mark.parametrize("megabytes", [1, 300])
-def test_sync(app_domain, megabytes, device_host, app_dir, data_dir, device_user, device_password):
+def test_sync(app_domain, megabytes, device_host, device_user, device_password):
     sync_file = 'test.file-{0}'.format(megabytes)
     if os.path.isfile(sync_file):
         os.remove(sync_file)
@@ -199,24 +198,24 @@ def test_verification(nextcloud_session_domain, app_domain, log_dir):
     assert 'EXCEPTION' not in response.text
 
 
-def test_disk(device_session, app_domain, device_host, app_dir, data_dir, device_user, device_password):
+def test_disk(device_session, app_domain, device_host, device_user, device_password):
     loop_device_cleanup(device_host, '/tmp/test0', device_password)
     loop_device_cleanup(device_host, '/tmp/test1', device_password)
 
     device0 = loop_device_add(device_host, 'ext4', '/tmp/test0', device_password)
-    __activate_disk(device_session, device0, device_host, app_dir, data_dir, device_password)
+    __activate_disk(device_session, device0, device_host, device_password)
     __create_test_dir('test0', app_domain, device_host, device_user, device_password)
     __check_test_dir(nextcloud_session_domain(app_domain, device_user, device_password), 'test0', app_domain)
 
     device1 = loop_device_add(device_host, 'ext2', '/tmp/test1', device_password)
-    __activate_disk(device_session, device1, device_host, app_dir, data_dir, device_password)
+    __activate_disk(device_session, device1, device_host, device_password)
     __create_test_dir('test1', app_domain, device_host, device_user, device_password)
     __check_test_dir(nextcloud_session_domain(app_domain, device_user, device_password), 'test1', app_domain)
 
-    __activate_disk(device_session, device0, device_host, app_dir, data_dir, device_password)
+    __activate_disk(device_session, device0, device_host, device_password)
     __check_test_dir(nextcloud_session_domain(app_domain, device_user, device_password), 'test0', app_domain)
 
-    __deactivate_disk(device_session, device_host, app_dir, data_dir, device_password)
+    __deactivate_disk(device_session, device_host, device_password)
 
 
 def __log_data_dir(device_host, device_password):
@@ -226,7 +225,7 @@ def __log_data_dir(device_host, device_password):
     run_ssh(device_host, 'ls -la /data/nextcloud', password=device_password)
 
 
-def __activate_disk(device_session, loop_device, device_host, app_dir, data_dir, device_password):
+def __activate_disk(device_session, loop_device, device_host, device_password):
     __log_data_dir(device_host, device_password)
     response = device_session.get('https://{0}/rest/settings/disk_activate'.format(device_host),
                                   params={'device': loop_device}, allow_redirects=False)
@@ -235,7 +234,7 @@ def __activate_disk(device_session, loop_device, device_host, app_dir, data_dir,
     assert response.status_code == 200, response.text
 
 
-def __deactivate_disk(device_session, device_host, app_dir, data_dir, device_password):
+def __deactivate_disk(device_session, device_host, device_password):
     response = device_session.get('https://{0}/rest/settings/disk_deactivate'.format(device_host),
                                   allow_redirects=False)
     files_scan(device_host, device_password)
@@ -264,8 +263,22 @@ def __check_test_dir(nextcloud_session, test_dir, app_domain):
     assert test_dir in dirs, response.text
 
 
-def test_phpinfo(device_host, app_dir, data_dir, device_password):
+def test_phpinfo(device_host, device_password):
     run_ssh(device_host, 'snap run nextcloud.php -i > {0}/phpinfo.log'.format(TMP_DIR),
+            password=device_password)
+
+
+def test_storage_change_event(device_host, device_password):
+    run_ssh(device_host, '/snap/platform/current/python/bin/python '
+                         '/snap/nextcloud/current/hooks/storage-change.py '
+                         '> {0}/storage-change.log'.format(TMP_DIR),
+            password=device_password)
+
+
+def test_access_change_event(device_host, device_password):
+    run_ssh(device_host, '/snap/platform/current/python/bin/python '
+                         '/snap/nextcloud/current/hooks/access-change.py '
+                         '> {0}/access-change.log'.format(TMP_DIR),
             password=device_password)
 
 

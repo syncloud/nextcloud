@@ -45,7 +45,13 @@ apps:
   
   php:
     command: bin/php-runner
-    
+
+  storage-change:
+    command: hooks/storage-change
+
+  access-change:
+    command: hooks/access-change
+
 confinement: strict
 description: Nextcloud
 grade: stable
