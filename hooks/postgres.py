@@ -1,4 +1,4 @@
-from syncloud_app import logger
+from syncloudlib import logger
 from subprocess import check_output
 
 
