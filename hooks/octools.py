@@ -30,7 +30,7 @@ class OCConfig:
             output = check_output('{0} {1} {2}'.format(
                 self.oc_config_path,
                 key,
-                "'{0}'".format(value)), shell=True).strip()
+                value), shell=True).strip()
             if output:
                 self.log.info(output)
         except CalledProcessError, e:
