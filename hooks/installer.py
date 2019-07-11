@@ -6,8 +6,7 @@ from os.path import isfile
 from os.path import join
 from subprocess import check_output, CalledProcessError
 from crontab import CronTab
-from syncloud_app import logger
-from syncloudlib import fs, linux, gen
+from syncloudlib import fs, linux, gen, logger
 from syncloudlib.application import paths, urls, storage, service
 
 from octools import OCConsole, OCConfig
