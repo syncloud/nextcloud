@@ -111,7 +111,7 @@ class Installer:
         self.cron.create()
 
         oc_config = OCConfig(join(self.app_dir, OC_CONFIG_PATH))
-        oc_config.set_value('memcache.local', '\OC\Memcache\APCu')
+        oc_config.set_value('memcache.local', "'\OC\Memcache\APCu'")
         oc_config.set_value('loglevel', '2')
         oc_config.set_value('logfile', join(self.app_data_dir, LOG_PATH))
         real_app_storage_dir = realpath(app_storage_dir)
@@ -123,7 +123,6 @@ class Installer:
         oc_config.set_value('mail_smtpauth', 'false')
         #oc_config.set_value('mail_smtpname', '')
         #oc_config.set_value('mail_smtppassword', '')
-
         
         self.on_domain_change()
 
@@ -226,9 +225,8 @@ class Installer:
     def on_domain_change(self):
         app_domain = urls.get_app_domain_name(APP_NAME)
         local_ip = check_output(["hostname", "-I"]).split(" ")[0]
-        domains = ['localhost', local_ip, app_domain]
         oc_config = OCConfig(join(self.app_dir, OC_CONFIG_PATH))
-        oc_config.set_value('trusted_domains', " ".join(domains))
+        oc_config.set_value('trusted_domains', "localhost {0} {1}".format(local_ip, app_domain))
 
 
 class Cron:
