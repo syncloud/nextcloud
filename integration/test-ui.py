@@ -46,58 +46,58 @@ def test_login(driver, app_domain):
 
     driver.get("https://{0}".format(app_domain))
     time.sleep(10)
-    print(driver.execute_script('return window.JSErrorCollector_errors ? window.JSErrorCollector_errors.pump() : []'))
 
 
-def test_main(driver, app_domain, device_user, device_password):
+def test_main(driver, app_domain, device_user, device_password, ui_mode):
 
     user = driver.find_element_by_id("user")
     user.send_keys(device_user)
     password = driver.find_element_by_id("password")
     password.send_keys(device_password)
-    screenshots(driver, screenshot_dir, 'login')
+    screenshots(driver, screenshot_dir, 'login-' + ui_mode)
     # print(driver.page_source.encode('utf-8'))
 
     password.send_keys(Keys.RETURN)
-    #time.sleep(10)
-    screenshots(driver, screenshot_dir, 'login_progress')
+    time.sleep(10)
+    screenshots(driver, screenshot_dir, 'login_progress-' + ui_mode)
        
     wait_driver = WebDriverWait(driver, 300)
 
-    wait_driver.until(EC.element_to_be_clickable((By.ID, 'cboxClose')))
-    wizard_close_button = driver.find_element_by_id("cboxClose")
-    screenshots(driver, screenshot_dir, 'main_first_time')
-    wizard_close_button.click()
-
+    if ui_mode == "desktop":
+        wait_driver.until(EC.element_to_be_clickable((By.ID, 'cboxClose')))
+        wizard_close_button = driver.find_element_by_id("cboxClose")
+        screenshots(driver, screenshot_dir, 'main_first_time-' + ui_mode)
+        wizard_close_button.click()
+    
     time.sleep(2)
-    screenshots(driver, screenshot_dir, 'main')
+    screenshots(driver, screenshot_dir, 'main-' + ui_mode)
 
 
-def test_settings(driver, app_domain):
+def test_settings(driver, app_domain, ui_mode):
     driver.get("https://{0}/index.php/settings/admin".format(app_domain))
     time.sleep(10)
-    screenshots(driver, screenshot_dir, 'admin')
+    screenshots(driver, screenshot_dir, 'admin-' + ui_mode)
 
 
-def test_settings_user(driver, app_domain):
+def test_settings_user(driver, app_domain, ui_mode):
     driver.get("https://{0}/index.php/settings/user".format(app_domain))
     time.sleep(10)
-    screenshots(driver, screenshot_dir, 'user')
+    screenshots(driver, screenshot_dir, 'user-' + ui_mode)
 
 
-def test_settings_ldap(driver, app_domain):
+def test_settings_ldap(driver, app_domain, ui_mode):
     driver.get("https://{0}/index.php/settings/admin/ldap".format(app_domain))
     time.sleep(10)
-    screenshots(driver, screenshot_dir, 'admin-ldap')
+    screenshots(driver, screenshot_dir, 'admin-ldap-' + ui_mode)
 
 
-def test_settings_security(driver, app_domain):
+def test_settings_security(driver, app_domain, ui_mode):
     driver.get("https://{0}/index.php/settings/admin/overview#security-warning".format(app_domain))
     time.sleep(10)
-    screenshots(driver, screenshot_dir, 'admin-security')
+    screenshots(driver, screenshot_dir, 'admin-security-' + ui_mode)
 
 
-def test_settings_additional(driver, app_domain):
+def test_settings_additional(driver, app_domain, ui_mode):
     driver.get("https://{0}/index.php/settings/admin/additional".format(app_domain))
     time.sleep(10)
-    screenshots(driver, screenshot_dir, 'admin-additional')
+    screenshots(driver, screenshot_dir, 'admin-additional-' + ui_mode)
