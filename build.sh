@@ -46,7 +46,7 @@ tar xf python-${ARCH}.tar.gz
 mv python ${BUILD_DIR}/
 
 wget --progress=dot:giga https://download.nextcloud.com/server/releases/${NAME}-${NEXTCLOUD_VERSION}.tar.bz2
-tar xf python-${ARCH}.tar.gz
+tar xf ${NAME}-${NEXTCLOUD_VERSION}.tar.bz2
 mv nextcloud ${BUILD_DIR}/
 
 ${BUILD_DIR}/python/bin/pip install -r ${DIR}/requirements.txt
