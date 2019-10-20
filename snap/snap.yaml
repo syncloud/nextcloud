@@ -39,7 +39,7 @@ apps:
   psql:
     command: bin/psql.sh
 
-  pg_dumpall:
+  pgdumpall:
     command: bin/pg_dumpall.sh
 
   cron:
