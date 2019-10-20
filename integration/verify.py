@@ -15,38 +15,36 @@ TMP_DIR = '/tmp/syncloud'
 
 
 @pytest.fixture(scope="session")
-def module_setup(request, device_host, data_dir, platform_data_dir, app_dir, service_prefix, log_dir):
-    request.addfinalizer(
-        lambda: module_teardown(device_host, data_dir, platform_data_dir, app_dir, service_prefix, log_dir))
+def module_setup(request, device, data_dir, platform_data_dir, app_dir, service_prefix, log_dir):
+    def module_teardown(device, data_dir, platform_data_dir, app_dir, service_prefix, log_dir):
+        platform_log_dir = join(log_dir, 'platform_log')
+        os.mkdir(platform_log_dir)
+        device.scp_from_device('{0}/log/*'.format(platform_data_dir), platform_log_dir)
+        device.run_ssh('ls -la {0} > {1}/app.data.ls.log'.format(data_dir, TMP_DIR), throw=False)
+        device.run_ssh('ls -la {0}/nextcloud/config > {1}/config.ls.log'.format(data_dir, TMP_DIR), throw=False)
+        device.run_ssh('cp {0}/nextcloud/config/config.php {1}'.format(data_dir, TMP_DIR), throw=False)
+        device.run_ssh('snap run nextcloud.occ > {1}/occ.help.log'.format(app_dir, TMP_DIR), throw=False)
+        device.run_ssh('top -bn 1 -w 500 -c > {0}/top.log'.format(TMP_DIR), throw=False)
+        device.run_ssh('ps auxfw > {0}/ps.log'.format(TMP_DIR), throw=False)
+        device.run_ssh('systemctl status {0}nextcloud.php-fpm > {1}/nextcloud.php-fpm.status.log'.format(service_prefix, TMP_DIR), throw=False)
+        device.run_ssh('netstat -nlp > {0}/netstat.log'.format(TMP_DIR), throw=False)
+        device.run_ssh('journalctl | tail -500 > {0}/journalctl.log'.format(TMP_DIR), throw=False)
+        device.run_ssh('tail -500 /var/log/syslog > {0}/syslog.log'.format(TMP_DIR), throw=False)
+        device.run_ssh('tail -500 /var/log/messages > {0}/messages.log'.format(TMP_DIR), throw=False)
+        device.run_ssh('ls -la /snap > {0}/snap.ls.log'.format(TMP_DIR), throw=False)
+        device.run_ssh('ls -la /snap/nextcloud > {0}/snap.nextcloud.ls.log'.format(TMP_DIR), throw=False)
+        device.run_ssh('ls -la /var/snap > {0}/var.snap.ls.log'.format(TMP_DIR), throw=False)
+        device.run_ssh('ls -la /var/snap/nextcloud > {0}/var.snap.nextcloud.ls.log'.format(TMP_DIR), throw=False)
+        device.run_ssh('ls -la /var/snap/nextcloud/common > {0}/var.snap.nextcloud.common.ls.log'.format(TMP_DIR), throw=False)
+        device.run_ssh('ls -la /data > {0}/data.ls.log'.format(TMP_DIR), throw=False)
+        device.run_ssh('ls -la /data/nextcloud > {0}/data.nextcloud.ls.log'.format(TMP_DIR), throw=False)
 
+        app_log_dir = join(log_dir, 'log')
+        os.mkdir(app_log_dir)
+        device.scp_from_device('{0}/log/*.log'.format(data_dir), app_log_dir)
+        device.scp_from_device('{0}/*'.format(TMP_DIR), app_log_dir)
 
-def module_teardown(device, data_dir, platform_data_dir, app_dir, service_prefix, log_dir):
-    platform_log_dir = join(log_dir, 'platform_log')
-    os.mkdir(platform_log_dir)
-    device.scp_from_device('{0}/log/*'.format(platform_data_dir), platform_log_dir)
-    device.run_ssh('ls -la {0} > {1}/app.data.ls.log'.format(data_dir, TMP_DIR), throw=False)
-    device.run_ssh('ls -la {0}/nextcloud/config > {1}/config.ls.log'.format(data_dir, TMP_DIR), throw=False)
-    device.run_ssh('cp {0}/nextcloud/config/config.php {1}'.format(data_dir, TMP_DIR), throw=False)
-    device.run_ssh('snap run nextcloud.occ > {1}/occ.help.log'.format(app_dir, TMP_DIR), throw=False)
-    device.run_ssh('top -bn 1 -w 500 -c > {0}/top.log'.format(TMP_DIR), throw=False)
-    device.run_ssh('ps auxfw > {0}/ps.log'.format(TMP_DIR), throw=False)
-    device.run_ssh('systemctl status {0}nextcloud.php-fpm > {1}/nextcloud.php-fpm.status.log'.format(service_prefix, TMP_DIR), throw=False)
-    device.run_ssh('netstat -nlp > {0}/netstat.log'.format(TMP_DIR), throw=False)
-    device.run_ssh('journalctl | tail -500 > {0}/journalctl.log'.format(TMP_DIR), throw=False)
-    device.run_ssh('tail -500 /var/log/syslog > {0}/syslog.log'.format(TMP_DIR), throw=False)
-    device.run_ssh('tail -500 /var/log/messages > {0}/messages.log'.format(TMP_DIR), throw=False)
-    device.run_ssh('ls -la /snap > {0}/snap.ls.log'.format(TMP_DIR), throw=False)
-    device.run_ssh('ls -la /snap/nextcloud > {0}/snap.nextcloud.ls.log'.format(TMP_DIR), throw=False)
-    device.run_ssh('ls -la /var/snap > {0}/var.snap.ls.log'.format(TMP_DIR), throw=False)
-    device.run_ssh('ls -la /var/snap/nextcloud > {0}/var.snap.nextcloud.ls.log'.format(TMP_DIR), throw=False)
-    device.run_ssh('ls -la /var/snap/nextcloud/common > {0}/var.snap.nextcloud.common.ls.log'.format(TMP_DIR), throw=False)
-    device.run_ssh('ls -la /data > {0}/data.ls.log'.format(TMP_DIR), throw=False)
-    device.run_ssh('ls -la /data/nextcloud > {0}/data.nextcloud.ls.log'.format(TMP_DIR), throw=False)
-
-    app_log_dir = join(log_dir, 'log')
-    os.mkdir(app_log_dir)
-    device.scp_from_device('{0}/log/*.log'.format(data_dir), app_log_dir)
-    device.scp_from_device('{0}/*'.format(TMP_DIR), app_log_dir)
+    request.addfinalizer(module_teardown)
 
 
 @pytest.fixture(scope='function')
