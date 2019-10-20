@@ -11,6 +11,11 @@ class Database:
     def execute(self, sql):
         log = logger.get_logger('psql')
         log.info("executing: {0}".format(sql))
-        log.info(check_output('snap run nextcloud.psql -U {0} -d {1} -c "{2}"'.format(
-            self.user, self.database, sql,
-        ), shell=True))
+        cmd = 'snap run nextcloud.psql -U {0} -d {1} -c "{2}"'.format(self.user, self.database, sql)
+        log.info(check_output(cmd, shell=True))
+
+    def dumpall(self, file):
+        log = logger.get_logger('pg_dumpall')
+        cmd = 'snap run nextcloud.pg_dumpall -U {0} -d {1} -f {2}'.format(self.user, self.database, file)
+        log.info("executing: {0}".format(cmd))
+        log.info(check_output(cmd, shell=True))

@@ -25,15 +25,31 @@ mkdir -p ${BUILD_DIR}
 
 DOWNLOAD_URL=http://artifact.syncloud.org/3rdparty
 
-coin --to ${BUILD_DIR} raw ${DOWNLOAD_URL}/php7-${ARCH}.tar.gz
-coin --to ${BUILD_DIR} raw ${DOWNLOAD_URL}/nginx-${ARCH}.tar.gz
-coin --to ${BUILD_DIR} raw ${DOWNLOAD_URL}/postgresql-${ARCH}.tar.gz
-coin --to ${BUILD_DIR} raw ${DOWNLOAD_URL}/python-${ARCH}.tar.gz
+wget --progress=dot:giga ${DOWNLOAD_URL}/php7-${ARCH}.tar.gz
+tar xf php7-${ARCH}.tar.gz
+mv php7 ${BUILD_DIR}/php
+
+wget --progress=dot:giga ${DOWNLOAD_URL}/nginx-${ARCH}.tar.gz
+tar xf nginx-${ARCH}.tar.gz
+mv nginx ${BUILD_DIR}/
+
+wget --progress=dot:giga ${DOWNLOAD_URL}/postgresql-${ARCH}.tar.gz
+tar xf postgresql-${ARCH}.tar.gz
+mv postgresql ${BUILD_DIR}/
+
+#wget --progress=dot:giga ${DOWNLOAD_URL}/postgresql-10-${ARCH}.tar.gz
+#tar xf postgresql-10-${ARCH}.tar.gz
+#mv postgresql-10 ${BUILD_DIR}/postgresql
+
+wget --progress=dot:giga ${DOWNLOAD_URL}/python-${ARCH}.tar.gz
+tar xf python-${ARCH}.tar.gz
+mv python ${BUILD_DIR}/
+
+wget --progress=dot:giga https://download.nextcloud.com/server/releases/${NAME}-${NEXTCLOUD_VERSION}.tar.bz2
+tar xf python-${ARCH}.tar.gz
+mv nextcloud ${BUILD_DIR}/
 
 ${BUILD_DIR}/python/bin/pip install -r ${DIR}/requirements.txt
-
-coin --to ${BUILD_DIR} raw https://download.nextcloud.com/server/releases/${NAME}-${NEXTCLOUD_VERSION}.tar.bz2
-mv ${BUILD_DIR}/php7 ${BUILD_DIR}/php
 
 cp -r bin ${BUILD_DIR}
 cp -r config ${BUILD_DIR}/config.templates

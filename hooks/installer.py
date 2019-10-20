@@ -1,4 +1,5 @@
 import logging
+import os
 import shutil
 import uuid
 from os.path import isdir, realpath
@@ -19,7 +20,6 @@ USER_NAME = APP_NAME
 DB_NAME = APP_NAME
 DB_USER = APP_NAME
 DB_PASSWORD = APP_NAME
-PSQL_PATH = 'postgresql/bin/psql'
 OCC_RUNNER_PATH = 'bin/occ-runner'
 OC_CONFIG_PATH = 'bin/{0}-config'.format(APP_NAME)
 LOG_PATH = 'log/{0}.log'.format(APP_NAME)
@@ -27,9 +27,9 @@ CRON_USER = APP_NAME
 APP_CONFIG_PATH = '{0}/config'.format(APP_NAME)
 PSQL_PORT = 5436
 
-SYSTEMD_NGINX_NAME = '{0}.nginx'.format(APP_NAME)
-SYSTEMD_PHP_FPM_NAME = '{0}.php-fpm'.format(APP_NAME) 
-
+SYSTEMD_NGINX = '{0}.nginx'.format(APP_NAME)
+SYSTEMD_PHP_FPM = '{0}.php-fpm'.format(APP_NAME)
+SYSTEMD_POSTGRESQL = '{0}.postgresql'.format(APP_NAME)
 
 def database_init(logger, app_install_dir, app_data_dir, user_name):
     database_path = join(app_data_dir, 'database')
@@ -51,6 +51,7 @@ class Installer:
         self.log = logger.get_logger('{0}_installer'.format(APP_NAME))
         self.app_dir = paths.get_app_dir(APP_NAME)
         self.app_data_dir = paths.get_data_dir(APP_NAME)
+        self.snap_data_dir = os.environ['SNAP_DATA']
 
         self.database_path = join(self.app_data_dir, 'database')
         self.occ = OCConsole(join(self.app_dir, OCC_RUNNER_PATH))
@@ -91,6 +92,10 @@ class Installer:
     def install(self):
         self.install_config()
         database_init(self.log, self.app_dir, self.app_data_dir, USER_NAME)
+
+    def pre_refresh(self):
+        db = Database(database=DB_NAME, user=DB_USER)
+        db.dumpall(join(self.snap_data_dir, 'database.dump'))
 
     def post_refresh(self):
         self.install_config()
@@ -206,8 +211,8 @@ class Installer:
         
         self.prepare_storage()
         self.occ.run('config:system:delete instanceid')
-        service.restart(SYSTEMD_PHP_FPM_NAME)
-        service.restart(SYSTEMD_NGINX_NAME)
+        service.restart(SYSTEMD_PHP_FPM)
+        service.restart(SYSTEMD_NGINX)
 
     def prepare_storage(self):
         app_storage_dir = storage.init_storage(APP_NAME, USER_NAME)
