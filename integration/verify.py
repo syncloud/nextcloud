@@ -190,10 +190,10 @@ def test_disk(device_session, app_domain, device, device_host, device_user, devi
     __create_test_dir('test1', app_domain, device_host, device_user, device_password)
     __check_test_dir(nextcloud_session_domain(app_domain, device_user, device_password), 'test1', app_domain)
 
-    __activate_disk(device_session, device0, device, device_host, device_password)
+    __activate_disk(device_session, device0, device, device_host)
     __check_test_dir(nextcloud_session_domain(app_domain, device_user, device_password), 'test0', app_domain)
 
-    __deactivate_disk(device_session, device, device_host, device_password)
+    __deactivate_disk(device_session, device, device_host)
 
 
 def __log_data_dir(device):
