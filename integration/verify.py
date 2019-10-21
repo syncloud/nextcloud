@@ -176,7 +176,7 @@ def test_verification(nextcloud_session_domain, app_domain, log_dir):
     assert 'EXCEPTION' not in response.text
 
 
-def test_disk(device_session, app_domain, device_host, device_user, device_password):
+def test_disk(device_session, app_domain, device, device_host, device_user, device_password):
     loop_device_cleanup(device_host, '/tmp/test0', device_password)
     loop_device_cleanup(device_host, '/tmp/test1', device_password)
 
