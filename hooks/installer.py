@@ -31,17 +31,6 @@ SYSTEMD_NGINX = '{0}.nginx'.format(APP_NAME)
 SYSTEMD_PHP_FPM = '{0}.php-fpm'.format(APP_NAME)
 SYSTEMD_POSTGRESQL = '{0}.postgresql'.format(APP_NAME)
 
-def database_init(logger, app_install_dir, app_data_dir, user_name):
-    database_path = join(app_data_dir, 'database')
-    if not isdir(database_path):
-        psql_initdb = join(app_install_dir, 'postgresql/bin/initdb')
-        logger.info(check_output(['sudo', '-H', '-u', user_name, psql_initdb, database_path]))
-        postgresql_conf_to = join(database_path, 'postgresql.conf')
-        postgresql_conf_from = join(app_data_dir, 'config', 'postgresql.conf')
-        shutil.copy(postgresql_conf_from, postgresql_conf_to)
-    else:
-        logger.info('Database path "{0}" already exists'.format(database_path))
-
 
 class Installer:
     def __init__(self):
@@ -58,7 +47,6 @@ class Installer:
         self.nextcloud_config_path = join(self.app_data_dir, 'nextcloud', 'config')
         self.nextcloud_config_file = join(self.nextcloud_config_path, 'config.php')
         self.cron = Cron(CRON_USER)
-        
         
     def install_config(self):
 
@@ -88,10 +76,22 @@ class Installer:
         fs.makepath(join(self.app_data_dir, 'extra-apps'))
 
         fs.chownpath(self.app_data_dir, USER_NAME, recursive=True)
+        fs.chownpath(self.snap_data_dir, USER_NAME, recursive=True)
 
     def install(self):
         self.install_config()
-        database_init(self.log, self.app_dir, self.app_data_dir, USER_NAME)
+        self.database_init(USER_NAME)
+
+    def database_init(self, user_name):
+        database_path = join(self.app_data_dir, 'database')
+        if not isdir(database_path):
+            psql_initdb = join(self.app_dir, 'postgresql/bin/initdb')
+            self.log.info(check_output(['sudo', '-H', '-u', user_name, psql_initdb, database_path]))
+            postgresql_conf_to = join(database_path, 'postgresql.conf')
+            postgresql_conf_from = join(self.app_data_dir, 'config', 'postgresql.conf')
+            shutil.copy(postgresql_conf_from, postgresql_conf_to)
+        else:
+            self.log.info('Database path "{0}" already exists'.format(database_path))
 
     def pre_refresh(self):
         db = Database(database=DB_NAME, user=DB_USER)
@@ -116,18 +116,18 @@ class Installer:
         self.cron.create()
 
         oc_config = OCConfig(join(self.app_dir, OC_CONFIG_PATH))
-        oc_config.set_value('memcache.local', "'\OC\Memcache\APCu'")
+        oc_config.set_value('memcache.local', "'\\OC\\Memcache\\APCu'")
         oc_config.set_value('loglevel', '2')
         oc_config.set_value('logfile', join(self.app_data_dir, LOG_PATH))
         real_app_storage_dir = realpath(app_storage_dir)
         oc_config.set_value('datadirectory', real_app_storage_dir)
-        #oc_config.set_value('integrity.check.disabled', 'true')
+        # oc_config.set_value('integrity.check.disabled', 'true')
         oc_config.set_value('mail_smtpmode', 'smtp')
         oc_config.set_value('mail_smtphost', 'localhost:25')
-        #oc_config.set_value('mail_smtpsecure', '')
+        # oc_config.set_value('mail_smtpsecure', '')
         oc_config.set_value('mail_smtpauth', 'false')
-        #oc_config.set_value('mail_smtpname', '')
-        #oc_config.set_value('mail_smtppassword', '')
+        # oc_config.set_value('mail_smtpname', '')
+        # oc_config.set_value('mail_smtppassword', '')
         
         self.on_domain_change()
 
@@ -140,13 +140,13 @@ class Installer:
 
         if 'require upgrade' in self.occ.run('status'):
             self.occ.run('maintenance:mode --on')
-            
+
             try:
                 self.occ.run('upgrade')
             except CalledProcessError, e:
                 self.log.warn('unable to upgrade')
                 self.log.warn(e.output)
-            
+
             self.occ.run('maintenance:mode --off')
             self.occ.run('db:add-missing-indices')
 
@@ -159,7 +159,11 @@ class Installer:
         db_postgres = Database(database='postgres', user=DB_USER)
         db_postgres.execute("ALTER USER {0} WITH PASSWORD '{1}';".format(DB_USER, DB_PASSWORD))
         real_app_storage_dir = realpath(app_storage_dir)
-        self.occ.run('maintenance:install  --database pgsql --database-host {0}:{1} --database-name nextcloud --database-user {2} --database-pass {3} --admin-user {4} --admin-pass {5} --data-dir {6}'.format(self.database_path, PSQL_PORT, DB_USER, DB_PASSWORD, INSTALL_USER, unicode(uuid.uuid4().hex), real_app_storage_dir))
+        self.occ.run('maintenance:install  --database pgsql --database-host {0}:{1}'
+                     ' --database-name nextcloud --database-user {2} --database-pass {3}'
+                     ' --admin-user {4} --admin-pass {5} --data-dir {6}'
+                     .format(self.database_path, PSQL_PORT, DB_USER, DB_PASSWORD,
+                             INSTALL_USER, unicode(uuid.uuid4().hex), real_app_storage_dir))
 
         self.occ.run('app:enable user_ldap')
 
