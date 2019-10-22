@@ -16,6 +16,6 @@ class Database:
 
     def dumpall(self, file):
         log = logger.get_logger('pg_dumpall')
-        cmd = 'snap run nextcloud.pgdumpall -U {0} -d {1} -f {2}'.format(self.user, self.database, file)
+        cmd = 'snap run nextcloud.pgdumpall -U {0} -i {1} -f {2}'.format(self.user, self.database, file)
         log.info("executing: {0}".format(cmd))
         log.info(check_output(cmd, shell=True))
