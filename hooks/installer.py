@@ -2,10 +2,11 @@ import logging
 import os
 import shutil
 import uuid
-from os.path import isdir, realpath
 from os.path import isfile
 from os.path import join
+from os.path import realpath
 from subprocess import check_output, CalledProcessError
+
 from crontab import CronTab
 from syncloudlib import fs, linux, gen, logger
 from syncloudlib.application import paths, urls, storage, service
@@ -47,7 +48,8 @@ class Installer:
         self.nextcloud_config_path = join(self.app_data_dir, 'nextcloud', 'config')
         self.nextcloud_config_file = join(self.nextcloud_config_path, 'config.php')
         self.cron = Cron(CRON_USER)
-        
+        self.db = Database()
+
     def install_config(self):
 
         home_folder = join('/home', USER_NAME)
@@ -80,22 +82,10 @@ class Installer:
 
     def install(self):
         self.install_config()
-        self.database_init(USER_NAME)
-
-    def database_init(self, user_name):
-        database_path = join(self.app_data_dir, 'database')
-        if not isdir(database_path):
-            psql_initdb = join(self.app_dir, 'bin/initdb.sh')
-            self.log.info(check_output(['sudo', '-H', '-u', user_name, psql_initdb, database_path]))
-            postgresql_conf_to = join(database_path, 'postgresql.conf')
-            postgresql_conf_from = join(self.app_data_dir, 'config', 'postgresql.conf')
-            shutil.copy(postgresql_conf_from, postgresql_conf_to)
-        else:
-            self.log.info('Database path "{0}" already exists'.format(database_path))
+        self.db.init(self.app_dir, self.app_data_dir)
 
     def pre_refresh(self):
-        db = Database(database=DB_NAME, user=DB_USER)
-        db.dumpall(join(self.snap_data_dir, 'database.dump'))
+        self.db.dumpall(join(self.snap_data_dir, 'database.dump'))
 
     def post_refresh(self):
         self.install_config()
@@ -155,9 +145,7 @@ class Installer:
         print("initialization")
 
         print("creating database files")
-
-        db_postgres = Database(database='postgres', user=DB_USER)
-        db_postgres.execute("ALTER USER {0} WITH PASSWORD '{1}';".format(DB_USER, DB_PASSWORD))
+        self.db.execute('postgres', DB_USER, "ALTER USER {0} WITH PASSWORD '{1}';".format(DB_USER, DB_PASSWORD))
         real_app_storage_dir = realpath(app_storage_dir)
         self.occ.run('maintenance:install  --database pgsql --database-host {0}:{1}'
                      ' --database-name nextcloud --database-user {2} --database-pass {3}'
@@ -204,9 +192,8 @@ class Installer:
 
         self.cron.run()
 
-        db = Database(database=DB_NAME, user=DB_USER)
-        db.execute("update oc_ldap_group_mapping set owncloud_name = 'admin';")
-        db.execute("update oc_ldap_group_members set owncloudname = 'admin';")
+        self.db.execute(DB_NAME, DB_USER, "update oc_ldap_group_mapping set owncloud_name = 'admin';")
+        self.db.execute(DB_NAME, DB_USER, "update oc_ldap_group_members set owncloudname = 'admin';")
 
         self.occ.run('user:delete {0}'.format(INSTALL_USER))
         self.occ.run('db:add-missing-indices')
