@@ -1,2 +1,3 @@
 export PSQL_PORT={{ db_psql_port }}
 export PSQL_DATABASE=${SNAP_COMMON}/database
+export LD_LIBRARY_PATH=${SNAP}/postgresql/lib

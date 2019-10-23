@@ -85,7 +85,7 @@ class Installer:
     def database_init(self, user_name):
         database_path = join(self.app_data_dir, 'database')
         if not isdir(database_path):
-            psql_initdb = join(self.app_dir, 'postgresql/bin/initdb')
+            psql_initdb = join(self.app_dir, 'bin/initdb.sh')
             self.log.info(check_output(['sudo', '-H', '-u', user_name, psql_initdb, database_path]))
             postgresql_conf_to = join(database_path, 'postgresql.conf')
             postgresql_conf_from = join(self.app_data_dir, 'config', 'postgresql.conf')
