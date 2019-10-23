@@ -12,7 +12,7 @@ export TMPDIR=/tmp
 export TMP=/tmp
 
 NAME=$1
-NEXTCLOUD_VERSION=15.0.0
+NEXTCLOUD_VERSION=16.0.5
 ARCH=$(uname -m)
 VERSION=$2
 
@@ -33,13 +33,9 @@ wget --progress=dot:giga ${DOWNLOAD_URL}/nginx-${ARCH}.tar.gz
 tar xf nginx-${ARCH}.tar.gz
 mv nginx ${BUILD_DIR}/
 
-wget --progress=dot:giga ${DOWNLOAD_URL}/postgresql-${ARCH}.tar.gz
-tar xf postgresql-${ARCH}.tar.gz
-mv postgresql ${BUILD_DIR}/
-
-#wget --progress=dot:giga ${DOWNLOAD_URL}/postgresql-10-${ARCH}.tar.gz
-#tar xf postgresql-10-${ARCH}.tar.gz
-#mv postgresql-10 ${BUILD_DIR}/postgresql
+wget --progress=dot:giga ${DOWNLOAD_URL}/postgresql-10-${ARCH}.tar.gz
+tar xf postgresql-10-${ARCH}.tar.gz
+mv postgresql-10 ${BUILD_DIR}/postgresql
 
 wget --progress=dot:giga ${DOWNLOAD_URL}/python-${ARCH}.tar.gz
 tar xf python-${ARCH}.tar.gz
