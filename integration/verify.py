@@ -50,12 +50,12 @@ def module_setup(request, device, data_dir, platform_data_dir, app_dir, service_
 @pytest.fixture(scope='function')
 def nextcloud_session_domain(app_domain, device_user, device_password):
     session = requests.session()
-    response = session.get('https://{0}/index.php/login'.format(app_domain), allow_redirects=False, verify=False)
+    response = session.get('https://{0}/login'.format(app_domain), allow_redirects=False, verify=False)
     print(response.text.encode("UTF-8"))
     print(response.headers)
     soup = BeautifulSoup(response.text, "html.parser")
     requesttoken = soup.find_all('input', {'name': 'requesttoken'})[0]['value']
-    response = session.post('https://{0}/index.php/login'.format(app_domain),
+    response = session.post('https://{0}/login'.format(app_domain),
                             data={'user': device_user, 'password': device_password, 'requesttoken': requesttoken},
                             allow_redirects=False, verify=False)
     assert response.status_code == 303, response.text
@@ -136,7 +136,7 @@ def test_cron(device):
 
 
 def test_visible_through_platform(app_domain):
-    response = requests.get('https://{0}/index.php/login'.format(app_domain), allow_redirects=False, verify=False)
+    response = requests.get('https://{0}/login'.format(app_domain), allow_redirects=False, verify=False)
     assert response.status_code == 200, response.text
 
 
@@ -158,7 +158,7 @@ def test_caldav(nextcloud_session_domain, app_domain, log_dir):
 
 def test_admin(nextcloud_session_domain, app_domain, log_dir):
     session, _ = nextcloud_session_domain
-    response = session.get('https://{0}/index.php/settings/admin'.format(app_domain), allow_redirects=False,
+    response = session.get('https://{0}/settings/admin'.format(app_domain), allow_redirects=False,
                            verify=False)
     with open(join(log_dir, 'admin.log'), 'w') as f:
         f.write(response.text.encode("UTF-8"))
@@ -167,7 +167,7 @@ def test_admin(nextcloud_session_domain, app_domain, log_dir):
 
 def test_verification(nextcloud_session_domain, app_domain, log_dir):
     session, _ = nextcloud_session_domain
-    response = session.get('https://{0}/index.php/settings/integrity/failed'.format(app_domain), allow_redirects=False,
+    response = session.get('https://{0}/settings/integrity/failed'.format(app_domain), allow_redirects=False,
                            verify=False)
     with open(join(log_dir, 'integrity.failed.log'), 'w') as f:
         f.write(response.text)
@@ -232,7 +232,7 @@ def __check_test_dir(nextcloud_session, test_dir, app_domain):
     assert response.status_code == 200, BeautifulSoup(response.text, "html.parser").find('li', class_='error')
 
     nextcloud, _ = nextcloud_session
-    response = nextcloud.get('https://{0}/index.php/apps/files/ajax/list.php?dir=/'.format(app_domain),
+    response = nextcloud.get('https://{0}/apps/files/ajax/list.php?dir=/'.format(app_domain),
                              verify=False,
                              allow_redirects=False)
     info = json.loads(response.text)
