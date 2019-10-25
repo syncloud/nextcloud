@@ -14,8 +14,12 @@ from syncloudlib.integration.hosts import add_host_alias
 TMP_DIR = '/tmp/syncloud'
 
 
-@pytest.fixture(scope="session")
-def module_setup(request, device, data_dir, platform_data_dir, app_dir, service_prefix, log_dir):
+def test_start(device, device_host, app, log_dir, domain, request, data_dir, platform_data_dir, app_dir):
+    shutil.rmtree(log_dir, ignore_errors=True)
+    os.mkdir(log_dir)
+    add_host_alias(app, device_host, domain)
+    device.run_ssh('date', retries=100)
+    device.run_ssh('mkdir {0}'.format(TMP_DIR))
     def module_teardown():
         platform_log_dir = join(log_dir, 'platform_log')
         os.mkdir(platform_log_dir)
@@ -26,7 +30,7 @@ def module_setup(request, device, data_dir, platform_data_dir, app_dir, service_
         device.run_ssh('snap run nextcloud.occ > {1}/occ.help.log'.format(app_dir, TMP_DIR), throw=False)
         device.run_ssh('top -bn 1 -w 500 -c > {0}/top.log'.format(TMP_DIR), throw=False)
         device.run_ssh('ps auxfw > {0}/ps.log'.format(TMP_DIR), throw=False)
-        device.run_ssh('systemctl status {0}nextcloud.php-fpm > {1}/nextcloud.php-fpm.status.log'.format(service_prefix, TMP_DIR), throw=False)
+        device.run_ssh('systemctl status snap.nextcloud.php-fpm > {0}/nextcloud.php-fpm.status.log'.format(TMP_DIR), throw=False)
         device.run_ssh('netstat -nlp > {0}/netstat.log'.format(TMP_DIR), throw=False)
         device.run_ssh('journalctl | tail -500 > {0}/journalctl.log'.format(TMP_DIR), throw=False)
         device.run_ssh('tail -500 /var/log/syslog > {0}/syslog.log'.format(TMP_DIR), throw=False)
@@ -60,14 +64,6 @@ def nextcloud_session_domain(app_domain, device_user, device_password):
                             allow_redirects=False, verify=False)
     assert response.status_code == 303, response.text
     return session, requesttoken
-
-
-def test_start(module_setup, device, device_host, app, log_dir, domain):
-    shutil.rmtree(log_dir, ignore_errors=True)
-    os.mkdir(log_dir)
-    add_host_alias(app, device_host, domain)
-    device.run_ssh('date', retries=100)
-    device.run_ssh('mkdir {0}'.format(TMP_DIR))
 
 
 def test_activate_device(device):
