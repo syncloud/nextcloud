@@ -43,6 +43,7 @@ def module_setup(request, device, data_dir, platform_data_dir, app_dir, service_
         os.mkdir(app_log_dir)
         device.scp_from_device('{0}/log/*.log'.format(data_dir), app_log_dir)
         device.scp_from_device('{0}/*'.format(TMP_DIR), app_log_dir)
+        shutil.copy2('/etc/hosts', app_log_dir)
 
     request.addfinalizer(module_teardown)
 
