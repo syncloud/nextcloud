@@ -7,7 +7,7 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
-from syncloudlib.integration.hosts import add_host_alias
+from syncloudlib.integration.hosts import add_host_alias_by_ip
 from syncloudlib.integration.screenshots import screenshots
 
 DIR = dirname(__file__)
@@ -27,10 +27,10 @@ def module_setup(request, device, log_dir, ui_mode):
     request.addfinalizer(module_teardown)
 
 
-def test_start(module_setup, app, device_host):
+def test_start(module_setup, app, domain, device_host):
     if not exists(screenshot_dir):
         os.mkdir(screenshot_dir)
-    add_host_alias(app, device_host)
+    add_host_alias_by_ip(app, domain, device_host)
 
 
 def test_login(driver, app_domain):
