@@ -9,7 +9,7 @@ import requests
 from bs4 import BeautifulSoup
 from syncloudlib.integration.installer import local_install, wait_for_installer
 from syncloudlib.integration.loop import loop_device_add, loop_device_cleanup
-from syncloudlib.integration.hosts import add_host_alias
+from syncloudlib.integration.hosts import add_host_alias_by_ip
 
 TMP_DIR = '/tmp/syncloud'
 
@@ -66,7 +66,7 @@ def nextcloud_session_domain(app_domain, device_user, device_password):
 def test_start(module_setup, device, device_host, app, log_dir, domain):
     shutil.rmtree(log_dir, ignore_errors=True)
     os.mkdir(log_dir)
-    add_host_alias(app, device_host, domain)
+    add_host_alias_by_ip(app, domain, device_host)
     device.run_ssh('date', retries=100)
     device.run_ssh('mkdir {0}'.format(TMP_DIR))
 
