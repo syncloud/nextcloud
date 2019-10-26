@@ -38,7 +38,10 @@ apps:
 
   psql:
     command: bin/psql.sh
-  
+
+  pgdumpall:
+    command: bin/pg_dumpall.sh
+
   cron:
     command: bin/nextcloud-cron
   

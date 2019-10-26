@@ -17,3 +17,4 @@ geckodriver
 *.test.download
 *.test.upload
 test.file*
+venv
