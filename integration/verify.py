@@ -63,7 +63,7 @@ def nextcloud_session(app_domain, device_user, device_password):
                             data={'user': device_user, 'password': device_password, 'requesttoken': requesttoken},
                             allow_redirects=False, verify=False)
     assert response.status_code == 303, response.text
-    return session, requesttoken
+    return session
 
 
 def test_start(module_setup, device, device_host, app, log_dir, domain):
