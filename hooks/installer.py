@@ -40,15 +40,15 @@ class Installer:
 
         self.log = logger.get_logger('{0}_installer'.format(APP_NAME))
         self.app_dir = paths.get_app_dir(APP_NAME)
-        self.app_data_dir = paths.get_data_dir(APP_NAME)
-        self.snap_data_dir = os.environ['SNAP_DATA']
+        self.common_dir = paths.get_data_dir(APP_NAME)
+        self.data_dir = os.environ['SNAP_DATA']
+        self.config_path = join(self.common_dir, 'config')
 
-        self.database_path = join(self.app_data_dir, 'database')
         self.occ = OCConsole(join(self.app_dir, OCC_RUNNER_PATH))
-        self.nextcloud_config_path = join(self.app_data_dir, 'nextcloud', 'config')
+        self.nextcloud_config_path = join(self.common_dir, 'nextcloud', 'config')
         self.nextcloud_config_file = join(self.nextcloud_config_path, 'config.php')
         self.cron = Cron(CRON_USER)
-        self.db = Database()
+        self.db = Database(self.app_dir, self.data_dir, self.config_path)
 
     def install_config(self):
 
@@ -58,38 +58,39 @@ class Installer:
         storage.init_storage(APP_NAME, USER_NAME)
 
         templates_path = join(self.app_dir, 'config.templates')
-        config_path = join(self.app_data_dir, 'config')
-        
+
         fs.makepath(self.nextcloud_config_path)
               
         variables = {
             'app_dir': self.app_dir,
-            'app_data_dir': self.app_data_dir,
+            'app_data_dir': self.common_dir,
             'db_psql_port': PSQL_PORT
         }
-        gen.generate_files(templates_path, config_path, variables)
+        gen.generate_files(templates_path, self.config_path, variables)
 
-        default_config_file = join(config_path, 'config.php')
+        default_config_file = join(self.config_path, 'config.php')
         if not isfile(self.nextcloud_config_file):
             shutil.copy(default_config_file, self.nextcloud_config_file)
       
-        fs.makepath(join(self.app_data_dir, 'log'))
-        fs.makepath(join(self.app_data_dir, 'nginx'))
-        fs.makepath(join(self.app_data_dir, 'extra-apps'))
+        fs.makepath(join(self.common_dir, 'log'))
+        fs.makepath(join(self.common_dir, 'nginx'))
+        fs.makepath(join(self.common_dir, 'extra-apps'))
 
-        fs.chownpath(self.app_data_dir, USER_NAME, recursive=True)
-        fs.chownpath(self.snap_data_dir, USER_NAME, recursive=True)
+        fs.chownpath(self.common_dir, USER_NAME, recursive=True)
+        fs.chownpath(self.data_dir, USER_NAME, recursive=True)
 
     def install(self):
         self.install_config()
-        self.db.init(self.app_dir, self.app_data_dir)
+        self.db.init()
 
     def pre_refresh(self):
-        self.db.dumpall(join(self.snap_data_dir, 'database.dump'))
+        self.db.backup()
 
     def post_refresh(self):
         self.install_config()
-        
+        if self.db.requires_upgrade():
+            self.db.upgrade()
+
     def configure(self):
         self.prepare_storage()
         app_storage_dir = storage.init_storage(APP_NAME, USER_NAME)
@@ -108,7 +109,7 @@ class Installer:
         oc_config = OCConfig(join(self.app_dir, OC_CONFIG_PATH))
         oc_config.set_value('memcache.local', "'\\OC\\Memcache\\APCu'")
         oc_config.set_value('loglevel', '2')
-        oc_config.set_value('logfile', join(self.app_data_dir, LOG_PATH))
+        oc_config.set_value('logfile', join(self.common_dir, LOG_PATH))
         real_app_storage_dir = realpath(app_storage_dir)
         oc_config.set_value('datadirectory', real_app_storage_dir)
         # oc_config.set_value('integrity.check.disabled', 'true')
@@ -121,7 +122,7 @@ class Installer:
         
         self.on_domain_change()
 
-        fs.chownpath(self.app_data_dir, USER_NAME, recursive=True)
+        fs.chownpath(self.common_dir, USER_NAME, recursive=True)
 
     def installed(self):
         return 'installed' in open(self.nextcloud_config_file).read().strip()
@@ -150,7 +151,7 @@ class Installer:
         self.occ.run('maintenance:install  --database pgsql --database-host {0}:{1}'
                      ' --database-name nextcloud --database-user {2} --database-pass {3}'
                      ' --admin-user {4} --admin-pass {5} --data-dir {6}'
-                     .format(self.database_path, PSQL_PORT, DB_USER, DB_PASSWORD,
+                     .format(self.db.get_database_path(), PSQL_PORT, DB_USER, DB_PASSWORD,
                              INSTALL_USER, unicode(uuid.uuid4().hex), real_app_storage_dir))
 
         self.occ.run('app:enable user_ldap')
