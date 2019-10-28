@@ -1,2 +1,2 @@
 export PSQL_PORT={{ db_psql_port }}
-export PSQL_DATABASE=${SNAP}/database
+export PSQL_DATABASE={{ data_dir }}/database
