@@ -1,5 +1,5 @@
 import shutil
-from os.path import join, isfile
+from os.path import join, isfile, isdir
 from subprocess import check_output
 
 from syncloudlib import logger
@@ -36,7 +36,8 @@ class Database:
         self.restore()
 
     def remove(self):
-        shutil.rmtree(self.database_path)
+        if isdir(self.database_path)
+            shutil.rmtree(self.database_path)
 
     def init(self):
         cmd = join(self.app_dir, 'bin/initdb.sh')
