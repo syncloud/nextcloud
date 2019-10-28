@@ -6,16 +6,18 @@ if [[ -z "$1" ]]; then
     echo "usage $0 [start]"
     exit 1
 fi
+# shellcheck source=config/env
+. "${SNAP_COMMON}/config/env"
 
 case $1 in
 start)
-    exec ${DIR}/postgresql/bin/pg_ctl -w -s -D ${SNAP_COMMON}/database start
+    exec ${DIR}/postgresql/bin/pg_ctl -w -s -D ${PSQL_DATABASE} start
     ;;
 reload)
-    exec ${DIR}/postgresql/bin/pg_ctl -s -D ${SNAP_COMMON}/database reload
+    exec ${DIR}/postgresql/bin/pg_ctl -s -D ${PSQL_DATABASE} reload
     ;;
 stop)
-    exec ${DIR}/postgresql/bin/pg_ctl -s -D ${SNAP_COMMON}/database stop -m fast
+    exec ${DIR}/postgresql/bin/pg_ctl -s -D ${PSQL_DATABASE} stop -m fast
     ;;
 *)
     echo "not valid command"
