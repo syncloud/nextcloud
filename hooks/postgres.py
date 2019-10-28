@@ -36,7 +36,7 @@ class Database:
         self.restore()
 
     def remove(self):
-        if isdir(self.database_path)
+        if isdir(self.database_path):
             shutil.rmtree(self.database_path)
 
     def init(self):
