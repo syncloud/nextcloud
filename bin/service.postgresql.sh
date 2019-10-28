@@ -7,7 +7,7 @@ if [[ -z "$1" ]]; then
     exit 1
 fi
 # shellcheck source=config/env
-. "${SNAP_COMMON}/config/env"
+. "{{ config_dir }}/env"
 
 case $1 in
 start)

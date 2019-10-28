@@ -1,2 +1,2 @@
 export PSQL_PORT={{ db_psql_port }}
-export PSQL_DATABASE={{ data_dir }}/database
+export PSQL_DATABASE={{ database_dir }}

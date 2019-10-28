@@ -13,7 +13,7 @@ class Database:
         self.config_path = config_path
         self.data_dir = data_dir
         self.postgresql_config = join(self.config_path, 'postgresql.conf')
-        self.database_path = join(self.data_dir, 'database')
+        self.database_dir = join(self.data_dir, 'database')
         self.old_major_version_file = join(self.data_dir, 'db.major.version')
         self.new_major_version_file = join(self.app_dir, 'db.major.version')
         self.backup_file = join(self.data_dir, 'database.dump')
@@ -26,19 +26,19 @@ class Database:
         return old_version != new_version
 
     def get_database_path(self):
-        return self.database_path
+        return self.database_dir
 
     def remove(self):
         if not isfile(self.backup_file):
             raise Exception("Backup file does not exist: {0}".format(self.backup_file))
     
-        if isdir(self.database_path):
-            shutil.rmtree(self.database_path)
+        if isdir(self.database_dir):
+            shutil.rmtree(self.database_dir)
 
     def init(self):
         cmd = join(self.app_dir, 'bin/initdb.sh')
-        self.log.info(check_output([cmd, self.database_path]))
-        shutil.copy(self.postgresql_config, self.database_path)
+        self.log.info(check_output([cmd, self.database_dir]))
+        shutil.copy(self.postgresql_config, self.database_dir)
 
     def execute(self, database, user, sql):
         self.log.info("executing: {0}".format(sql))

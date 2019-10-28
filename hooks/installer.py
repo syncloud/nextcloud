@@ -42,13 +42,13 @@ class Installer:
         self.app_dir = paths.get_app_dir(APP_NAME)
         self.common_dir = paths.get_data_dir(APP_NAME)
         self.data_dir = os.environ['SNAP_DATA']
-        self.config_path = join(self.common_dir, 'config')
+        self.config_dir = join(self.data_dir, 'config')
 
         self.occ = OCConsole(join(self.app_dir, OCC_RUNNER_PATH))
         self.nextcloud_config_path = join(self.common_dir, 'nextcloud', 'config')
         self.nextcloud_config_file = join(self.nextcloud_config_path, 'config.php')
         self.cron = Cron(CRON_USER)
-        self.db = Database(self.app_dir, self.data_dir, self.config_path)
+        self.db = Database(self.app_dir, self.data_dir, self.config_dir)
 
     def install_config(self):
 
@@ -65,11 +65,13 @@ class Installer:
             'app_dir': self.app_dir,
             'common_dir': self.common_dir,
             'data_dir': self.data_dir,
-            'db_psql_port': PSQL_PORT
+            'db_psql_port': PSQL_PORT,
+            'database_dir': self.db.database_dir,
+            'config_dir': self.config_dir,
         }
-        gen.generate_files(templates_path, self.config_path, variables)
+        gen.generate_files(templates_path, self.config_dir, variables)
 
-        default_config_file = join(self.config_path, 'config.php')
+        default_config_file = join(self.config_dir, 'config.php')
         if not isfile(self.nextcloud_config_file):
             shutil.copy(default_config_file, self.nextcloud_config_file)
       
