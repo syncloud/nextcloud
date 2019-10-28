@@ -8,7 +8,7 @@ if [ -z "$SNAP_COMMON" ]; then
 fi
 
 # shellcheck source=config/env
-. "${SNAP_COMMON}/config/env"
+. "{{ config_dir }}/env"
 export LD_LIBRARY_PATH=${DIR}/postgresql/lib
 
 if [[ "$(whoami)" == "nextcloud" ]]; then
