@@ -28,14 +28,10 @@ class Database:
     def get_database_path(self):
         return self.database_path
 
-    def upgrade(self):
+    def remove(self):
         if not isfile(self.backup_file):
             raise Exception("Backup file does not exist: {0}".format(self.backup_file))
-        self.remove()
-        self.init()
-        self.restore()
-
-    def remove(self):
+    
         if isdir(self.database_path):
             shutil.rmtree(self.database_path)
 

@@ -90,7 +90,8 @@ class Installer:
     def post_refresh(self):
         self.install_config()
         if self.db.requires_upgrade():
-            self.db.upgrade()
+            self.db.remove()
+            self.db.init()
 
     def configure(self):
         self.prepare_storage()
@@ -141,6 +142,9 @@ class Installer:
 
             self.occ.run('maintenance:mode --off')
             self.occ.run('db:add-missing-indices')
+
+        if self.db.requires_upgrade():
+            self.db.restore()
 
     def initialize(self, app_storage_dir):
 
