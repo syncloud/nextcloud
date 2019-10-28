@@ -63,7 +63,8 @@ class Installer:
               
         variables = {
             'app_dir': self.app_dir,
-            'app_data_dir': self.common_dir,
+            'common_dir': self.common_dir,
+            'data_dir': self.data_dir,
             'db_psql_port': PSQL_PORT
         }
         gen.generate_files(templates_path, self.config_path, variables)

@@ -1,6 +1,6 @@
 <?php
 $CONFIG = array (
- 'datadirectory' => '{{ app_data_dir }}',
+ 'datadirectory' => '{{ common_dir }}',
  'log_type' => 'syslog',
  'logfile' => '',
  'apps_paths' => array(
@@ -10,7 +10,7 @@ $CONFIG = array (
  		'writable' => false,
  	),
  	array(
- 		'path'=> '{{ app_data_dir }}/extra-apps',
+ 		'path'=> '{{ common_dir }}/extra-apps',
  		'url' => '/extra-apps',
  		'writable' => true,
  	),
