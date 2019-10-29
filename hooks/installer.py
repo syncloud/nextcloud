@@ -71,10 +71,6 @@ class Installer:
         }
         gen.generate_files(templates_path, self.config_dir, variables)
 
-        # default_config_file = join(self.config_dir, 'config.php')
-        # if not isfile(self.nextcloud_config_file):
-        #     shutil.copy(default_config_file, self.nextcloud_config_file)
-      
         fs.makepath(join(self.common_dir, 'log'))
         fs.makepath(join(self.common_dir, 'nginx'))
         fs.makepath(join(self.common_dir, 'extra-apps'))
@@ -150,9 +146,9 @@ class Installer:
 
     def initialize(self, app_storage_dir):
 
-        print("initialization")
+        default_config_file = join(self.config_dir, 'config.php')
+        shutil.copy(default_config_file, self.nextcloud_config_file)
 
-        print("creating database files")
         self.db.execute('postgres', DB_USER, "ALTER USER {0} WITH PASSWORD '{1}';".format(DB_USER, DB_PASSWORD))
         real_app_storage_dir = realpath(app_storage_dir)
         self.occ.run('maintenance:install  --database pgsql --database-host {0}:{1}'
