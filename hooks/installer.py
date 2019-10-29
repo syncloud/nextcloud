@@ -54,13 +54,9 @@ class Installer:
 
         home_folder = join('/home', USER_NAME)
         linux.useradd(USER_NAME, home_folder=home_folder)
-
         storage.init_storage(APP_NAME, USER_NAME)
-
         templates_path = join(self.app_dir, 'config.templates')
 
-        fs.makepath(self.nextcloud_config_path)
-              
         variables = {
             'app_dir': self.app_dir,
             'common_dir': self.common_dir,
@@ -80,6 +76,12 @@ class Installer:
 
     def install(self):
         self.install_config()
+
+        fs.makepath(self.nextcloud_config_path)
+        default_config_file = join(self.config_dir, 'config.php')
+        shutil.copy(default_config_file, self.nextcloud_config_file)
+        fs.chownpath(self.nextcloud_config_path, USER_NAME, recursive=True)
+
         self.db.init()
 
     def pre_refresh(self):
@@ -87,6 +89,8 @@ class Installer:
 
     def post_refresh(self):
         self.install_config()
+        self.migrate_nextcloud_config_file()
+
         if self.db.requires_upgrade():
             self.db.remove()
             self.db.init()
@@ -124,19 +128,21 @@ class Installer:
         fs.chownpath(self.common_dir, USER_NAME, recursive=True)
         fs.chownpath(self.data_dir, USER_NAME, recursive=True)
 
+    def migrate_nextcloud_config_file(self):
+        # Migrate from common dir to data dir
+        if not isfile(self.nextcloud_config_file):
+            old_nextcloud_config_file = join(self.common_dir, 'nextcloud', 'config', 'config.php')
+            if isfile(old_nextcloud_config_file):
+                old_database_dir = join(self.common_dir, 'database')
+                with open(old_nextcloud_config_file) as f:
+                    content = f.read().replace(old_database_dir, self.db.get_database_path())
+                with open(self.nextcloud_config_file, "w") as f:
+                    f.write(content)
+
     def installed(self):
         return 'installed' in open(self.nextcloud_config_file).read().strip()
 
     def upgrade(self):
-
-        # Migrate from common dir to data dir
-        if not isfile(self.nextcloud_config_file):
-            old_nextcloud_config_file = join(self.common_dir, 'nextcloud', 'config', 'config.php')
-            old_database_dir = join(self.common_dir, 'database')
-            with open(old_nextcloud_config_file) as f:
-                content = f.read().replace(old_database_dir, self.db.get_database_path())
-            with open(self.nextcloud_config_file, "w") as f:
-                f.write(content)
 
         if 'require upgrade' in self.occ.run('status'):
             self.occ.run('maintenance:mode --on')
