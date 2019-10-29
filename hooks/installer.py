@@ -22,7 +22,6 @@ DB_NAME = APP_NAME
 DB_USER = APP_NAME
 DB_PASSWORD = APP_NAME
 OCC_RUNNER_PATH = 'bin/occ-runner'
-OC_CONFIG_PATH = 'bin/{0}-config'.format(APP_NAME)
 LOG_PATH = 'log/{0}.log'.format(APP_NAME)
 CRON_USER = APP_NAME
 APP_CONFIG_PATH = '{0}/config'.format(APP_NAME)
@@ -38,17 +37,18 @@ class Installer:
         if not logger.factory_instance:
             logger.init(logging.DEBUG, True)
 
-        self.log = logger.get_logger('{0}_installer'.format(APP_NAME))
+        self.log = logger.get_logger('nextcloud_installer')
         self.app_dir = paths.get_app_dir(APP_NAME)
         self.common_dir = paths.get_data_dir(APP_NAME)
         self.data_dir = os.environ['SNAP_DATA']
         self.config_dir = join(self.data_dir, 'config')
 
         self.occ = OCConsole(join(self.app_dir, OCC_RUNNER_PATH))
-        self.nextcloud_config_path = join(self.common_dir, 'nextcloud', 'config')
+        self.nextcloud_config_path = join(self.data_dir, 'nextcloud', 'config')
         self.nextcloud_config_file = join(self.nextcloud_config_path, 'config.php')
         self.cron = Cron(CRON_USER)
         self.db = Database(self.app_dir, self.data_dir, self.config_dir)
+        self.oc_config = OCConfig(join(self.app_dir, 'bin/nextcloud-config'))
 
     def install_config(self):
 
@@ -73,7 +73,7 @@ class Installer:
 
         fs.makepath(join(self.common_dir, 'log'))
         fs.makepath(join(self.common_dir, 'nginx'))
-        fs.makepath(join(self.common_dir, 'extra-apps'))
+        fs.makepath(join(self.data_dir, 'extra-apps'))
 
         fs.chownpath(self.common_dir, USER_NAME, recursive=True)
         fs.chownpath(self.data_dir, USER_NAME, recursive=True)
@@ -106,28 +106,37 @@ class Installer:
         self.cron.remove()
         self.cron.create()
 
-        oc_config = OCConfig(join(self.app_dir, OC_CONFIG_PATH))
-        oc_config.set_value('memcache.local', "'\\OC\\Memcache\\APCu'")
-        oc_config.set_value('loglevel', '2')
-        oc_config.set_value('logfile', join(self.common_dir, LOG_PATH))
+        self.oc_config.set_value('memcache.local', "'\\OC\\Memcache\\APCu'")
+        self.oc_config.set_value('loglevel', '2')
+        self.oc_config.set_value('logfile', join(self.common_dir, LOG_PATH))
         real_app_storage_dir = realpath(app_storage_dir)
-        oc_config.set_value('datadirectory', real_app_storage_dir)
+        self.oc_config.set_value('datadirectory', real_app_storage_dir)
         # oc_config.set_value('integrity.check.disabled', 'true')
-        oc_config.set_value('mail_smtpmode', 'smtp')
-        oc_config.set_value('mail_smtphost', 'localhost:25')
+        self.oc_config.set_value('mail_smtpmode', 'smtp')
+        self.oc_config.set_value('mail_smtphost', 'localhost:25')
         # oc_config.set_value('mail_smtpsecure', '')
-        oc_config.set_value('mail_smtpauth', 'false')
+        self.oc_config.set_value('mail_smtpauth', 'false')
         # oc_config.set_value('mail_smtpname', '')
         # oc_config.set_value('mail_smtppassword', '')
         
         self.on_domain_change()
 
         fs.chownpath(self.common_dir, USER_NAME, recursive=True)
+        fs.chownpath(self.data_dir, USER_NAME, recursive=True)
 
     def installed(self):
         return 'installed' in open(self.nextcloud_config_file).read().strip()
 
     def upgrade(self):
+
+        # Migrate from common dir to data dir
+        if not isfile(self.nextcloud_config_file):
+            old_nextcloud_config_file = join(self.common_dir, 'nextcloud', 'config', 'config.php')
+            old_database_dir = join(self.common_dir, 'database')
+            with open(old_nextcloud_config_file) as f:
+                content = f.read().replace(old_database_dir, self.db.get_database_path())
+            with open(self.nextcloud_config_file, "w") as f:
+                f.write(content)
 
         if 'require upgrade' in self.occ.run('status'):
             self.occ.run('maintenance:mode --on')
@@ -219,14 +228,12 @@ class Installer:
         fs.makepath(tmp_storage_path)
         fs.chownpath(tmp_storage_path, USER_NAME)
         real_app_storage_dir = realpath(app_storage_dir)
-        oc_config = OCConfig(join(self.app_dir, OC_CONFIG_PATH))
-        oc_config.set_value('datadirectory', real_app_storage_dir)
+        self.oc_config.set_value('datadirectory', real_app_storage_dir)
 
     def on_domain_change(self):
         app_domain = urls.get_app_domain_name(APP_NAME)
         local_ip = check_output(["hostname", "-I"]).split(" ")[0]
-        oc_config = OCConfig(join(self.app_dir, OC_CONFIG_PATH))
-        oc_config.set_value('trusted_domains', "localhost {0} {1}".format(local_ip, app_domain))
+        self.oc_config.set_value('trusted_domains', "localhost {0} {1}".format(local_ip, app_domain))
 
 
 class Cron:

@@ -10,7 +10,7 @@ $CONFIG = array (
  		'writable' => false,
  	),
  	array(
- 		'path'=> '{{ common_dir }}/extra-apps',
+ 		'path'=> '{{ data_dir }}/extra-apps',
  		'url' => '/extra-apps',
  		'writable' => true,
  	),
