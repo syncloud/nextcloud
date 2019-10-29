@@ -71,9 +71,9 @@ class Installer:
         }
         gen.generate_files(templates_path, self.config_dir, variables)
 
-        default_config_file = join(self.config_dir, 'config.php')
-        if not isfile(self.nextcloud_config_file):
-            shutil.copy(default_config_file, self.nextcloud_config_file)
+        # default_config_file = join(self.config_dir, 'config.php')
+        # if not isfile(self.nextcloud_config_file):
+        #     shutil.copy(default_config_file, self.nextcloud_config_file)
       
         fs.makepath(join(self.common_dir, 'log'))
         fs.makepath(join(self.common_dir, 'nginx'))
