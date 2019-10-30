@@ -138,6 +138,8 @@ class Installer:
                     content = f.read().replace(old_database_dir, self.db.get_database_path())
                 with open(self.nextcloud_config_file, "w") as f:
                     f.write(content)
+                fs.chownpath(self.nextcloud_config_path, USER_NAME, recursive=True)
+
 
     def installed(self):
         return 'installed' in open(self.nextcloud_config_file).read().strip()
@@ -160,9 +162,6 @@ class Installer:
             self.db.restore()
 
     def initialize(self, app_storage_dir):
-
-        default_config_file = join(self.config_dir, 'config.php')
-        shutil.copy(default_config_file, self.nextcloud_config_file)
 
         self.db.execute('postgres', DB_USER, "ALTER USER {0} WITH PASSWORD '{1}';".format(DB_USER, DB_PASSWORD))
         real_app_storage_dir = realpath(app_storage_dir)
