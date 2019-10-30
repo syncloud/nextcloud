@@ -12,12 +12,10 @@ export TMPDIR=/tmp
 export TMP=/tmp
 
 NAME=$1
-NEXTCLOUD_VERSION=15.0.0
+NEXTCLOUD_VERSION=16.0.5
 ARCH=$(uname -m)
 VERSION=$2
-
-rm -rf ${DIR}/lib
-mkdir ${DIR}/lib
+DB_MAJOR_VERSION=10
 
 rm -rf build
 BUILD_DIR=${DIR}/build/${NAME}
@@ -33,14 +31,10 @@ wget --progress=dot:giga ${DOWNLOAD_URL}/nginx-${ARCH}.tar.gz
 tar xf nginx-${ARCH}.tar.gz
 mv nginx ${BUILD_DIR}/
 
-wget --progress=dot:giga ${DOWNLOAD_URL}/postgresql-${ARCH}.tar.gz
-tar xf postgresql-${ARCH}.tar.gz
-mv postgresql ${BUILD_DIR}/
-
-#wget --progress=dot:giga ${DOWNLOAD_URL}/postgresql-10-${ARCH}.tar.gz
-#tar xf postgresql-10-${ARCH}.tar.gz
-#mv postgresql-10 ${BUILD_DIR}/postgresql
-
+wget --progress=dot:giga ${DOWNLOAD_URL}/postgresql-${DB_MAJOR_VERSION}-${ARCH}.tar.gz
+tar xf postgresql-${DB_MAJOR_VERSION}-${ARCH}.tar.gz
+mv postgresql-${DB_MAJOR_VERSION} ${BUILD_DIR}/postgresql
+echo "${DB_MAJOR_VERSION}" > ${BUILD_DIR}/db.major.version
 wget --progress=dot:giga ${DOWNLOAD_URL}/python-${ARCH}.tar.gz
 tar xf python-${ARCH}.tar.gz
 mv python ${BUILD_DIR}/
@@ -53,7 +47,6 @@ ${BUILD_DIR}/python/bin/pip install -r ${DIR}/requirements.txt
 
 cp -r bin ${BUILD_DIR}
 cp -r config ${BUILD_DIR}/config.templates
-cp -r lib ${BUILD_DIR}
 cp -r hooks ${BUILD_DIR}
 rm -rf ${BUILD_DIR}/${NAME}/config
 ls -la ${BUILD_DIR}/${NAME}/apps

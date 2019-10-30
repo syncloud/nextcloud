@@ -54,8 +54,9 @@ def test_main(driver, device_user, device_password, ui_mode):
     wait_driver = WebDriverWait(driver, 300)
 
     if ui_mode == "desktop":
-        wait_driver.until(EC.element_to_be_clickable((By.ID, 'cboxClose')))
-        wizard_close_button = driver.find_element_by_id("cboxClose")
+        close_css_selector = 'a.icon-close'
+        wait_driver.until(EC.presence_of_element_located((By.CSS_SELECTOR, close_css_selector)))
+        wizard_close_button = driver.find_element_by_css_selector(close_css_selector)
         screenshots(driver, screenshot_dir, 'main_first_time-' + ui_mode)
         wizard_close_button.click()
     
@@ -64,30 +65,30 @@ def test_main(driver, device_user, device_password, ui_mode):
 
 
 def test_settings(driver, app_domain, ui_mode):
-    driver.get("https://{0}/index.php/settings/admin".format(app_domain))
+    driver.get("https://{0}/settings/admin".format(app_domain))
     time.sleep(10)
     screenshots(driver, screenshot_dir, 'admin-' + ui_mode)
 
 
 def test_settings_user(driver, app_domain, ui_mode):
-    driver.get("https://{0}/index.php/settings/user".format(app_domain))
+    driver.get("https://{0}/settings/user".format(app_domain))
     time.sleep(10)
     screenshots(driver, screenshot_dir, 'user-' + ui_mode)
 
 
 def test_settings_ldap(driver, app_domain, ui_mode):
-    driver.get("https://{0}/index.php/settings/admin/ldap".format(app_domain))
+    driver.get("https://{0}/settings/admin/ldap".format(app_domain))
     time.sleep(10)
     screenshots(driver, screenshot_dir, 'admin-ldap-' + ui_mode)
 
 
 def test_settings_security(driver, app_domain, ui_mode):
-    driver.get("https://{0}/index.php/settings/admin/overview#security-warning".format(app_domain))
+    driver.get("https://{0}/settings/admin/overview#security-warning".format(app_domain))
     time.sleep(10)
     screenshots(driver, screenshot_dir, 'admin-security-' + ui_mode)
 
 
 def test_settings_additional(driver, app_domain, ui_mode):
-    driver.get("https://{0}/index.php/settings/admin/additional".format(app_domain))
+    driver.get("https://{0}/settings/admin/additional".format(app_domain))
     time.sleep(10)
     screenshots(driver, screenshot_dir, 'admin-additional-' + ui_mode)

@@ -12,7 +12,7 @@ fi
 export LD_LIBRARY_PATH=${DIR}/postgresql/lib
 
 if [[ "$(whoami)" == "nextcloud" ]]; then
-    ${DIR}/postgresql/bin/psql -p ${PSQL_PORT} -h ${PSQL_DATABASE} "$@"
+    ${DIR}/postgresql/bin/initdb "$@"
 else
-    sudo -E -H -u nextcloud LD_LIBRARY_PATH=${LD_LIBRARY_PATH} ${DIR}/postgresql/bin/psql -p ${PSQL_PORT} -h ${PSQL_DATABASE} "$@"
+    sudo -E -H -u nextcloud LD_LIBRARY_PATH=${LD_LIBRARY_PATH} ${DIR}/postgresql/bin/initdb "$@"
 fi
