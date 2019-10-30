@@ -46,7 +46,7 @@ class Database:
         self.log.info(check_output(cmd, shell=True))
 
     def restore(self):
-        cmd = 'snap run nextcloud.psql -f {0} postgres'.format(self.backup_file)
+        cmd = 'snap run nextcloud.psql -f {0}'.format(self.backup_file)
         self.log.info("executing: {0}".format(cmd))
         self.log.info(check_output(cmd, shell=True))
 
