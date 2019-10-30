@@ -2,13 +2,13 @@
 
 DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && cd .. && pwd )
 
-if [[ -z "$SNAP_COMMON" ]]; then
-  echo "SNAP_COMMON environment variable must be set"
+if [[ -z "$SNAP_DATA" ]]; then
+  echo "SNAP_DATA environment variable must be set"
   exit 1
 fi
 
 export LD_LIBRARY_PATH=${DIR}/php/lib:${DIR}/postgresql/lib
-export NEXTCLOUD_CONFIG_DIR=${SNAP_COMMON}/nextcloud/config
+export NEXTCLOUD_CONFIG_DIR=${SNAP_DATA}/nextcloud/config
 
 if [[ "$(whoami)" == "nextcloud" ]]; then
     ${DIR}/php/bin/php -c ${SNAP_DATA}/config/php.ini "$@"
