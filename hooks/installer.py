@@ -145,6 +145,8 @@ class Installer:
         return 'installed' in open(self.nextcloud_config_file).read().strip()
 
     def upgrade(self):
+        if self.db.requires_upgrade():
+            self.db.restore()
 
         if 'require upgrade' in self.occ.run('status'):
             self.occ.run('maintenance:mode --on')
@@ -157,9 +159,6 @@ class Installer:
 
             self.occ.run('maintenance:mode --off')
             self.occ.run('db:add-missing-indices')
-
-        if self.db.requires_upgrade():
-            self.db.restore()
 
     def initialize(self, app_storage_dir):
 
