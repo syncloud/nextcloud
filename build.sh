@@ -21,7 +21,7 @@ rm -rf build
 BUILD_DIR=${DIR}/build/${NAME}
 mkdir -p ${BUILD_DIR}
 
-DOWNLOAD_URL=http://artifact.syncloud.org/3rdparty
+DOWNLOAD_URL=https://github.com/syncloud/3rdparty/releases/download/1
 
 wget --progress=dot:giga ${DOWNLOAD_URL}/php7-${ARCH}.tar.gz
 tar xf php7-${ARCH}.tar.gz
