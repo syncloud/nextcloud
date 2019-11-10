@@ -105,7 +105,8 @@ class Installer:
             self.initialize(app_storage_dir)
         
         self.occ.run('ldap:set-config s01 ldapEmailAttribute mail')
-   
+        extra_apps_dir = join(self.data_dir, 'extra_apps')
+        self.occ.run('config:system:set app_paths 1 path --value={0}'.format(extra_apps_dir))
         # migrate to systemd cron units
         self.cron.remove()
         self.cron.create()
