@@ -11,23 +11,22 @@ from syncloudlib.integration.hosts import add_host_alias_by_ip
 from syncloudlib.integration.screenshots import screenshots
 
 DIR = dirname(__file__)
-screenshot_dir = join(DIR, 'screenshot')
 TMP_DIR = '/tmp/syncloud/ui'
 
 
 @pytest.fixture(scope="session")
-def module_setup(request, device, log_dir, ui_mode):
+def module_setup(request, device, artifact_dir, ui_mode):
     def module_teardown():
         device.activated()
         device.run_ssh('mkdir -p {0}'.format(TMP_DIR), throw=False)
         device.run_ssh('journalctl > {0}/journalctl.ui.{1} log'.format(TMP_DIR, ui_mode), throw=False)
         device.run_ssh('cp /var/log/syslog {0}/syslog.ui.{1}.log'.format(TMP_DIR, ui_mode), throw=False)
-        device.scp_from_device('{0}/*'.format(TMP_DIR), join(log_dir, 'log'))
+        device.scp_from_device('{0}/*'.format(TMP_DIR), join(artifact_dir, 'log'))
 
     request.addfinalizer(module_teardown)
 
 
-def test_start(module_setup, app, domain, device_host):
+def test_start(module_setup, app, domain, device_host, screenshot_dir):
     if not exists(screenshot_dir):
         os.mkdir(screenshot_dir)
     add_host_alias_by_ip(app, domain, device_host)
@@ -38,7 +37,7 @@ def test_login(driver, app_domain):
     time.sleep(10)
 
 
-def test_main(driver, device_user, device_password, ui_mode):
+def test_main(driver, device_user, device_password, ui_mode, screenshot_dir):
 
     user = driver.find_element_by_id("user")
     user.send_keys(device_user)
@@ -64,31 +63,31 @@ def test_main(driver, device_user, device_password, ui_mode):
     screenshots(driver, screenshot_dir, 'main-' + ui_mode)
 
 
-def test_settings(driver, app_domain, ui_mode):
+def test_settings(driver, app_domain, ui_mode, screenshot_dir):
     driver.get("https://{0}/settings/admin".format(app_domain))
     time.sleep(10)
     screenshots(driver, screenshot_dir, 'admin-' + ui_mode)
 
 
-def test_settings_user(driver, app_domain, ui_mode):
+def test_settings_user(driver, app_domain, ui_mode, screenshot_dir):
     driver.get("https://{0}/settings/user".format(app_domain))
     time.sleep(10)
     screenshots(driver, screenshot_dir, 'user-' + ui_mode)
 
 
-def test_settings_ldap(driver, app_domain, ui_mode):
+def test_settings_ldap(driver, app_domain, ui_mode, screenshot_dir):
     driver.get("https://{0}/settings/admin/ldap".format(app_domain))
     time.sleep(10)
     screenshots(driver, screenshot_dir, 'admin-ldap-' + ui_mode)
 
 
-def test_settings_security(driver, app_domain, ui_mode):
+def test_settings_security(driver, app_domain, ui_mode, screenshot_dir):
     driver.get("https://{0}/settings/admin/overview#security-warning".format(app_domain))
     time.sleep(10)
     screenshots(driver, screenshot_dir, 'admin-security-' + ui_mode)
 
 
-def test_settings_additional(driver, app_domain, ui_mode):
+def test_settings_additional(driver, app_domain, ui_mode, screenshot_dir):
     driver.get("https://{0}/settings/admin/additional".format(app_domain))
     time.sleep(10)
     screenshots(driver, screenshot_dir, 'admin-additional-' + ui_mode)
