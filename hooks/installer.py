@@ -42,7 +42,7 @@ class Installer:
         self.common_dir = paths.get_data_dir(APP_NAME)
         self.data_dir = os.environ['SNAP_DATA']
         self.config_dir = join(self.data_dir, 'config')
-
+        self.extra_apps_dir = join(self.data_dir, 'extra-apps')
         self.occ = OCConsole(join(self.app_dir, OCC_RUNNER_PATH))
         self.nextcloud_config_path = join(self.data_dir, 'nextcloud', 'config')
         self.nextcloud_config_file = join(self.nextcloud_config_path, 'config.php')
@@ -70,7 +70,7 @@ class Installer:
         fs.makepath(self.nextcloud_config_path)
         fs.makepath(join(self.common_dir, 'log'))
         fs.makepath(join(self.common_dir, 'nginx'))
-        fs.makepath(join(self.data_dir, 'extra-apps'))
+        fs.makepath(self.extra_apps_dir)
 
         fs.chownpath(self.common_dir, USER_NAME, recursive=True)
         fs.chownpath(self.data_dir, USER_NAME, recursive=True)
@@ -105,8 +105,7 @@ class Installer:
             self.initialize(app_storage_dir)
         
         self.occ.run('ldap:set-config s01 ldapEmailAttribute mail')
-        extra_apps_dir = join(self.data_dir, 'extra_apps')
-        self.occ.run('config:system:set apps_paths 1 path --value="{0}"'.format(extra_apps_dir))
+        self.occ.run('config:system:set apps_paths 1 path --value="{0}"'.format(self.extra_apps_dir))
         # migrate to systemd cron units
         self.cron.remove()
         self.cron.create()
