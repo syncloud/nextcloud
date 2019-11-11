@@ -83,6 +83,7 @@ class Installer:
         fs.chownpath(self.nextcloud_config_path, USER_NAME, recursive=True)
 
         self.db.init()
+        self.db.init_config()
 
     def pre_refresh(self):
         self.db.backup()
@@ -94,6 +95,8 @@ class Installer:
         if self.db.requires_upgrade():
             self.db.remove()
             self.db.init()
+        
+        self.db.init_config()
 
     def configure(self):
         self.prepare_storage()
