@@ -40,7 +40,7 @@ class Installer:
         self.log = logger.get_logger('nextcloud_installer')
         self.app_dir = paths.get_app_dir(APP_NAME)
         self.common_dir = paths.get_data_dir(APP_NAME)
-        self.data_dir = join('var', 'snap', APP_NAME, 'current')
+        self.data_dir = join('/var'/snap', APP_NAME, 'current')
         self.config_dir = join(self.data_dir, 'config')
         self.extra_apps_dir = join(self.data_dir, 'extra-apps')
         self.occ = OCConsole(join(self.app_dir, OCC_RUNNER_PATH))
