@@ -40,14 +40,14 @@ class Installer:
         self.log = logger.get_logger('nextcloud_installer')
         self.app_dir = paths.get_app_dir(APP_NAME)
         self.common_dir = paths.get_data_dir(APP_NAME)
-        self.data_dir = os.environ['SNAP_DATA']
+        self.data_dir = join('var', 'snap', APP_NAME, 'current')
         self.config_dir = join(self.data_dir, 'config')
         self.extra_apps_dir = join(self.data_dir, 'extra-apps')
         self.occ = OCConsole(join(self.app_dir, OCC_RUNNER_PATH))
         self.nextcloud_config_path = join(self.data_dir, 'nextcloud', 'config')
         self.nextcloud_config_file = join(self.nextcloud_config_path, 'config.php')
         self.cron = Cron(CRON_USER)
-        self.db = Database(self.app_dir, self.data_dir, self.config_dir)
+        self.db = Database(self.app_dir, self.data_dir, self.config_dir, PSQL_PORT)
         self.oc_config = OCConfig(join(self.app_dir, 'bin/nextcloud-config'))
 
     def install_config(self):
@@ -106,6 +106,7 @@ class Installer:
         
         self.occ.run('ldap:set-config s01 ldapEmailAttribute mail')
         self.occ.run('config:system:set apps_paths 1 path --value="{0}"'.format(self.extra_apps_dir))
+        self.occ.run('config:system:set dbhost --value="{0}"'.format(self.db.self.database_host))
         # migrate to systemd cron units
         self.cron.remove()
         self.cron.create()

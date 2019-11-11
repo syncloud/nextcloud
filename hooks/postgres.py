@@ -7,7 +7,7 @@ from syncloudlib import logger
 
 class Database:
 
-    def __init__(self, app_dir, data_dir, config_path):
+    def __init__(self, app_dir, data_dir, config_path, port):
         self.log = logger.get_logger('database')
         self.app_dir = app_dir
         self.config_path = config_path
@@ -17,6 +17,7 @@ class Database:
         self.old_major_version_file = join(self.data_dir, 'db.major.version')
         self.new_major_version_file = join(self.app_dir, 'db.major.version')
         self.backup_file = join(self.data_dir, 'database.dump')
+        self.database_host = '{0}:{1}'.format(self.database_dir, port)
 
     def requires_upgrade(self):
         if not isfile(self.old_major_version_file):
