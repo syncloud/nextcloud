@@ -40,7 +40,7 @@ class Database:
         cmd = join(self.app_dir, 'bin/initdb.sh')
         self.log.info(check_output([cmd, self.database_dir]))
 
-    def init_config():
+    def init_config(self):
         shutil.copy(self.postgresql_config, self.database_dir)
 
     def execute(self, database, user, sql):
