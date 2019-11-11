@@ -106,7 +106,7 @@ class Installer:
         
         self.occ.run('ldap:set-config s01 ldapEmailAttribute mail')
         self.occ.run('config:system:set apps_paths 1 path --value="{0}"'.format(self.extra_apps_dir))
-        self.occ.run('config:system:set dbhost --value="{0}"'.format(self.db.self.database_host))
+        self.occ.run('config:system:set dbhost --value="{0}"'.format(self.db.database_host))
         # migrate to systemd cron units
         self.cron.remove()
         self.cron.create()
