@@ -2,6 +2,7 @@ import logging
 import os
 import shutil
 import uuid
+import re
 from os.path import isfile
 from os.path import join
 from os.path import realpath
@@ -80,7 +81,7 @@ class Installer:
 
         default_config_file = join(self.config_dir, 'config.php')
         shutil.copy(default_config_file, self.nextcloud_config_file)
-        fs.chownpath(self.nextcloud_config_path, USER_NAME, recursive=True)
+        self.fix_config_permission()
 
         self.db.init()
         self.db.init_config()
@@ -91,6 +92,7 @@ class Installer:
     def post_refresh(self):
         self.install_config()
         self.migrate_nextcloud_config_file()
+        self.fix_version_specific_dbhost()
 
         if self.db.requires_upgrade():
             self.db.remove()
@@ -133,17 +135,32 @@ class Installer:
         fs.chownpath(self.data_dir, USER_NAME, recursive=True)
 
     def migrate_nextcloud_config_file(self):
-        # Migrate from common dir to data dir
-        if not isfile(self.nextcloud_config_file):
+         if not isfile(self.nextcloud_config_file):
             old_nextcloud_config_file = join(self.common_dir, 'nextcloud', 'config', 'config.php')
             if isfile(old_nextcloud_config_file):
-                old_database_dir = join(self.common_dir, 'database')
-                with open(old_nextcloud_config_file) as f:
-                    content = f.read().replace(old_database_dir, self.db.get_database_path())
-                with open(self.nextcloud_config_file, "w") as f:
-                    f.write(content)
-                fs.chownpath(self.nextcloud_config_path, USER_NAME, recursive=True)
+                shutil.copy(old_nextcloud_config_file, self.nextcloud_config_file)
+                self.fix_config_permission()
 
+
+    def fix_config_permission(self):
+        fs.chownpath(self.nextcloud_config_file, USER_NAME)
+
+
+    def fix_version_specific_dbhost(self):
+        content = self.read_nextcloud_config()
+        pattern = r"'dbhost'\s*=>\s*'.*?'"
+        replacement = "'dbhost' => '{0}'".format(self.db.database_host)
+        new_content = re.sub(pattern, replacement, content)
+        self.write_nextcloud_config(new_content)
+        self.fix_config_permission()
+
+    def read_nextcloud_config(self):
+        with open(self.nextcloud_config_file) as f:
+            return f.read()
+
+    def write_nextcloud_config(self, content):
+        with open(self.nextcloud_config_file, "w") as f:
+            f.write(content)
 
     def installed(self):
         return 'installed' in open(self.nextcloud_config_file).read().strip()
