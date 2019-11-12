@@ -18,9 +18,9 @@ requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
 
 
 @pytest.fixture(scope="session")
-def module_setup(request, device, data_dir, platform_data_dir, app_dir, log_dir):
+def module_setup(request, device, data_dir, platform_data_dir, app_dir, artifact_dir):
     def module_teardown():
-        platform_log_dir = join(log_dir, 'platform_log')
+        platform_log_dir = join(artifact_dir, 'platform_log')
         os.mkdir(platform_log_dir)
         device.scp_from_device('{0}/log/*'.format(platform_data_dir), platform_log_dir)
         device.run_ssh('ls -la {0} > {1}/app.data.ls.log'.format(data_dir, TMP_DIR), throw=False)
@@ -44,7 +44,7 @@ def module_setup(request, device, data_dir, platform_data_dir, app_dir, log_dir)
         device.run_ssh('ls -la /data > {0}/data.ls.log'.format(TMP_DIR), throw=False)
         device.run_ssh('ls -la /data/nextcloud > {0}/data.nextcloud.ls.log'.format(TMP_DIR), throw=False)
 
-        app_log_dir = join(log_dir, 'log')
+        app_log_dir = join(artifact_dir, 'log')
         os.mkdir(app_log_dir)
         device.scp_from_device('{0}/log/*.log'.format(data_dir), app_log_dir)
         device.scp_from_device('{0}/*'.format(TMP_DIR), app_log_dir)
@@ -253,6 +253,15 @@ def __check_test_dir(nextcloud_session, test_dir, app_domain):
 
 def test_phpinfo(device):
     device.run_ssh('snap run nextcloud.php -i > {0}/phpinfo.log'.format(TMP_DIR))
+
+
+def test_ext_apps_calendar(device, nextcloud_session, app_domain):
+    device.run_ssh('snap run nextcloud.occ app:install calendar')
+    response = nextcloud_session.get(
+        'https://{0}/apps/calendar/'.format(app_domain),
+        allow_redirects=False,
+        verify=False)
+    assert response.status_code == 200, response.text
 
 
 def test_storage_change_event(device):
