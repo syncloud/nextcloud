@@ -75,6 +75,7 @@ def test_start(module_setup, device, device_host, app, log_dir, domain):
     add_host_alias_by_ip(app, domain, device_host)
     device.run_ssh('date', retries=100)
     device.run_ssh('mkdir {0}'.format(TMP_DIR))
+    device.run_ssh('snap refresh platform --channel=master')
 
 
 def test_activate_device(device):
@@ -265,15 +266,11 @@ def test_ext_apps_calendar(device, nextcloud_session, app_domain):
 
 
 def test_storage_change_event(device):
-    device.run_ssh('/snap/platform/current/python/bin/python '
-                   '/snap/nextcloud/current/hooks/storage-change.py '
-                   '> {0}/storage-change.log'.format(TMP_DIR))
+    device.run_ssh('snap run nextcloud.storage-change > {0}/storage-change.log'.format(TMP_DIR))
 
 
 def test_access_change_event(device):
-    device.run_ssh('/snap/platform/current/python/bin/python '
-                   '/snap/nextcloud/current/hooks/access-change.py '
-                   '> {0}/access-change.log'.format(TMP_DIR))
+    device.run_ssh('snap run nextcloud.access-change > {0}/access-change.log'.format(TMP_DIR))
 
 
 def test_remove(device_session, device_host):
