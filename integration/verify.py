@@ -3,7 +3,7 @@ import os
 from os.path import join
 from subprocess import check_output
 import shutil
-
+from requests.auth import HTTPBasicAuth
 import pytest
 import requests
 from bs4 import BeautifulSoup
@@ -54,25 +54,6 @@ def module_setup(request, device, data_dir, platform_data_dir, app_dir, artifact
     request.addfinalizer(module_teardown)
 
 
-@pytest.fixture(scope='function')
-def nextcloud_session(app_domain, device_user, device_password, artifact_dir):
-    session = requests.session()
-    response = session.get('https://{0}/login'.format(app_domain), allow_redirects=False, verify=False)
-    with open(join(artifact_dir, 'login.get.log'), 'w') as f:
-        f.write(response.text.encode("UTF-8"))
-    soup = BeautifulSoup(response.text, "html.parser")
-    tokens = soup.find_all('input', {'name': 'requesttoken'})
-    assert len(tokens) > 0
-    requesttoken = tokens[0]['value']
-    response = session.post('https://{0}/login'.format(app_domain),
-                            data={'user': device_user, 'password': device_password, 'requesttoken': requesttoken},
-                            allow_redirects=False, verify=False)
-    with open(join(artifact_dir, 'login.post.log'), 'w') as f:
-        f.write(response.text.encode("UTF-8"))
-    assert response.status_code == 303
-    return session
-
-
 def test_start(module_setup, device, device_host, app, domain):
     add_host_alias_by_ip(app, domain, device_host)
     device.run_ssh('date', retries=100)
@@ -88,18 +69,6 @@ def test_activate_device(device):
 def test_install(app_archive_path, device_session, device_host, device_password):
     local_install(device_host, device_password, app_archive_path)
     wait_for_installer(device_session, device_host)
-
-
-def test_resource(nextcloud_session, app_domain):
-    response = nextcloud_session.get('https://{0}/core/img/loading.gif'.format(app_domain), verify=False)
-    assert response.status_code == 200, response.text
-
-
-def test_index(nextcloud_session, app_domain, artifact_dir):
-    response = nextcloud_session.get('https://{0}'.format(app_domain), verify=False)
-    with open(join(artifact_dir, 'index.log'), 'w') as f:
-        f.write(response.text.encode("UTF-8"))
-    assert response.status_code == 200, response.text
 
 
 # noinspection PyUnresolvedReferences
@@ -149,62 +118,44 @@ def test_visible_through_platform(app_domain):
     assert response.status_code == 200, response.text
 
 
-def test_carddav(nextcloud_session, app_domain, artifact_dir):
-    response = nextcloud_session.request(
+def test_carddav(app_domain, artifact_dir, device_user, device_password):
+    response = requests.request(
         'PROPFIND',
         'https://{0}/.well-known/carddav'.format(app_domain),
         allow_redirects=True,
-        verify=False)
+        verify=False,
+        auth=HTTPBasicAuth(device_user, device_password))
     with open(join(artifact_dir, 'well-known.carddav.headers.log'), 'w') as f:
         f.write(str(response.headers).replace(',', '\n'))
 
 
-def test_caldav(nextcloud_session, app_domain, artifact_dir):
-    response = nextcloud_session.request(
+def test_caldav(app_domain, artifact_dir, device_user, device_password):
+    response = requests.request(
         'PROPFIND',
         'https://{0}/.well-known/caldav'.format(app_domain),
         allow_redirects=True,
-        verify=False)
+        verify=False,
+        auth=HTTPBasicAuth(device_user, device_password))
     with open(join(artifact_dir, 'well-known.caldav.headers.log'), 'w') as f:
         f.write(str(response.headers).replace(',', '\n'))
 
 
-def test_admin(nextcloud_session, app_domain, artifact_dir):
-    response = nextcloud_session.get('https://{0}/settings/admin'.format(app_domain),
-                                     allow_redirects=False, verify=False)
-    with open(join(artifact_dir, 'admin.log'), 'w') as f:
-        f.write(response.text.encode("UTF-8"))
-    assert response.status_code == 200, response.text
-
-
-def test_verification(nextcloud_session, app_domain, artifact_dir):
-    response = nextcloud_session.get(
-        'https://{0}/settings/integrity/failed'.format(app_domain),
-        allow_redirects=False,
-        verify=False)
-    with open(join(artifact_dir, 'integrity.failed.log'), 'w') as f:
-        f.write(response.text)
-    assert response.status_code == 200, response.text
-    assert 'INVALID_HASH' not in response.text
-    assert 'EXCEPTION' not in response.text
-
-
-def test_disk(device_session, app_domain, device, device_host, device_user, device_password):
+def test_disk(device_session, app_domain, device, device_host, device_user, device_password, artifact_dir):
     loop_device_cleanup(device_host, '/tmp/test0', device_password)
     loop_device_cleanup(device_host, '/tmp/test1', device_password)
 
     device0 = loop_device_add(device_host, 'ext4', '/tmp/test0', device_password)
     __activate_disk(device_session, device0, device, device_host)
-    __create_test_dir('test0', app_domain, device_host, device_user, device_password)
-    __check_test_dir(nextcloud_session(app_domain, device_user, device_password), 'test0', app_domain)
+    __create_test_dir('test0', app_domain, device_user, device_password, artifact_dir)
+    __check_test_dir(device_user, device_password, 'test0', app_domain, artifact_dir)
 
     device1 = loop_device_add(device_host, 'ext2', '/tmp/test1', device_password)
     __activate_disk(device_session, device1, device, device_host)
-    __create_test_dir('test1', app_domain, device_host, device_user, device_password)
-    __check_test_dir(nextcloud_session(app_domain, device_user, device_password), 'test1', app_domain)
+    __create_test_dir('test1', app_domain, device_user, device_password, artifact_dir)
+    __check_test_dir(device_user, device_password, 'test1', app_domain, artifact_dir)
 
     __activate_disk(device_session, device0, device, device_host)
-    __check_test_dir(nextcloud_session(app_domain, device_user, device_password), 'test0', app_domain)
+    __check_test_dir(device_user, device_password, 'test0', app_domain, artifact_dir)
 
     __deactivate_disk(device_session, device, device_host)
 
@@ -232,24 +183,20 @@ def __deactivate_disk(device_session, device, device_host):
     assert response.status_code == 200, response.text
 
 
-def __create_test_dir(test_dir, app_domain, device_host, device_user, device_password):
+def __create_test_dir(test_dir, app_domain, device_user, device_password, artifact_dir):
     response = requests.request('MKCOL', 'https://{0}:{1}@{2}/remote.php/webdav/{3}'.format(
-        device_user, device_password, device_host, test_dir),
-                                headers={"Host": app_domain}, verify=False)
-    print(response.text)
+        device_user, device_password, app_domain, test_dir), verify=False)
+    with open(join(artifact_dir, 'create.{0}.dir.log'.format(test_dir)), 'w') as f:
+        f.write(response.text)
     assert response.status_code == 201, response.text
 
 
-def __check_test_dir(nextcloud_session, test_dir, app_domain):
-    response = requests.get('https://{0}'.format(app_domain), verify=False)
-    assert response.status_code == 200, BeautifulSoup(response.text, "html.parser").find('li', class_='error')
-
-    response = nextcloud_session.get(
-        'https://{0}/apps/files/ajax/list.php?dir=/'.format(app_domain),
-        verify=False,
-        allow_redirects=False)
+def __check_test_dir(device_user, device_password, test_dir, app_domain, artifact_dir):
+    response = requests.request('PROPFIND', 'https://{0}:{1}@{2}/remote.php/dav/files/{0}'.format(
+        device_user, device_password, app_domain, test_dir), verify=False)
     info = json.loads(response.text)
-    print(response.text)
+    with open(join(artifact_dir, 'check.{0}.dir.log'.format(test_dir)), 'w') as f:
+        f.write(response.text)
     dirs = map(lambda v: v['name'], info['data']['files'])
     assert test_dir in dirs, response.text
 
