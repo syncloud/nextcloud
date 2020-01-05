@@ -55,10 +55,10 @@ def module_setup(request, device, data_dir, platform_data_dir, app_dir, artifact
 
 
 @pytest.fixture(scope='function')
-def nextcloud_session(app_domain, device_user, device_password, log_dir):
+def nextcloud_session(app_domain, device_user, device_password, artifact_dir):
     session = requests.session()
     response = session.get('https://{0}/login'.format(app_domain), allow_redirects=False, verify=False)
-    with open(join(log_dir, 'login.get.log'), 'w') as f:
+    with open(join(artifact_dir, 'login.get.log'), 'w') as f:
         f.write(response.text.encode("UTF-8"))
     soup = BeautifulSoup(response.text, "html.parser")
     tokens = soup.find_all('input', {'name': 'requesttoken'})
@@ -67,15 +67,13 @@ def nextcloud_session(app_domain, device_user, device_password, log_dir):
     response = session.post('https://{0}/login'.format(app_domain),
                             data={'user': device_user, 'password': device_password, 'requesttoken': requesttoken},
                             allow_redirects=False, verify=False)
-    with open(join(log_dir, 'login.post.log'), 'w') as f:
+    with open(join(artifact_dir, 'login.post.log'), 'w') as f:
         f.write(response.text.encode("UTF-8"))
     assert response.status_code == 303
     return session
 
 
-def test_start(module_setup, device, device_host, app, log_dir, domain):
-    shutil.rmtree(log_dir, ignore_errors=True)
-    os.mkdir(log_dir)
+def test_start(module_setup, device, device_host, app, domain):
     add_host_alias_by_ip(app, domain, device_host)
     device.run_ssh('date', retries=100)
     device.run_ssh('mkdir {0}'.format(TMP_DIR))
@@ -97,9 +95,9 @@ def test_resource(nextcloud_session, app_domain):
     assert response.status_code == 200, response.text
 
 
-def test_index(nextcloud_session, app_domain, log_dir):
+def test_index(nextcloud_session, app_domain, artifact_dir):
     response = nextcloud_session.get('https://{0}'.format(app_domain), verify=False)
-    with open(join(log_dir, 'index.log'), 'w') as f:
+    with open(join(artifact_dir, 'index.log'), 'w') as f:
         f.write(response.text.encode("UTF-8"))
     assert response.status_code == 200, response.text
 
@@ -151,40 +149,40 @@ def test_visible_through_platform(app_domain):
     assert response.status_code == 200, response.text
 
 
-def test_carddav(nextcloud_session, app_domain, log_dir):
+def test_carddav(nextcloud_session, app_domain, artifact_dir):
     response = nextcloud_session.request(
         'PROPFIND',
         'https://{0}/.well-known/carddav'.format(app_domain),
         allow_redirects=True,
         verify=False)
-    with open(join(log_dir, 'well-known.carddav.headers.log'), 'w') as f:
+    with open(join(artifact_dir, 'well-known.carddav.headers.log'), 'w') as f:
         f.write(str(response.headers).replace(',', '\n'))
 
 
-def test_caldav(nextcloud_session, app_domain, log_dir):
+def test_caldav(nextcloud_session, app_domain, artifact_dir):
     response = nextcloud_session.request(
         'PROPFIND',
         'https://{0}/.well-known/caldav'.format(app_domain),
         allow_redirects=True,
         verify=False)
-    with open(join(log_dir, 'well-known.caldav.headers.log'), 'w') as f:
+    with open(join(artifact_dir, 'well-known.caldav.headers.log'), 'w') as f:
         f.write(str(response.headers).replace(',', '\n'))
 
 
-def test_admin(nextcloud_session, app_domain, log_dir):
+def test_admin(nextcloud_session, app_domain, artifact_dir):
     response = nextcloud_session.get('https://{0}/settings/admin'.format(app_domain),
                                      allow_redirects=False, verify=False)
-    with open(join(log_dir, 'admin.log'), 'w') as f:
+    with open(join(artifact_dir, 'admin.log'), 'w') as f:
         f.write(response.text.encode("UTF-8"))
     assert response.status_code == 200, response.text
 
 
-def test_verification(nextcloud_session, app_domain, log_dir):
+def test_verification(nextcloud_session, app_domain, artifact_dir):
     response = nextcloud_session.get(
         'https://{0}/settings/integrity/failed'.format(app_domain),
         allow_redirects=False,
         verify=False)
-    with open(join(log_dir, 'integrity.failed.log'), 'w') as f:
+    with open(join(artifact_dir, 'integrity.failed.log'), 'w') as f:
         f.write(response.text)
     assert response.status_code == 200, response.text
     assert 'INVALID_HASH' not in response.text
