@@ -55,18 +55,21 @@ def module_setup(request, device, data_dir, platform_data_dir, app_dir, artifact
 
 
 @pytest.fixture(scope='function')
-def nextcloud_session(app_domain, device_user, device_password):
+def nextcloud_session(app_domain, device_user, device_password, log_dir):
     session = requests.session()
     response = session.get('https://{0}/login'.format(app_domain), allow_redirects=False, verify=False)
-    # print(response.headers)
+    with open(join(log_dir, 'login.get.log'), 'w') as f:
+        f.write(response.text.encode("UTF-8"))
     soup = BeautifulSoup(response.text, "html.parser")
     tokens = soup.find_all('input', {'name': 'requesttoken'})
-    assert len(tokens) > 0, response.text.encode("UTF-8")
+    assert len(tokens) > 0
     requesttoken = tokens[0]['value']
     response = session.post('https://{0}/login'.format(app_domain),
                             data={'user': device_user, 'password': device_password, 'requesttoken': requesttoken},
                             allow_redirects=False, verify=False)
-    assert response.status_code == 303, response.text
+    with open(join(log_dir, 'login.post.log'), 'w') as f:
+        f.write(response.text.encode("UTF-8"))
+    assert response.status_code == 303
     return session
 
 
