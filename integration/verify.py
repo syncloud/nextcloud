@@ -175,7 +175,7 @@ def __activate_disk(device_session, loop_device, device, device_host):
     files_scan(device)
     assert response.status_code == 200, response.text
 
-    device.run_ssh('snap run nextcloud.occ > occ.activate.log')
+    device.run_ssh('snap run nextcloud.occ > {0}/occ.activate.log'.format(TMP_DIR))
 
 def __deactivate_disk(device_session, device, device_host):
     response = device_session.get('https://{0}/rest/settings/disk_deactivate'.format(device_host),
