@@ -193,9 +193,9 @@ def __create_test_dir(test_dir, app_domain, device_user, device_password, artifa
 
 
 def __check_test_dir(device_user, device_password, test_dir, app_domain, artifact_dir):
-    response = requests.request('PROPFIND', 'https://{0}:{1}@{2}/remote.php/dav/files/{0}'.format(
-        device_user, device_password, app_domain, test_dir), verify=False)
-    info = json.loads(response.text)
+    response = requests.request('PROPFIND', 'https://{0}:{1}@{2}/remote.php/dav/files/{0}/'.format(
+        device_user, device_password, app_domain), verify=False)
+    info = BeautifulSoup(response.text, "xml")
     with open(join(artifact_dir, 'check.{0}.dir.log'.format(test_dir)), 'w') as f:
         f.write(response.text)
     dirs = map(lambda v: v['name'], info['data']['files'])
