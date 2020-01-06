@@ -127,17 +127,17 @@ def test_occ_check(device):
 
 
 def test_occ_status(device):
-    device.run_ssh('snap run nextcloud.occ status')
+    device.run_ssh('snap run nextcloud.occ status   ')
 
 
-def test_carddav(app_domain, artifact_dir, device_user, device_password):
+def test_webdav(app_domain, artifact_dir, device_user, device_password):
     response = requests.request('PROPFIND', 'https://{0}:{1}@{2}/remote.php/webdav/'.format(
         device_user, device_password, app_domain), verify=False)
     with open(join(artifact_dir, 'webdav.list.log'), 'w') as f:
         f.write(str(response.text).replace(',', '\n'))
 
 
-def test_webdav(app_domain, artifact_dir, device_user, device_password):
+def test_carddav(app_domain, artifact_dir, device_user, device_password):
     response = requests.request(
         'PROPFIND',
         'https://{0}/.well-known/carddav'.format(app_domain),
