@@ -118,7 +118,26 @@ def test_visible_through_platform(app_domain):
     assert response.status_code == 200, response.text
 
 
+def test_occ_users(device):
+    device.run_ssh('snap run nextcloud.occ user:list')
+
+
+def test_occ_check(device):
+    device.run_ssh('snap run nextcloud.occ check')
+
+
+def test_occ_status(device):
+    device.run_ssh('snap run nextcloud.occ status')
+
+
 def test_carddav(app_domain, artifact_dir, device_user, device_password):
+    response = requests.request('PROPFIND', 'https://{0}:{1}@{2}/remote.php/webdav/'.format(
+        device_user, device_password, app_domain), verify=False)
+    with open(join(artifact_dir, 'webdav.list.log'), 'w') as f:
+        f.write(str(response.text).replace(',', '\n'))
+
+
+def test_webdav(app_domain, artifact_dir, device_user, device_password):
     response = requests.request(
         'PROPFIND',
         'https://{0}/.well-known/carddav'.format(app_domain),
@@ -197,7 +216,7 @@ def __create_test_dir(test_dir, app_domain, device_user, device_password, artifa
 
 
 def __check_test_dir(device_user, device_password, test_dir, app_domain, artifact_dir):
-    response = requests.request('PROPFIND', 'https://{0}:{1}@{2}/remote.php/dav/files/{0}/'.format(
+    response = requests.request('PROPFIND', 'https://{0}:{1}@{2}/remote.php/webdav/'.format(
         device_user, device_password, app_domain), verify=False)
     info = BeautifulSoup(response.text, "xml")
     with open(join(artifact_dir, 'check.{0}.dir.log'.format(test_dir)), 'w') as f:
