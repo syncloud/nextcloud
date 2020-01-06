@@ -18,14 +18,14 @@ requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
 
 
 @pytest.fixture(scope="session")
-def module_setup(request, device, data_dir, platform_data_dir, app_dir, artifact_dir):
+def module_setup(request, device, platform_data_dir, app_dir, artifact_dir):
     def module_teardown():
         platform_log_dir = join(artifact_dir, 'platform_log')
         os.mkdir(platform_log_dir)
         device.scp_from_device('{0}/log/*'.format(platform_data_dir), platform_log_dir)
-        device.run_ssh('ls -la {0} > {1}/app.data.ls.log'.format(data_dir, TMP_DIR), throw=False)
-        device.run_ssh('ls -la {0}/nextcloud/config > {1}/config.ls.log'.format(data_dir, TMP_DIR), throw=False)
-        device.run_ssh('cp {0}/nextcloud/config/config.php {1}'.format(data_dir, TMP_DIR), throw=False)
+        device.run_ssh('ls -la /var/snap/nextcloud/current > {0}/app.data.ls.log'.format(TMP_DIR), throw=False)
+        device.run_ssh('ls -la /var/snap/nextcloud/current/nextcloud/config > {0}/config.ls.log'.format(TMP_DIR), throw=False)
+        device.run_ssh('cp /var/snap/nextcloud/current/nextcloud/config/config.php {0}'.format(TMP_DIR), throw=False)
         device.run_ssh('snap run nextcloud.occ > {1}/occ.help.log'.format(app_dir, TMP_DIR), throw=False)
         device.run_ssh('top -bn 1 -w 500 -c > {0}/top.log'.format(TMP_DIR), throw=False)
         device.run_ssh('ps auxfw > {0}/ps.log'.format(TMP_DIR), throw=False)
@@ -46,7 +46,7 @@ def module_setup(request, device, data_dir, platform_data_dir, app_dir, artifact
 
         app_log_dir = join(artifact_dir, 'log')
         os.mkdir(app_log_dir)
-        device.scp_from_device('{0}/log/*.log'.format(data_dir), app_log_dir)
+        device.scp_from_device('/var/snap/nextcloud/common/log/*.log', app_log_dir)
         device.scp_from_device('{0}/*'.format(TMP_DIR), app_log_dir)
         shutil.copy2('/etc/hosts', app_log_dir)
         check_output('chmod -R a+r {0}'.format(artifact_dir), shell=True)
@@ -143,6 +143,10 @@ def test_caldav(app_domain, artifact_dir, device_user, device_password):
 def test_disk(device_session, app_domain, device, device_host, device_user, device_password, artifact_dir):
     loop_device_cleanup(device_host, '/tmp/test0', device_password)
     loop_device_cleanup(device_host, '/tmp/test1', device_password)
+
+    __create_test_dir('test00', app_domain, device_user, device_password, artifact_dir)
+    files_scan(device)
+    __check_test_dir(device_user, device_password, 'test00', app_domain, artifact_dir)
 
     device0 = loop_device_add(device_host, 'ext4', '/tmp/test0', device_password)
     __activate_disk(device_session, device0, device, device_host)
