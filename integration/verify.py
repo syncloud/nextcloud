@@ -221,8 +221,8 @@ def __check_test_dir(device_user, device_password, test_dir, app_domain, artifac
     info = BeautifulSoup(response.text, "xml")
     with open(join(artifact_dir, 'check.{0}.dir.log'.format(test_dir)), 'w') as f:
         f.write(response.text)
-    dirs = map(lambda v: v['name'], info['data']['files'])
-    assert test_dir in dirs, response.text
+    #dirs = map(lambda v: v['name'], info['data']['files'])
+    assert test_dir in response.text, response.text
 
 
 def test_phpinfo(device):
