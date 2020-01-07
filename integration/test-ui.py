@@ -100,10 +100,7 @@ def test_apps_calendar(driver, app_domain, ui_mode, screenshot_dir):
 
 
 def test_verification(driver, app_domain, ui_mode, screenshot_dir):
-    driver.get(
-        'https://{0}/settings/integrity/failed'.format(app_domain),
-        allow_redirects=False,
-        verify=False)
+    driver.get('https://{0}/settings/integrity/failed'.format(app_domain))
     screenshots(driver, screenshot_dir, 'integrity-failed-' + ui_mode)
     source = driver.page_source.encode("utf-8")
     assert 'INVALID_HASH' not in source
