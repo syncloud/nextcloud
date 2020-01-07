@@ -229,15 +229,6 @@ def test_phpinfo(device):
     device.run_ssh('snap run nextcloud.php -i > {0}/phpinfo.log'.format(TMP_DIR))
 
 
-def test_ext_apps_calendar(device, nextcloud_session, app_domain):
-    device.run_ssh('snap run nextcloud.occ app:install calendar')
-    response = nextcloud_session.get(
-        'https://{0}/apps/calendar/'.format(app_domain),
-        allow_redirects=False,
-        verify=False)
-    assert response.status_code == 200, response.text
-
-
 def test_storage_change_event(device):
     device.run_ssh('snap run nextcloud.storage-change > {0}/storage-change.log'.format(TMP_DIR))
 
