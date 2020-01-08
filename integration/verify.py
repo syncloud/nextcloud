@@ -58,11 +58,10 @@ def test_start(module_setup, device, device_host, app, domain):
     add_host_alias_by_ip(app, domain, device_host)
     device.run_ssh('date', retries=100)
     device.run_ssh('mkdir {0}'.format(TMP_DIR))
-    device.run_ssh('snap refresh platform --channel=master')
 
 
 def test_activate_device(device):
-    response = device.activate()
+    response = device.activate("master")
     assert response.status_code == 200, response.text
 
 
