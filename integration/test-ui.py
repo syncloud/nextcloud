@@ -91,3 +91,17 @@ def test_settings_additional(driver, app_domain, ui_mode, screenshot_dir):
     driver.get("https://{0}/settings/admin/additional".format(app_domain))
     time.sleep(10)
     screenshots(driver, screenshot_dir, 'admin-additional-' + ui_mode)
+
+
+def test_apps_calendar(driver, app_domain, ui_mode, screenshot_dir):
+    driver.get("https://{0}/calendar".format(app_domain))
+    time.sleep(10)
+    screenshots(driver, screenshot_dir, 'calendar-' + ui_mode)
+
+
+def test_verification(driver, app_domain, ui_mode, screenshot_dir):
+    driver.get('https://{0}/settings/integrity/failed'.format(app_domain))
+    screenshots(driver, screenshot_dir, 'integrity-failed-' + ui_mode)
+    source = driver.page_source.encode("utf-8")
+    assert 'INVALID_HASH' not in source
+    assert 'EXCEPTION' not in source
