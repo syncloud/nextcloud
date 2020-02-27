@@ -53,7 +53,7 @@ def test_main(driver, device_user, device_password, ui_mode, screenshot_dir):
     wait_driver = WebDriverWait(driver, 300)
 
     if ui_mode == "desktop":
-        close_btn_xpath =  "//button[@aria-label='Close']")
+        close_btn_xpath =  "//button[@aria-label='Close']"
         wait.until(EC.presence_of_element_located(done_message))
         close_css_selector = 'a.icon-close'
         wait_driver.until(EC.presence_of_element_located_by_xpath(close_btn_xpath))
