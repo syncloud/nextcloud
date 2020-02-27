@@ -48,8 +48,8 @@ steps:
     command_timeout: 2m
     host:
       from_secret: artifact_host
-    password:
-      from_secret: artifact_password
+    key:
+      from_secret: artifact_key
     source: artifact/*
     strip_components: 1
     target: /home/artifact/repo/nextcloud/${DRONE_BUILD_NUMBER}-arm
@@ -141,8 +141,8 @@ steps:
     command_timeout: 2m
     host:
       from_secret: artifact_host
-    password:
-      from_secret: artifact_password
+    key:
+      from_secret: artifact_key
     source: artifact/*
     strip_components: 1
     target: /home/artifact/repo/nextcloud/${DRONE_BUILD_NUMBER}-amd64
