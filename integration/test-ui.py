@@ -54,7 +54,7 @@ def test_main(driver, device_user, device_password, ui_mode, screenshot_dir):
 
     if ui_mode == "desktop":
         close_btn_xpath =  "//button[@aria-label='Close']"
-        wait_driver.until(EC.presence_of_element_located_by_xpath(close_btn_xpath))
+        wait_driver.until(EC.presence_of_element_located((By.XPATH, close_btn_xpath)))
         wizard_close_button = driver.find_element_by_xpath(close_btn_xpath)
         screenshots(driver, screenshot_dir, 'main_first_time-' + ui_mode)
         wizard_close_button.click()
