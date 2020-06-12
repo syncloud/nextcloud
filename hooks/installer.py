@@ -174,22 +174,25 @@ class Installer:
 
             try:
                 self.occ.run('upgrade')
+                self.occ.run('app:update --all')
             except CalledProcessError, e:
                 self.log.warn('unable to upgrade')
                 self.log.warn(e.output)
 
             self.occ.run('maintenance:mode --off')
             self.occ.run('db:add-missing-indices')
+            self.occ.run('db:add-missing-columns')
 
     def initialize(self, app_storage_dir):
 
         self.db.execute('postgres', DB_USER, "ALTER USER {0} WITH PASSWORD '{1}';".format(DB_USER, DB_PASSWORD))
         real_app_storage_dir = realpath(app_storage_dir)
+        INSTALL_USER_PASSWORD = unicode(uuid.uuid4().hex)
         self.occ.run('maintenance:install  --database pgsql --database-host {0}:{1}'
                      ' --database-name nextcloud --database-user {2} --database-pass {3}'
                      ' --admin-user {4} --admin-pass {5} --data-dir {6}'
                      .format(self.db.get_database_path(), PSQL_PORT, DB_USER, DB_PASSWORD,
-                             INSTALL_USER, unicode(uuid.uuid4().hex), real_app_storage_dir))
+                             INSTALL_USER, INSTALL_USER_PASSWORD, real_app_storage_dir))
 
         self.occ.run('app:enable user_ldap')
 
@@ -228,7 +231,8 @@ class Installer:
         
         self.occ.run('db:convert-filecache-bigint')
 
-        self.cron.run()
+        # cron takes a lot of time and fails the installation on big existing file storage
+        # self.cron.run()
 
         self.db.execute(DB_NAME, DB_USER, "update oc_ldap_group_mapping set owncloud_name = 'admin';")
         self.db.execute(DB_NAME, DB_USER, "update oc_ldap_group_members set owncloudname = 'admin';")
@@ -259,6 +263,7 @@ class Installer:
         app_domain = urls.get_app_domain_name(APP_NAME)
         local_ip = check_output(["hostname", "-I"]).split(" ")[0]
         self.oc_config.set_value('trusted_domains', "localhost {0} {1}".format(local_ip, app_domain))
+        self.oc_config.set_value('trusted_proxies', app_domain)
 
 
 class Cron:

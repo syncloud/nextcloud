@@ -1,5 +1,6 @@
 import os
 from os.path import dirname, join, exists
+from subprocess import check_output
 
 import pytest
 import time
@@ -19,9 +20,10 @@ def module_setup(request, device, artifact_dir, ui_mode):
     def module_teardown():
         device.activated()
         device.run_ssh('mkdir -p {0}'.format(TMP_DIR), throw=False)
-        device.run_ssh('journalctl > {0}/journalctl.ui.{1} log'.format(TMP_DIR, ui_mode), throw=False)
+        device.run_ssh('journalctl > {0}/journalctl.ui.{1}.log'.format(TMP_DIR, ui_mode), throw=False)
         device.run_ssh('cp /var/log/syslog {0}/syslog.ui.{1}.log'.format(TMP_DIR, ui_mode), throw=False)
         device.scp_from_device('{0}/*'.format(TMP_DIR), join(artifact_dir, 'log'))
+        check_output('chmod -R a+r {0}'.format(artifact_dir), shell=True)
 
     request.addfinalizer(module_teardown)
 
@@ -53,9 +55,14 @@ def test_main(driver, device_user, device_password, ui_mode, screenshot_dir):
     wait_driver = WebDriverWait(driver, 300)
 
     if ui_mode == "desktop":
-        close_btn_xpath =  "//button[@aria-label='Close']"
-        wait_driver.until(EC.presence_of_element_located((By.XPATH, close_btn_xpath)))
-        wizard_close_button = driver.find_element_by_xpath(close_btn_xpath)
+        close_css_selector = 'button.header-close'
+        wait_driver.until(EC.presence_of_element_located((By.CSS_SELECTOR, close_css_selector)))
+        wizard_close_button = driver.find_element_by_css_selector(close_css_selector)
+
+        # close_btn_xpath =  "//span[text()='Close']"
+        # wait_driver.until(EC.presence_of_element_located((By.XPATH, close_btn_xpath)))
+        # wizard_close_button = driver.find_element_by_xpath(close_btn_xpath)
+
         screenshots(driver, screenshot_dir, 'main_first_time-' + ui_mode)
         wizard_close_button.click()
     
@@ -105,3 +112,10 @@ def test_verification(driver, app_domain, ui_mode, screenshot_dir):
     source = driver.page_source.encode("utf-8")
     assert 'INVALID_HASH' not in source
     assert 'EXCEPTION' not in source
+
+
+def test_users(driver, app_domain, ui_mode, screenshot_dir):
+    driver.get('https://{0}/settings/users'.format(app_domain))
+    screenshots(driver, screenshot_dir, 'users-' + ui_mode)
+    source = driver.page_source.encode("utf-8")
+    assert 'Server Error' not in source
