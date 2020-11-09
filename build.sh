@@ -76,3 +76,5 @@ echo "- ${ARCH}" >> ${SNAP_DIR}/meta/snap.yaml
 PACKAGE=${NAME}_${VERSION}_${ARCH}.snap
 echo ${PACKAGE} > package.name
 mksquashfs ${SNAP_DIR} ${DIR}/${PACKAGE} -noappend -comp xz -no-xattrs -all-root
+mkdir ${DIR}/artifact
+cp ${DIR}/${PACKAGE} ${DIR}/artifact
