@@ -56,7 +56,7 @@ def test_main(driver, device_user, device_password, ui_mode, screenshot_dir):
 
     if ui_mode == "desktop":
         close_css_selector = 'button.header-close'
-        wait_driver.until(EC.presence_of_element_located((By.CSS_SELECTOR, close_css_selector)))
+        wait_driver.until(EC.element_to_be_clickable((By.CSS_SELECTOR, close_css_selector)))
         wizard_close_button = driver.find_element_by_css_selector(close_css_selector)
 
         # close_btn_xpath =  "//span[text()='Close']"
