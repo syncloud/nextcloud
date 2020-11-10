@@ -8,6 +8,7 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.common.action_chains import ActionChains
 from syncloudlib.integration.hosts import add_host_alias_by_ip
 from syncloudlib.integration.screenshots import screenshots
 
@@ -52,18 +53,18 @@ def test_main(driver, device_user, device_password, ui_mode, screenshot_dir):
     time.sleep(10)
     screenshots(driver, screenshot_dir, 'login_progress-' + ui_mode)
        
-    wait_driver = WebDriverWait(driver, 300)
+    wait_driver = WebDriverWait(driver, 100)
 
     if ui_mode == "desktop":
         close_css_selector = 'button.header-close'
-        wait_driver.until(EC.element_to_be_clickable((By.CSS_SELECTOR, close_css_selector)))
+        wait_driver.until(EC.presence_of_element_located((By.CSS_SELECTOR, close_css_selector)))
         wizard_close_button = driver.find_element_by_css_selector(close_css_selector)
-
-        # close_btn_xpath =  "//span[text()='Close']"
-        # wait_driver.until(EC.presence_of_element_located((By.XPATH, close_btn_xpath)))
-        # wizard_close_button = driver.find_element_by_xpath(close_btn_xpath)
-
         screenshots(driver, screenshot_dir, 'main_first_time-' + ui_mode)
+        hover = ActionChains(driver).move_to_element(wizard_close_button)
+        hover.perform()
+        screenshots(driver, screenshot_dir, 'main_first_time-hover-' + ui_mode)
+        wait_driver.until(EC.element_to_be_clickable((By.CSS_SELECTOR, close_css_selector)))
+        screenshots(driver, screenshot_dir, 'main_first_time-click' + ui_mode)
         wizard_close_button.click()
     
     time.sleep(2)
