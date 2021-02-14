@@ -1,16 +1,15 @@
-import json
 import os
-from os.path import join
-from subprocess import check_output
-import shutil
-from requests.auth import HTTPBasicAuth
 import pytest
 import requests
+import shutil
 from bs4 import BeautifulSoup
+from os.path import join
+from requests.auth import HTTPBasicAuth
+from requests.packages.urllib3.exceptions import InsecureRequestWarning
+from subprocess import check_output
+from syncloudlib.integration.hosts import add_host_alias_by_ip
 from syncloudlib.integration.installer import local_install, wait_for_installer
 from syncloudlib.integration.loop import loop_device_add, loop_device_cleanup
-from syncloudlib.integration.hosts import add_host_alias_by_ip
-from requests.packages.urllib3.exceptions import InsecureRequestWarning
 
 TMP_DIR = '/tmp/syncloud'
 
@@ -199,8 +198,8 @@ def __log_data_dir(device):
 
 def __activate_disk(device_session, loop_device, device, device_host):
     __log_data_dir(device)
-    response = device_session.get('https://{0}/rest/settings/disk_activate'.format(device_host),
-                                  json={'device': loop_device}, allow_redirects=False)
+    response = device_session.post('https://{0}/rest/settings/disk_activate'.format(device_host),
+                                   json={'device': loop_device}, allow_redirects=False)
     __log_data_dir(device)
     files_scan(device)
     assert response.status_code == 200, response.text
@@ -209,8 +208,8 @@ def __activate_disk(device_session, loop_device, device, device_host):
 
 
 def __deactivate_disk(device_session, device, device_host):
-    response = device_session.get('https://{0}/rest/settings/disk_deactivate'.format(device_host),
-                                  allow_redirects=False)
+    response = device_session.post('https://{0}/rest/settings/disk_deactivate'.format(device_host),
+                                   allow_redirects=False)
     files_scan(device)
     assert response.status_code == 200, response.text
 
