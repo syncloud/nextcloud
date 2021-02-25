@@ -204,7 +204,7 @@ class Installer:
 
         self.occ.run('ldap:set-config s01 ldapHost ldap://localhost')
         self.occ.run('ldap:set-config s01 ldapPort 389')
-        self.occ.run('ldap:set-config s01 ldapAgentName dc=syncloud,dc=org')
+        self.occ.run('ldap:set-config s01 ldapAgentName cn=admin,dc=syncloud,dc=org')
         self.occ.run('ldap:set-config s01 ldapBase dc=syncloud,dc=org')
         self.occ.run('ldap:set-config s01 ldapAgentPassword syncloud')
 
@@ -222,7 +222,7 @@ class Installer:
         self.occ.run('ldap:set-config s01 ldapGroupDisplayName cn')
         self.occ.run('ldap:set-config s01 ldapBaseGroups ou=groups,dc=syncloud,dc=org')
         self.occ.run('ldap:set-config s01 ldapGroupFilter "(&(|(objectclass=posixGroup)))"')
-        self.occ.run('ldap:set-config s01 ldapGroupFilterGroups syncloud')
+        # self.occ.run('ldap:set-config s01 ldapGroupFilterGroups syncloud')
         self.occ.run('ldap:set-config s01 ldapGroupMemberAssocAttr memberUid')
 
         self.occ.run('ldap:set-config s01 ldapTLS 0')
