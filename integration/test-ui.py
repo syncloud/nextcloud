@@ -58,43 +58,43 @@ def test_main(selenium, device_user, device_password, ui_mode, screenshot_dir):
 
 def test_settings(selenium, app_domain):
     selenium.driver.get("https://{0}/settings/admin".format(app_domain))
-    selenium.find_by_xpah("//h2[text()='Background jobs']")
+    selenium.find_by_xpath("//h2[text()='Background jobs']")
     selenium.screenshot('admin')
 
 
 def test_settings_user(selenium, app_domain):
     selenium.driver.get("https://{0}/settings/user".format(app_domain))
-    selenium.find_by_xpah("//label[text()='Profile picture']")
+    selenium.find_by_xpath("//label[text()='Profile picture']")
     selenium.screenshot('user')
 
 
 def test_settings_ldap(selenium, app_domain):
     selenium.driver.get("https://{0}/settings/admin/ldap".format(app_domain))
-    selenium.find_by_xpah("//h2[text()='LDAP / AD integration']")
+    selenium.find_by_xpath("//h2[text()='LDAP / AD integration']")
     selenium.screenshot('admin-ldap')
 
 
 def test_settings_security(selenium, app_domain):
     selenium.driver.get("https://{0}/settings/admin/overview#security-warning".format(app_domain))
-    selenium.find_by_xpah("//h2[text()='Security & setup warnings']")
+    selenium.find_by_xpath("//h2[text()='Security & setup warnings']")
     selenium.screenshot('admin-security')
 
 
 def test_settings_additional(selenium, app_domain):
     selenium.driver.get("https://{0}/settings/admin/additional".format(app_domain))
-    selenium.find_by_xpah("//h2[text()='Maps routing settings']")
+    selenium.find_by_xpath("//h2[text()='Maps routing settings']")
     selenium.screenshot('admin-additional')
 
 
 # def test_apps_calendar(selenium, app_domain):
 #     selenium.driver.get("https://{0}/calendar".format(app_domain))
-#     selenium.find_by_xpah("//h2[text()='Maps routing settings']")
+#     selenium.find_by_xpath("//h2[text()='Maps routing settings']")
 #     selenium.screenshot('calendar')
 
 
 def test_verification(selenium, app_domain):
     selenium.driver.get('https://{0}/settings/integrity/failed'.format(app_domain))
-    selenium.find_by_xpah("//pre[text()='No errors have been found.']")
+    selenium.find_by_xpath("//pre[text()='No errors have been found.']")
     selenium.screenshot('integrity-failed')
     source = selenium.driver.page_source.encode("utf-8")
     assert 'INVALID_HASH' not in source
@@ -103,7 +103,7 @@ def test_verification(selenium, app_domain):
 
 def test_users(selenium, app_domain):
     selenium.driver.get('https://{0}/settings/users'.format(app_domain))
-    selenium.find_by_xpah("//span[@title='Admins']")
+    selenium.find_by_xpath("//span[@title='Admins']")
     selenium.screenshot('users')
     source = selenium.driver.page_source.encode("utf-8")
     assert 'Server Error' not in source
