@@ -1,7 +1,7 @@
 <?php
 $CONFIG = array (
  'datadirectory' => '{{ common_dir }}',
- 'check_data_directory_permissions': false,
+ 'check_data_directory_permissions' => false,
  'log_type' => 'syslog',
  'logfile' => '',
  'apps_paths' => array(
