@@ -49,7 +49,7 @@ def test_main(selenium, device_user, device_password, ui_mode, screenshot_dir):
         hover = ActionChains(selenium.driver).move_to_element(wizard_close_button)
         hover.perform()
         selenium.screenshot('main_first_time-hover')
-        selenium.driver.until(EC.element_to_be_clickable((By.CSS_SELECTOR, close_css_selector)))
+        selenium.wait_driver.until(EC.element_to_be_clickable((By.CSS_SELECTOR, close_css_selector)))
         selenium.screenshot('main_first_time-click')
         wizard_close_button.click()
 
