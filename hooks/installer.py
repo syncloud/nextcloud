@@ -209,7 +209,7 @@ class Installer:
         self.occ.run('ldap:set-config s01 ldapAgentPassword syncloud')
 
         self.occ.run('ldap:set-config s01 hasMemberOfFilterSupport 0')
-        self.occ.run('ldap:set-config s01 ldapLoginFilter "(&(|(objectclass=inetOrgPerson))(uid=%uid))"')
+        self.occ.run('ldap:set-config s01 ldapLoginFilter "(&(|(objectclass=inetOrgPerson))(cn=%uid))"')
 
         self.occ.run('ldap:set-config s01 ldapUserFilter "(|(objectclass=inetOrgPerson))"')
         self.occ.run('ldap:set-config s01 ldapUserFilterObjectclass inetOrgPerson')
