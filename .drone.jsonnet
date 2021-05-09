@@ -44,8 +44,8 @@ local build(arch) = {
               "pip2 install -r dev_requirements.txt",
               "DOMAIN=$(cat domain)",
               "cd integration",
-              "xvfb-run -l --server-args='-screen 0, 1024x4096x24' py.test -x -s test-ui.py --ui-mode=desktop --domain=$DOMAIN --device-host=device --app=" + name,
-              "xvfb-run -l --server-args='-screen 0, 1024x4096x24' py.test -x -s test-ui.py --ui-mode=mobile --domain=$DOMAIN --device-host=device --app=" + name,
+              "py.test -x -s test-ui.py --ui-mode=desktop --domain=$DOMAIN --device-host=device --app=" + name,
+              "py.test -x -s test-ui.py --ui-mode=mobile --domain=$DOMAIN --device-host=device --app=" + name,
             ],
             volumes: [{
                 name: "shm",
@@ -92,21 +92,31 @@ local build(arch) = {
             }
         }
     ],
-    services: [{
-        name: "device",
-        image: "syncloud/systemd-" + arch,
-        privileged: true,
-        volumes: [
-            {
-                name: "dbus",
-                path: "/var/run/dbus"
-            },
-            {
-                name: "dev",
-                path: "/dev"
-            }
-        ]
-    }],
+    services: [
+        {
+            name: "device",
+            image: "syncloud/systemd-" + arch,
+            privileged: true,
+            volumes: [
+                {
+                    name: "dbus",
+                    path: "/var/run/dbus"
+                },
+                {
+                    name: "dev",
+                    path: "/dev"
+                }
+            ]
+        },
+        if arch == "arm" then {} else {
+            name: "selenium",
+            image: "selenium/standalone-firefox:4.0.0-beta-1-20210215",
+            volumes: [{
+                name: "shm",
+                path: "/dev/shm"
+            }]
+        }
+    ],
     volumes: [
         {
             name: "dbus",

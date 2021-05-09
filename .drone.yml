@@ -70,6 +70,7 @@ services:
   - name: dev
     path: /dev
 
+
 volumes:
 - name: dbus
   host:
@@ -116,8 +117,8 @@ steps:
   - pip2 install -r dev_requirements.txt
   - DOMAIN=$(cat domain)
   - cd integration
-  - xvfb-run -l --server-args='-screen 0, 1024x4096x24' py.test -x -s test-ui.py --ui-mode=desktop --domain=$DOMAIN --device-host=device --app=nextcloud
-  - xvfb-run -l --server-args='-screen 0, 1024x4096x24' py.test -x -s test-ui.py --ui-mode=mobile --domain=$DOMAIN --device-host=device --app=nextcloud
+  - py.test -x -s test-ui.py --ui-mode=desktop --domain=$DOMAIN --device-host=device --app=nextcloud
+  - py.test -x -s test-ui.py --ui-mode=mobile --domain=$DOMAIN --device-host=device --app=nextcloud
   volumes:
   - name: shm
     path: /dev/shm
@@ -162,6 +163,12 @@ services:
     path: /var/run/dbus
   - name: dev
     path: /dev
+
+- name: selenium
+  image: selenium/standalone-firefox:4.0.0-beta-1-20210215
+  volumes:
+  - name: shm
+    path: /dev/shm
 
 volumes:
 - name: dbus
