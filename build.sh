@@ -25,7 +25,7 @@ DOWNLOAD_URL=https://github.com/syncloud/3rdparty/releases/download/1
 
 wget --progress=dot:giga ${DOWNLOAD_URL}/php7-${ARCH}.tar.gz
 tar xf php7-${ARCH}.tar.gz
-mv php7 ${BUILD_DIR}/php
+mv php ${BUILD_DIR}/
 
 wget --progress=dot:giga ${DOWNLOAD_URL}/nginx-${ARCH}.tar.gz
 tar xf nginx-${ARCH}.tar.gz
