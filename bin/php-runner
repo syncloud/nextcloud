@@ -11,7 +11,7 @@ fi
 export NEXTCLOUD_CONFIG_DIR=${SNAP_DATA}/nextcloud/config
 
 if [[ "$(whoami)" == "nextcloud" ]]; then
-    exec ${DIR}/php/lib/ld.so --library-path ${DIR}/php/lib:${DIR}/php/lib/private ${DIR}/php/bin/php -c ${SNAP_DATA}/config/php.ini "$@"
+    ${DIR}/php/lib/ld.so --library-path ${DIR}/php/lib:${DIR}/php/lib/private ${DIR}/php/bin/php -c ${SNAP_DATA}/config/php.ini "$@"
 else
-    sudo -H -E -u nextcloud exec ${DIR}/php/lib/ld.so --library-path ${DIR}/php/lib:${DIR}/php/lib/private ${DIR}/php/bin/php -c ${SNAP_DATA}/config/php.ini "$@"
+    sudo -H -E -u nextcloud ${DIR}/php/lib/ld.so --library-path ${DIR}/php/lib:${DIR}/php/lib/private ${DIR}/php/bin/php -c ${SNAP_DATA}/config/php.ini "$@"
 fi
