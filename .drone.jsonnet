@@ -1,8 +1,8 @@
 local name = "nextcloud";
 
-local build(arch) = {
+local build(arch, distro) = {
     kind: "pipeline",
-    name: arch,
+    name: arch + " " + distro,
 
     platform: {
         os: "linux",
@@ -95,7 +95,7 @@ local build(arch) = {
     services: [
         {
             name: "device",
-            image: "syncloud/systemd-" + arch,
+            image: "syncloud/platform-" + distro + '-' + arch,
             privileged: true,
             volumes: [
                 {
@@ -138,6 +138,8 @@ local build(arch) = {
 };
 
 [
-    build("arm"),
-    build("amd64")
+    build("arm", "jessie"),
+    build("amd64", "jessie"),
+    build("arm", "buster"),
+    build("amd64", "buster")
 ]
