@@ -30,7 +30,7 @@ local build(arch, distro) = {
             name: "test-integration",
             image: "python:3.9-buster",
             commands: [
-              "apt-get update && apt-get install -y sshpass openssh-client netcat rustc",
+              "apt-get update && apt-get install -y sshpass openssh-client netcat rustc file",
               "pip install -r dev_requirements.txt",
               "APP_ARCHIVE_PATH=$(realpath $(cat package.name))",
               "DOMAIN=$(cat domain)",
