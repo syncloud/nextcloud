@@ -96,7 +96,7 @@ def test_verification(selenium, app_domain):
     selenium.driver.get('https://{0}/settings/integrity/failed'.format(app_domain))
     selenium.find_by_xpath("//pre[text()='No errors have been found.']")
     selenium.screenshot('integrity-failed')
-    source = selenium.driver.page_source.encode("utf-8")
+    source = selenium.driver.page_source
     assert 'INVALID_HASH' not in source
     assert 'EXCEPTION' not in source
 
@@ -105,5 +105,5 @@ def test_users(selenium, app_domain):
     selenium.driver.get('https://{0}/settings/users'.format(app_domain))
     selenium.find_by_xpath("//span[@title='Admins']")
     selenium.screenshot('users')
-    source = selenium.driver.page_source.encode("utf-8")
+    source = selenium.driver.page_source
     assert 'Server Error' not in source
