@@ -237,7 +237,7 @@ def test_phpinfo(device):
 
 
 def test_php_dns(device):
-    ip = device.run_ssh('"snap run nextcloud.php -r \\\"echo gethostbyname(\'apps.nextcloud.com\');\\\""')
+    ip = device.run_ssh('snap run nextcloud.php -r \\\"echo gethostbyname(\'apps.nextcloud.com\');\\\"')
     assert ip != "apps.nextcloud.com"
 
 
