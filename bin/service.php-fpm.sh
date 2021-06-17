@@ -9,10 +9,9 @@ fi
 
 #export LD_LIBRARY_PATH=${DIR}/php/lib:${DIR}/php/lib/private
 #:${DIR}/postgresql/lib
-
+export LC_ALL=C
 case $1 in
 start)
-#    exec ${DIR}/php/lib/ld.so $DIR/php/sbin/php-fpm -y ${SNAP_DATA}/config/php-fpm.conf -c ${SNAP_DATA}/config/php.ini
     exec ${DIR}/php/lib/ld.so --library-path ${DIR}/php/lib:${DIR}/php/lib/private $DIR/php/sbin/php-fpm -y ${SNAP_DATA}/config/php-fpm.conf -c ${SNAP_DATA}/config/php.ini
     ;;
 post-start)
