@@ -1,9 +1,10 @@
 local name = "nextcloud";
+local browser = "firefox";
 
-local build(arch) = {
+local build(arch, distro) = {
     kind: "pipeline",
-    name: arch,
-
+    type: "docker",
+    name: arch + " " + distro,
     platform: {
         os: "linux",
         arch: arch
@@ -11,7 +12,7 @@ local build(arch) = {
     steps: [
         {
             name: "version",
-            image: "syncloud/build-deps-" + arch,
+            image: "syncloud/build-deps-" + arch + ":2021.4.1",
             commands: [
                 "echo $(date +%y%m%d)$DRONE_BUILD_NUMBER > version",
                 "echo " + arch + "$DRONE_BRANCH > domain"
@@ -19,33 +20,33 @@ local build(arch) = {
         },
         {
             name: "build",
-            image: "syncloud/build-deps-" + arch,
+            image: "syncloud/build-deps-" + arch + ":2021.4.1",
             commands: [
                 "VERSION=$(cat version)",
                 "./build.sh " + name + " $VERSION"
             ]
         },
         {
-            name: "test-intergation",
-            image: "syncloud/build-deps-" + arch,
+            name: "test-integration",
+            image: "python:3.9-buster",
             commands: [
-              "pip2 install -r dev_requirements.txt",
+              "apt-get update && apt-get install -y sshpass openssh-client netcat rustc file",
+              "pip install -r dev_requirements.txt",
               "APP_ARCHIVE_PATH=$(realpath $(cat package.name))",
               "DOMAIN=$(cat domain)",
               "cd integration",
               "py.test -x -s verify.py --domain=$DOMAIN --app-archive-path=$APP_ARCHIVE_PATH --device-host=device --app=" + name
             ]
-        },
-        if arch == "arm" then {} else
+        }] + ( if arch == "arm" then [] else [
         {
-            name: "test-ui",
-            image: "syncloud/build-deps-" + arch,
+            name: "test-ui-desktop",
+            image: "python:3.9-buster",
             commands: [
-              "pip2 install -r dev_requirements.txt",
+              "apt-get update && apt-get install -y sshpass openssh-client",
+              "pip install -r dev_requirements.txt",
               "DOMAIN=$(cat domain)",
               "cd integration",
-              "py.test -x -s test-ui.py --ui-mode=desktop --domain=$DOMAIN --device-host=device --app=" + name,
-              "py.test -x -s test-ui.py --ui-mode=mobile --domain=$DOMAIN --device-host=device --app=" + name,
+              "py.test -x -s test-ui.py --ui-mode=desktop --domain=$DOMAIN --device-host=device --app=" + name + " --browser=" + browser,
             ],
             volumes: [{
                 name: "shm",
@@ -53,8 +54,23 @@ local build(arch) = {
             }]
         },
         {
+            name: "test-ui-mobile",
+            image: "python:3.9-buster",
+            commands: [
+              "apt-get update && apt-get install -y sshpass openssh-client",
+              "pip install -r dev_requirements.txt",
+              "DOMAIN=$(cat domain)",
+              "cd integration",
+              "py.test -x -s test-ui.py --ui-mode=mobile --domain=$DOMAIN --device-host=device --app=" + name + " --browser=" + browser,
+            ],
+            volumes: [{
+                name: "shm",
+                path: "/dev/shm"
+            }]
+        }]) + [
+        {
             name: "upload",
-            image: "syncloud/build-deps-" + arch,
+            image: "python:3.9-buster",
             environment: {
                 AWS_ACCESS_KEY_ID: {
                     from_secret: "AWS_ACCESS_KEY_ID"
@@ -66,13 +82,13 @@ local build(arch) = {
             commands: [
               "VERSION=$(cat version)",
               "PACKAGE=$(cat package.name)",
-              "pip2 install -r dev_requirements.txt",
+              "pip install syncloud-lib s3cmd",
               "syncloud-upload.sh " + name + " $DRONE_BRANCH $VERSION $PACKAGE"
             ]
         },
         {
             name: "artifact",
-            image: "appleboy/drone-scp",
+            image: "appleboy/drone-scp:1.6.2",
             settings: {
                 host: {
                     from_secret: "artifact_host"
@@ -95,7 +111,7 @@ local build(arch) = {
     services: [
         {
             name: "device",
-            image: "syncloud/systemd-" + arch,
+            image: "syncloud/platform-" + distro + '-' + arch,
             privileged: true,
             volumes: [
                 {
@@ -107,16 +123,15 @@ local build(arch) = {
                     path: "/dev"
                 }
             ]
-        },
-        if arch == "arm" then {} else {
+        }
+    ] + if arch == "arm" then [] else [{
             name: "selenium",
-            image: "selenium/standalone-firefox:4.0.0-beta-1-20210215",
+            image: "selenium/standalone-" + browser + ":4.0.0-beta-3-prerelease-20210402",
             volumes: [{
                 name: "shm",
                 path: "/dev/shm"
             }]
-        }
-    ],
+        }],
     volumes: [
         {
             name: "dbus",
@@ -138,6 +153,8 @@ local build(arch) = {
 };
 
 [
-    build("arm"),
-    build("amd64")
+    build("arm", "jessie"),
+    build("amd64", "jessie"),
+    build("arm", "buster"),
+    build("amd64", "buster")
 ]

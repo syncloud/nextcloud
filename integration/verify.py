@@ -236,6 +236,11 @@ def test_phpinfo(device):
     device.run_ssh('snap run nextcloud.php -i > {0}/phpinfo.log'.format(TMP_DIR))
 
 
+def test_php_dns(device):
+    ip = device.run_ssh('snap run nextcloud.php -r \\\"echo gethostbyname(\'apps.nextcloud.com\');\\\"')
+    assert ip != "apps.nextcloud.com"
+
+
 def test_storage_change_event(device):
     device.run_ssh('snap run nextcloud.storage-change > {0}/storage-change.log'.format(TMP_DIR))
 
