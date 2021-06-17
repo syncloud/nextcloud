@@ -2,15 +2,8 @@
 
 DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
 
-if [[ -z "$SNAP_DATA" ]]; then
-  echo "SNAP_DATA environment variable must be set"
-  exit 1
-fi
-
-export NEXTCLOUD_CONFIG_DIR=${SNAP_DATA}/nextcloud/config
-
 if [[ "$(whoami)" == "nextcloud" ]]; then
-    ${DIR}/php.sh -c ${SNAP_DATA}/config/php.ini "$@"
+    ${DIR}/php.sh "$@"
 else
-    sudo -H -u nextcloud ${DIR}/php.sh -c ${SNAP_DATA}/config/php.ini "$@"
+    sudo -H -u nextcloud ${DIR}/php.sh "$@"
 fi
