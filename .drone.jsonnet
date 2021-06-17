@@ -1,10 +1,10 @@
 local name = "nextcloud";
 local browser = "firefox";
 
-local build(arch, distro) = {
+local build(arch, platform_image) = {
     kind: "pipeline",
     type: "docker",
-    name: arch + " " + distro,
+    name: platform_image,
     platform: {
         os: "linux",
         arch: arch
@@ -111,7 +111,7 @@ local build(arch, distro) = {
     services: [
         {
             name: "device",
-            image: "syncloud/platform-" + distro + '-' + arch,
+            image: "syncloud/" + platform_image,
             privileged: true,
             volumes: [
                 {
@@ -153,8 +153,8 @@ local build(arch, distro) = {
 };
 
 [
-    build("arm", "jessie"),
-    build("amd64", "jessie"),
-    build("arm", "buster"),
-    build("amd64", "buster")
+    build("arm", "platform-jessie-arm"),
+    build("amd64", "platform--jessie-amd64"),
+    build("arm", "platform-arm:21.01"),
+    build("amd64", "platform-amd64:21.01")
 ]
