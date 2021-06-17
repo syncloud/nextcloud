@@ -9,9 +9,9 @@ fi
 
 #export LD_LIBRARY_PATH=${DIR}/php/lib:${DIR}/postgresql/lib
 export NEXTCLOUD_CONFIG_DIR=${SNAP_DATA}/nextcloud/config
-export LC_ALL=C
+
 if [[ "$(whoami)" == "nextcloud" ]]; then
-    ${DIR}/php/lib/ld.so --library-path ${DIR}/php/lib:${DIR}/php/lib/private ${DIR}/php/bin/php -c ${SNAP_DATA}/config/php.ini "$@"
+    LC_ALL=C ${DIR}/php/lib/ld.so --library-path ${DIR}/php/lib:${DIR}/php/lib/private ${DIR}/php/bin/php -c ${SNAP_DATA}/config/php.ini "$@"
 else
-    sudo -H -E -u nextcloud ${DIR}/php/lib/ld.so --library-path ${DIR}/php/lib:${DIR}/php/lib/private ${DIR}/php/bin/php -c ${SNAP_DATA}/config/php.ini "$@"
+    sudo -H -E -u nextcloud LC_ALL=C ${DIR}/php/lib/ld.so --library-path ${DIR}/php/lib:${DIR}/php/lib/private ${DIR}/php/bin/php -c ${SNAP_DATA}/config/php.ini "$@"
 fi
