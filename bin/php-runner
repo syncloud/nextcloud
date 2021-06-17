@@ -1,6 +1,6 @@
 #!/bin/bash -e
 
-DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && cd .. && pwd )
+DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
 
 if [[ -z "$SNAP_DATA" ]]; then
   echo "SNAP_DATA environment variable must be set"
