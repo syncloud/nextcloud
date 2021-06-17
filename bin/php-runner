@@ -7,11 +7,10 @@ if [[ -z "$SNAP_DATA" ]]; then
   exit 1
 fi
 
-#export LD_LIBRARY_PATH=${DIR}/php/lib:${DIR}/postgresql/lib
 export NEXTCLOUD_CONFIG_DIR=${SNAP_DATA}/nextcloud/config
 
 if [[ "$(whoami)" == "nextcloud" ]]; then
-    LC_ALL=C ${DIR}/php/lib/ld.so --library-path ${DIR}/php/lib:${DIR}/php/lib/private ${DIR}/php/bin/php -c ${SNAP_DATA}/config/php.ini "$@"
+    ${DIR}/php.sh -c ${SNAP_DATA}/config/php.ini "$@"
 else
-    sudo -H -u nextcloud LC_ALL=C ${DIR}/php/lib/ld.so --library-path ${DIR}/php/lib:${DIR}/php/lib/private ${DIR}/php/bin/php -c ${SNAP_DATA}/config/php.ini "$@"
+    sudo -H -u nextcloud ${DIR}/php.sh -c ${SNAP_DATA}/config/php.ini "$@"
 fi
