@@ -6,5 +6,4 @@ export LC_ALL=en_US.UTF-8
 export LC_ALL=en_US.UTF-8
 export LC_TIME=en_US.UTF-8
 export NEXTCLOUD_CONFIG_DIR=${SNAP_DATA}/nextcloud/config
-exec ${DIR}/php/lib/ld.so --library-path ${DIR}/php/lib:${DIR}/php/lib/private ${DIR}/php/bin/php  -c ${SNAP_DATA}/config/php.in "$@"
-
+exec $DIR/php/bin/php.sh -c ${SNAP_DATA}/config/php.ini "$@"
