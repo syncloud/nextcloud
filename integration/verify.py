@@ -137,7 +137,7 @@ def test_occ_status(device):
 
 
 def test_occ_mail(device):
-    device.run_ssh('snap run nextcloud.occ install mail')
+    device.run_ssh('snap run nextcloud.occ app:install mail')
 
 
 def test_webdav(app_domain, artifact_dir, device_user, device_password):
