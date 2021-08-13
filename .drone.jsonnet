@@ -158,7 +158,3 @@ local build(arch, platform_image) = {
     build("arm", "platform-arm:21.01"),
     build("amd64", "platform-amd64:21.01")
 ]
-
-64:21.01")
-]
-
