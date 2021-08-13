@@ -15,7 +15,7 @@ local build(arch, platform_image) = {
             image: "syncloud/build-deps-" + arch + ":2021.4.1",
             commands: [
                 "echo $(date +%y%m%d)$DRONE_BUILD_NUMBER > version",
-                "echo " + arch + "$DRONE_BRANCH > domain"
+                "echo example.com > domain"
             ]
         },
         {
@@ -157,5 +157,8 @@ local build(arch, platform_image) = {
     build("amd64", "platform-jessie-amd64"),
     build("arm", "platform-arm:21.01"),
     build("amd64", "platform-amd64:21.01")
+]
+
+64:21.01")
 ]
 
