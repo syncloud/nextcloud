@@ -47,7 +47,7 @@ def module_setup(request, device, platform_data_dir, app_dir, artifact_dir):
         os.mkdir(app_log_dir)
         device.scp_from_device('/var/snap/nextcloud/common/log/*.log', app_log_dir)
         device.scp_from_device('{0}/*'.format(TMP_DIR), app_log_dir)
-        check_output('cp /etc/hosts {0}/hosts.log'.format(app_log_dir))
+        check_output('cp /etc/hosts {0}/hosts.log'.format(app_log_dir), shell=True)
         check_output('chmod -R a+r {0}'.format(artifact_dir), shell=True)
 
     request.addfinalizer(module_teardown)
