@@ -170,8 +170,8 @@ def test_caldav(app_domain, artifact_dir, device_user, device_password):
 
 
 def test_disk(device_session, app_domain, device, domain, device_user, device_password, artifact_dir):
-    loop_device_cleanup(device_host, '/tmp/test0', device_password)
-    loop_device_cleanup(device_host, '/tmp/test1', device_password)
+    loop_device_cleanup(domain, '/tmp/test0', device_password)
+    loop_device_cleanup(domain, '/tmp/test1', device_password)
 
     __create_test_dir('test00', app_domain, device_user, device_password, artifact_dir)
     files_scan(device)
