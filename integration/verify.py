@@ -64,9 +64,9 @@ def test_activate_device(device):
     assert response.status_code == 200, response.text
 
 
-def test_install(app_archive_path, device_session, device_host, device_password):
-    local_install(device_host, device_password, app_archive_path)
-    wait_for_installer(device_session, device_host)
+def test_install(app_archive_path, device_session, domain, device_password):
+    local_install(domain, device_password, app_archive_path)
+    wait_for_installer(device_session, domain)
 
 
 # noinspection PyUnresolvedReferences
