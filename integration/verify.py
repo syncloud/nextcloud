@@ -138,7 +138,7 @@ def test_occ_status(device):
 
 def test_occ_mail(device):
     device.run_ssh('snap run nextcloud.occ app:install mail')
-
+    device.run_ssh('snap run nextcloud.occ mail:account:sync 1")
 
 def test_webdav(app_domain, artifact_dir, device_user, device_password):
     response = requests.request('PROPFIND', 'https://{0}:{1}@{2}/remote.php/webdav/'.format(
