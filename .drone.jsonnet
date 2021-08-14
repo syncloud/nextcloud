@@ -15,7 +15,7 @@ local build(arch, platform_image) = {
             image: "syncloud/build-deps-" + arch + ":2021.4.1",
             commands: [
                 "echo $(date +%y%m%d)$DRONE_BUILD_NUMBER > version",
-                "echo example.com > domain"
+                "echo device.com > domain"
             ]
         },
         {
@@ -110,7 +110,7 @@ local build(arch, platform_image) = {
     ],
     services: [
         {
-            name: "device",
+            name: "device.com",
             image: "syncloud/" + platform_image,
             privileged: true,
             volumes: [
