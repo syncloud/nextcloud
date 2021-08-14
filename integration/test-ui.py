@@ -26,7 +26,7 @@ def module_setup(request, device, artifact_dir, ui_mode):
 
 
 def test_start(module_setup, app, domain, device_host):
-    #add_host_alias(app, device_host, domain)
+    add_host_alias(app, device_host, domain)
 
 
 def test_login(selenium):
@@ -112,3 +112,5 @@ def test_users(selenium, app_domain):
     selenium.screenshot('users')
     source = selenium.driver.page_source
     assert 'Server Error' not in source
+
+

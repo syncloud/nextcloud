@@ -61,7 +61,7 @@ local build(arch, platform_image) = {
               "pip install -r dev_requirements.txt",
               "DOMAIN=$(cat domain)",
               "cd integration",
-              "py.test -x -s test-ui.py --ui-mode=mobile --domain=$DOMAIN --device-host=device.com --app=" + name + " --browser=" + browser,
+              "py.test -x -s test-ui.py --ui-mode=mobile --domain=$DOMAIN --device-host=nextcloud.device.com --app=" + name + " --browser=" + browser,
             ],
             volumes: [{
                 name: "shm",
@@ -110,7 +110,7 @@ local build(arch, platform_image) = {
     ],
     services: [
         {
-            name: "device.com",
+            name: "nextcloud.device.com",
             image: "syncloud/" + platform_image,
             privileged: true,
             volumes: [
