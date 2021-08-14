@@ -35,7 +35,7 @@ local build(arch, platform_image) = {
               "APP_ARCHIVE_PATH=$(realpath $(cat package.name))",
               "DOMAIN=$(cat domain)",
               "cd integration",
-              "py.test -x -s verify.py --domain=$DOMAIN --app-archive-path=$APP_ARCHIVE_PATH --device-host=device.com --app=" + name
+              "py.test -x -s verify.py --domain=$DOMAIN --app-archive-path=$APP_ARCHIVE_PATH --device-host=nextcloud.device.com --app=" + name
             ]
         }] + ( if arch == "arm" then [] else [
         {
@@ -46,7 +46,7 @@ local build(arch, platform_image) = {
               "pip install -r dev_requirements.txt",
               "DOMAIN=$(cat domain)",
               "cd integration",
-              "py.test -x -s test-ui.py --ui-mode=desktop --domain=$DOMAIN --device-host=device.com --app=" + name + " --browser=" + browser,
+              "py.test -x -s test-ui.py --ui-mode=desktop --domain=$DOMAIN --device-host=nextcloud.device.com --app=" + name + " --browser=" + browser,
             ],
             volumes: [{
                 name: "shm",
