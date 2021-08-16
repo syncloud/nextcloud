@@ -136,10 +136,10 @@ def test_occ_status(device):
     device.run_ssh('snap run nextcloud.occ status   ')
 
 
-def test_occ_mail(device):
+def test_occ_mail(device, device_user):
     device.run_ssh('snap run nextcloud.occ app:install mail')
     device.run_ssh('snap run nextcloud.occ mail:account:create --help')
-    device.run_ssh('snap run nextcloud.occ mail:account:create 1 test test@syncloud.test mail 143 None test test mail 25 None test test')
+    device.run_ssh('snap run nextcloud.occ mail:account:create {0} test test@syncloud.test mail 143 None test test mail 25 None test test'.format(device_user))
     device.run_ssh('snap run nextcloud.occ mail:account:sync --help')
     device.run_ssh('snap run nextcloud.occ mail:account:sync 1')
     
