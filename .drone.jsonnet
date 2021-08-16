@@ -123,6 +123,13 @@ local build(arch, platform_image) = {
                     path: "/dev"
                 }
             ]
+        },
+        {
+            name: "mail",
+            image: "mailhog/mailhog:v1.0.0",
+            environment: {
+                MH_HOSTNAME: "syncloud.test"
+            }
         }
     ] + if arch == "arm" then [] else [{
             name: "selenium",
