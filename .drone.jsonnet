@@ -126,10 +126,7 @@ local build(arch, platform_image) = {
         },
         {
             name: "mail",
-            image: "mailhog/mailhog:v1.0.0",
-            environment: {
-                MH_HOSTNAME: "syncloud.test"
-            }
+            image: "antespi/docker-imap-devel:latest"
         }
     ] + if arch == "arm" then [] else [{
             name: "selenium",
@@ -162,6 +159,10 @@ local build(arch, platform_image) = {
 [
     build("arm", "platform-jessie-arm"),
     build("amd64", "platform-jessie-amd64"),
+    build("arm", "platform-arm:21.01"),
+    build("amd64", "platform-amd64:21.01")
+]
+,
     build("arm", "platform-arm:21.01"),
     build("amd64", "platform-amd64:21.01")
 ]
