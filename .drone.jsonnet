@@ -126,7 +126,11 @@ local build(arch, platform_image) = {
         },
         {
             name: "mail",
-            image: "antespi/docker-imap-devel:latest"
+            image: "antespi/docker-imap-devel:latest",
+            environment: {
+                MAILNAME: "syncloud.test",
+                MAIL_ADDRESS: "test@syncloud.test"
+            }
         }
     ] + if arch == "arm" then [] else [{
             name: "selenium",
