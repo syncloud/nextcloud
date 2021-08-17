@@ -125,7 +125,7 @@ local build(arch, platform_image) = {
             ]
         },
         {
-            name: "mail",
+            name: "syncloud.test",
             image: "antespi/docker-imap-devel:latest",
             environment: {
                 MAILNAME: "syncloud.test",
