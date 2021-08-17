@@ -137,6 +137,7 @@ def test_occ_status(device):
 
 
 def test_occ_mail(device, device_user):
+    print(check_output('curl imap://test@syncloud.test:debug@mail/INBOX?NEW', shell=True))
     device.run_ssh('snap run nextcloud.occ app:install mail')
     device.run_ssh('snap run nextcloud.occ mail:account:create --help')
     device.run_ssh('snap run nextcloud.occ mail:account:create {0} test test@syncloud.test mail 993 ssl test@syncloud.test debug mail 25 None test test'.format(device_user))
