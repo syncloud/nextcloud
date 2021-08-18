@@ -128,8 +128,7 @@ local build(arch, platform_image) = {
             name: "syncloud.test",
             image: "mailserver/docker-mailserver:10.1.0",
             environment: {
-                MAILNAME: "syncloud.test",
-                MAIL_ADDRESS: "test@syncloud.test"
+                OVERRIDE_HOSTNAME: "syncloud.test"
             }
         }
     ] + if arch == "arm" then [] else [{
