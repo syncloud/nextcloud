@@ -27,6 +27,17 @@ local build(arch, platform_image) = {
             ]
         },
         {
+            name: "syncloud.test",
+            image: "mailserver/docker-mailserver:10.1.0",
+            detached: tue,
+            environment: {
+                OVERRIDE_HOSTNAME: "syncloud.test"
+            },
+            commands: [
+                "mail addmailuser pass@localhost.localdomain 'passwird'"
+            ]
+        },
+        {
             name: "test-integration",
             image: "python:3.9-buster",
             commands: [
@@ -124,13 +135,7 @@ local build(arch, platform_image) = {
                 }
             ]
         },
-        {
-            name: "syncloud.test",
-            image: "mailserver/docker-mailserver:10.1.0",
-            environment: {
-                OVERRIDE_HOSTNAME: "syncloud.test"
-            }
-        }
+    
     ] + if arch == "arm" then [] else [{
             name: "selenium",
             image: "selenium/standalone-" + browser + ":4.0.0-beta-3-prerelease-20210402",
