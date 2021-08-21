@@ -137,7 +137,7 @@ def test_occ_status(device):
 
 
 def test_occ_mail(device, device_user):
-    print(check_output('nc syncloud.test:25 < integration/mail.test', shell=True))
+    print(check_output('nc syncloud.test:25 < /drone/src/integration/mail.test', shell=True))
 
     device.run_ssh('snap run nextcloud.occ app:install mail')
     device.run_ssh('snap run nextcloud.occ mail:account:create --help')
