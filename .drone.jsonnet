@@ -43,7 +43,7 @@ local build(arch, platform_image) = {
             name: "emails",
             image: "python:3.9-buster",
             commands: [
-              "apt-get update && apt-get install -y netcat,
+              "apt-get update && apt-get install -y netcat",
               "nc syncloud.test:25 < /drone/src/integration/mail.test"
             ]
         },
