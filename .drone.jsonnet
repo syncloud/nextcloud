@@ -45,7 +45,7 @@ local build(arch, platform_image) = {
             commands: [
               "apt-get update && apt-get install -y dnsutils netcat",
               "dig +short A syncloud.test",
-              "nc syncloud.test:25 < /drone/src/integration/mail.test"
+              "nc syncloud.test 25 < /drone/src/integration/mail.test"
             ]
         },
         {
