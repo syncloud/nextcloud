@@ -34,7 +34,7 @@ local build(arch, platform_image) = {
                 OVERRIDE_HOSTNAME: "syncloud.test"
             },
             commands: [
-                "mail addmailuser user@syncloud.test 'password'",
+                "addmailuser user@syncloud.test 'password'",
                 "supervisord --configuration /etc/supervisor/supervisord.conf"
             ]
         },
