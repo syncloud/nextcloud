@@ -1,0 +1,12 @@
+HELO syncloud.test
+MAIL FROM: user@syncloud.test
+RCPT TO: user@syncloud.test
+DATA
+From: Docker Mail Server <user@syncloud.test>
+To: Existing Local User <user@syncloud.test>
+Date: Sat, 22 May 2010 07:43:25 -0400
+Subject: Test Message
+This is a test mail.
+
+.
+QUIT
