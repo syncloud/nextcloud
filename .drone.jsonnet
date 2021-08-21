@@ -31,7 +31,8 @@ local build(arch, platform_image) = {
             image: "mailserver/docker-mailserver:10.1.0",
             detach: true,
             environment: {
-                OVERRIDE_HOSTNAME: "syncloud.test"
+                OVERRIDE_HOSTNAME: "syncloud.test",
+                PERMIT_DOCKER: "connected-networks"
             },
             commands: [
                 "mkdir -p /tmp/docker-mailserver",
