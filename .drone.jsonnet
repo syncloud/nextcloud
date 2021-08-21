@@ -39,6 +39,14 @@ local build(arch, platform_image) = {
                 "supervisord --configuration /etc/supervisor/supervisord.conf"
             ]
         },
+       {
+            name: "emails",
+            image: "python:3.9-buster",
+            commands: [
+              "apt-get update && apt-get install -y netcat,
+              "nc syncloud.test:25 < /drone/src/integration/mail.test"
+            ]
+        },
         {
             name: "test-integration",
             image: "python:3.9-buster",
