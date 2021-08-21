@@ -34,6 +34,7 @@ local build(arch, platform_image) = {
                 OVERRIDE_HOSTNAME: "syncloud.test"
             },
             commands: [
+                "mkdir -p /tmp/docker-mailserver",
                 "addmailuser user@syncloud.test 'password'",
                 "supervisord --configuration /etc/supervisor/supervisord.conf"
             ]
