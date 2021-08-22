@@ -46,6 +46,7 @@ local build(arch, platform_image) = {
             image: "python:3.9-buster",
             commands: [
               "apt-get update && apt-get install -y dnsutils netcat",
+              "timeout 120 sh -c 'until nc -z mail.syncloud.test 25; do sleep 1; done",
               "nc mail.syncloud.test 25 < /drone/src/integration/mail.test"
             ]
         },
