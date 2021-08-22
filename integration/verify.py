@@ -141,7 +141,7 @@ def test_occ_mail(device, device_user, artifact_dir):
 
     device.run_ssh('snap run nextcloud.occ app:install mail')
     device.run_ssh('snap run nextcloud.occ mail:account:create --help')
-    device.run_ssh('snap run nextcloud.occ mail:account:create {0} test user@syncloud.test syncloud.test 143 None user@syncloud.test password syncloud.test 25 None test test'.format(device_user))
+    device.run_ssh('snap run nextcloud.occ mail:account:create {0} test user@syncloud.test mail.syncloud.test 143 None user@syncloud.test password mail.syncloud.test 25 None test test'.format(device_user))
     device.run_ssh('snap run nextcloud.occ mail:account:sync --help')
     device.run_ssh('snap run nextcloud.occ mail:account:sync 1 -vvv')
     
