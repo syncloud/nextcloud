@@ -27,11 +27,12 @@ local build(arch, platform_image) = {
             ]
         },
         {
-            name: "syncloud.test",
+            name: "mail.syncloud.test",
             image: "mailserver/docker-mailserver:10.1.0",
             detach: true,
             environment: {
-                OVERRIDE_HOSTNAME: "syncloud.test",
+                OVERRIDE_HOSTNAME: "mail.syncloud.test",
+                DISABLE_AMAVIS: "1",
                 PERMIT_DOCKER: "connected-networks"
             },
             commands: [
