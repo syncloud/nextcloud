@@ -12,7 +12,7 @@ local build(arch, platform_image) = {
     steps: [
         {
             name: "version",
-            image: "syncloud/build-deps-" + arch + ":2021.4.1",
+            image: "debian:buster-slim",
             commands: [
                 "echo $(date +%y%m%d)$DRONE_BUILD_NUMBER > version",
                 "echo " + arch + "$DRONE_BRANCH > domain"
@@ -20,7 +20,7 @@ local build(arch, platform_image) = {
         },
         {
             name: "build",
-            image: "syncloud/build-deps-" + arch + ":2021.4.1",
+            image: "debian:buster-slim",
             commands: [
                 "VERSION=$(cat version)",
                 "./build.sh " + name + " $VERSION"
@@ -28,7 +28,7 @@ local build(arch, platform_image) = {
         },
         {
             name: "test-integration",
-            image: "python:3.9-buster",
+            image: "python:3.9-slim-buster",
             commands: [
               "apt-get update && apt-get install -y sshpass openssh-client netcat rustc file",
               "pip install -r dev_requirements.txt",
@@ -40,7 +40,7 @@ local build(arch, platform_image) = {
         }] + ( if arch == "arm" then [] else [
         {
             name: "test-ui-desktop",
-            image: "python:3.9-buster",
+            image: "python:3.9-slim-buster",
             commands: [
               "apt-get update && apt-get install -y sshpass openssh-client",
               "pip install -r dev_requirements.txt",
@@ -55,7 +55,7 @@ local build(arch, platform_image) = {
         },
         {
             name: "test-ui-mobile",
-            image: "python:3.9-buster",
+            image: "python:3.9-slim-buster",
             commands: [
               "apt-get update && apt-get install -y sshpass openssh-client",
               "pip install -r dev_requirements.txt",
@@ -70,7 +70,7 @@ local build(arch, platform_image) = {
         }]) + [
         {
             name: "upload",
-            image: "python:3.9-buster",
+            image: "python:3.9-slim-buster",
             environment: {
                 AWS_ACCESS_KEY_ID: {
                     from_secret: "AWS_ACCESS_KEY_ID"
@@ -158,4 +158,3 @@ local build(arch, platform_image) = {
     build("arm", "platform-arm:21.01"),
     build("amd64", "platform-amd64:21.01")
 ]
-
