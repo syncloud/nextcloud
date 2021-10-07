@@ -17,6 +17,9 @@ ARCH=$(uname -m)
 VERSION=$2
 DB_MAJOR_VERSION=10
 
+apt update
+apt -y install wget squashfs-tools dpkg-dev
+
 rm -rf build
 BUILD_DIR=${DIR}/build/${NAME}
 mkdir -p ${BUILD_DIR}
