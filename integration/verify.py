@@ -7,7 +7,7 @@ from os.path import join
 from requests.auth import HTTPBasicAuth
 from requests.packages.urllib3.exceptions import InsecureRequestWarning
 from subprocess import check_output
-from syncloudlib.integration.hosts import add_host_alias_by_ip
+from syncloudlib.integration.hosts import add_host_alias
 from syncloudlib.integration.installer import local_install, wait_for_installer
 from syncloudlib.integration.loop import loop_device_add, loop_device_cleanup
 
@@ -54,7 +54,7 @@ def module_setup(request, device, platform_data_dir, app_dir, artifact_dir):
 
 
 def test_start(module_setup, device, device_host, app, domain):
-    add_host_alias_by_ip(app, domain, device_host)
+    add_host_alias(app, device_host, domain)
     device.run_ssh('date', retries=100)
     device.run_ssh('mkdir {0}'.format(TMP_DIR))
 
