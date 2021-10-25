@@ -15,7 +15,7 @@ local build(arch, platform_image) = {
             image: "debian:buster-slim",
             commands: [
                 "echo $(date +%y%m%d)$DRONE_BUILD_NUMBER > version",
-                "echo " + arch + "$DRONE_BRANCH > domain"
+                "echo device.com > domain"
             ]
         },
         {
@@ -35,7 +35,7 @@ local build(arch, platform_image) = {
               "APP_ARCHIVE_PATH=$(realpath $(cat package.name))",
               "DOMAIN=$(cat domain)",
               "cd integration",
-              "py.test -x -s verify.py --domain=$DOMAIN --app-archive-path=$APP_ARCHIVE_PATH --device-host=device --app=" + name
+              "py.test -x -s verify.py --domain=$DOMAIN --app-archive-path=$APP_ARCHIVE_PATH --device-host=nextcloud.device.com --app=" + name
             ]
         }] + ( if arch == "arm" then [] else [
         {
@@ -46,7 +46,7 @@ local build(arch, platform_image) = {
               "pip install -r dev_requirements.txt",
               "DOMAIN=$(cat domain)",
               "cd integration",
-              "py.test -x -s test-ui.py --ui-mode=desktop --domain=$DOMAIN --device-host=device --app=" + name + " --browser=" + browser,
+              "py.test -x -s test-ui.py --ui-mode=desktop --domain=$DOMAIN --device-host=nextcloud.device.com --app=" + name + " --browser=" + browser,
             ],
             volumes: [{
                 name: "shm",
@@ -61,7 +61,7 @@ local build(arch, platform_image) = {
               "pip install -r dev_requirements.txt",
               "DOMAIN=$(cat domain)",
               "cd integration",
-              "py.test -x -s test-ui.py --ui-mode=mobile --domain=$DOMAIN --device-host=device --app=" + name + " --browser=" + browser,
+              "py.test -x -s test-ui.py --ui-mode=mobile --domain=$DOMAIN --device-host=nextcloud.device.com --app=" + name + " --browser=" + browser,
             ],
             volumes: [{
                 name: "shm",
@@ -110,7 +110,7 @@ local build(arch, platform_image) = {
     ],
     services: [
         {
-            name: "device",
+            name: "nextcloud.device.com",
             image: "syncloud/" + platform_image,
             privileged: true,
             volumes: [
@@ -158,3 +158,4 @@ local build(arch, platform_image) = {
     build("arm", "platform-arm:21.01"),
     build("amd64", "platform-amd64:21.01")
 ]
+
