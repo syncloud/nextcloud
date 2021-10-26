@@ -28,7 +28,7 @@ local build(arch, platform_image) = {
         },
         {
             name: "test-integration",
-            image: "python:3.9-slim-buster",
+            image: "python:3.8-slim-buster",
             commands: [
               "apt-get update && apt-get install -y sshpass openssh-client netcat rustc file libxml2-dev libxslt-dev build-essential libz-dev",
               "pip install -r dev_requirements.txt",
@@ -40,7 +40,7 @@ local build(arch, platform_image) = {
         }] + ( if arch == "arm" then [] else [
         {
             name: "test-ui-desktop",
-            image: "python:3.9-slim-buster",
+            image: "python:3.8-slim-buster",
             commands: [
               "apt-get update && apt-get install -y sshpass openssh-client libxml2-dev libxslt-dev build-essential libz-dev",
               "pip install -r dev_requirements.txt",
@@ -55,7 +55,7 @@ local build(arch, platform_image) = {
         },
         {
             name: "test-ui-mobile",
-            image: "python:3.9-slim-buster",
+            image: "python:3.8-slim-buster",
             commands: [
               "apt-get update && apt-get install -y sshpass openssh-client libxml2-dev libxslt-dev build-essential libz-dev",
               "pip install -r dev_requirements.txt",
@@ -70,7 +70,7 @@ local build(arch, platform_image) = {
         }]) + [
         {
             name: "upload",
-            image: "python:3.9-slim-buster",
+            image: "python:3.8-slim-buster",
             environment: {
                 AWS_ACCESS_KEY_ID: {
                     from_secret: "AWS_ACCESS_KEY_ID"
