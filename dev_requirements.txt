@@ -3,4 +3,3 @@ beautifulsoup4==4.4.0
 lxml==4.4.2
 selenium==3.141.0
 syncloud-lib==256
-loud-lib==256
