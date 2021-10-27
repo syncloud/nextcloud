@@ -66,7 +66,6 @@ def test_activate_device(device):
 
 def test_install(app_archive_path, device_session, device_host, device_password):
     local_install(device_host, device_password, app_archive_path)
-    wait_for_installer(device_session, device_host)
 
 
 # noinspection PyUnresolvedReferences
