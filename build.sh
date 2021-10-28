@@ -24,17 +24,17 @@ rm -rf build
 BUILD_DIR=${DIR}/build/${NAME}
 mkdir -p ${BUILD_DIR}
 
-DOWNLOAD_URL=https://github.com/syncloud/3rdparty/releases/download/1
+DOWNLOAD_URL=https://github.com/syncloud/3rdparty/releases/download
 
-wget --progress=dot:giga ${DOWNLOAD_URL}/php7-${ARCH}.tar.gz
+wget --progress=dot:giga ${DOWNLOAD_URL}/php7/php7-${ARCH}.tar.gz
 tar xf php7-${ARCH}.tar.gz
 mv php ${BUILD_DIR}/
 
-wget --progress=dot:giga ${DOWNLOAD_URL}/nginx-${ARCH}.tar.gz
+wget --progress=dot:giga ${DOWNLOAD_URL}/nginx/nginx-${ARCH}.tar.gz
 tar xf nginx-${ARCH}.tar.gz
 mv nginx ${BUILD_DIR}/
 
-wget --progress=dot:giga ${DOWNLOAD_URL}/postgresql-${DB_MAJOR_VERSION}-${ARCH}.tar.gz
+wget --progress=dot:giga ${DOWNLOAD_URL}/postgresql-${DB_MAJOR_VERSION}/postgresql-${DB_MAJOR_VERSION}-${ARCH}.tar.gz
 tar xf postgresql-${DB_MAJOR_VERSION}-${ARCH}.tar.gz
 mv postgresql-${DB_MAJOR_VERSION} ${BUILD_DIR}/postgresql
 echo "${DB_MAJOR_VERSION}" > ${BUILD_DIR}/db.major.version

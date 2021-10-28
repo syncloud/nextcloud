@@ -1,7 +1,7 @@
 local name = "nextcloud";
 local browser = "firefox";
 
-local build(arch, platform_image) = {
+local build(arch, testUI, platform_image) = {
     kind: "pipeline",
     type: "docker",
     name: platform_image,
@@ -37,7 +37,7 @@ local build(arch, platform_image) = {
               "cd integration",
               "py.test -x -s verify.py --domain=$DOMAIN --app-archive-path=$APP_ARCHIVE_PATH --device-host=nextcloud.device.com --app=" + name
             ]
-        }] + ( if arch == "arm" then [] else [
+        }] + ( if testUI then [
         {
             name: "test-ui-desktop",
             image: "python:3.8-slim-buster",
@@ -67,7 +67,7 @@ local build(arch, platform_image) = {
                 name: "shm",
                 path: "/dev/shm"
             }]
-        }]) + [
+        }] else [] ) + [
         {
             name: "upload",
             image: "python:3.8-slim-buster",
@@ -124,14 +124,14 @@ local build(arch, platform_image) = {
                 }
             ]
         }
-    ] + if arch == "arm" then [] else [{
+    ] + ( if testUI then [{
             name: "selenium",
             image: "selenium/standalone-" + browser + ":4.0.0-beta-3-prerelease-20210402",
             volumes: [{
                 name: "shm",
                 path: "/dev/shm"
             }]
-        }],
+        }] else [] ),
     volumes: [
         {
             name: "dbus",
@@ -153,9 +153,7 @@ local build(arch, platform_image) = {
 };
 
 [
-    build("arm", "platform-jessie-arm"),
-    build("amd64", "platform-jessie-amd64"),
-    build("arm", "platform-arm:21.01"),
-    build("amd64", "platform-amd64:21.01")
+    build("arm", false, "platform-buster-arm:21.10"),
+    build("amd64", true, "platform-buster-amd64:21.10"),
+    build("arm64", false, "platform-buster-arm64:21.10")
 ]
-
