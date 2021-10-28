@@ -38,7 +38,8 @@ wget --progress=dot:giga ${DOWNLOAD_URL}/postgresql-${DB_MAJOR_VERSION}/postgres
 tar xf postgresql-${DB_MAJOR_VERSION}-${ARCH}.tar.gz
 mv postgresql-${DB_MAJOR_VERSION} ${BUILD_DIR}/postgresql
 echo "${DB_MAJOR_VERSION}" > ${BUILD_DIR}/db.major.version
-wget --progress=dot:giga ${DOWNLOAD_URL}/python-${ARCH}.tar.gz
+
+wget --progress=dot:giga ${DOWNLOAD_URL}/python3/python3-${ARCH}.tar.gz
 tar xf python-${ARCH}.tar.gz
 mv python ${BUILD_DIR}/
 
