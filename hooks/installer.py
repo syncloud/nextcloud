@@ -175,7 +175,7 @@ class Installer:
             try:
                 self.occ.run('upgrade')
                 self.occ.run('app:update --all')
-            except CalledProcessError, e:
+            except CalledProcessError as e:
                 self.log.warn('unable to upgrade')
                 self.log.warn(e.output)
 
