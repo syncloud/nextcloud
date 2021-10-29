@@ -165,6 +165,18 @@ local build(arch, testUI, platform_image) = {
         {
             name: "shm",
             temp: {}
+        },
+        {
+            name: "docker",
+            host: {
+                path: "/usr/bin/docker"
+            }
+        },
+        {
+            name: "docker.sock",
+            host: {
+                path: "/var/run/docker.sock"
+            }
         }
     ]
 };
