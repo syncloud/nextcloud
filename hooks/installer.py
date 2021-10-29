@@ -187,7 +187,7 @@ class Installer:
 
         self.db.execute('postgres', DB_USER, "ALTER USER {0} WITH PASSWORD '{1}';".format(DB_USER, DB_PASSWORD))
         real_app_storage_dir = realpath(app_storage_dir)
-        INSTALL_USER_PASSWORD = unicode(uuid.uuid4().hex)
+        INSTALL_USER_PASSWORD = uuid.uuid4().hex
         self.occ.run('maintenance:install  --database pgsql --database-host {0}:{1}'
                      ' --database-name nextcloud --database-user {2} --database-pass {3}'
                      ' --admin-user {4} --admin-pass {5} --data-dir {6}'
