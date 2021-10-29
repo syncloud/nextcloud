@@ -14,7 +14,7 @@ class OCConsole:
             if output:
                 self.log.info(output)
             return output
-        except CalledProcessError, e:
+        except CalledProcessError as e:
             self.log.error("occ error: " + e.output)
             raise e
 
@@ -33,6 +33,6 @@ class OCConfig:
                 value), shell=True).strip()
             if output:
                 self.log.info(output)
-        except CalledProcessError, e:
+        except CalledProcessError as e:
             self.log.error("occ config error: " + e.output)
             raise e
