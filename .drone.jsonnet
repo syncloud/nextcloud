@@ -48,10 +48,10 @@ local build(arch, testUI, platform_image) = {
             image: "python:3.8-slim-buster",
             commands: [
               "apt-get update && apt-get install -y sshpass openssh-client netcat rustc file libxml2-dev libxslt-dev build-essential libz-dev curl",
-              "pip install -r dev_requirements.txt",
               "APP_ARCHIVE_PATH=$(realpath $(cat package.name))",
               "DOMAIN=$(cat domain)",
               "cd integration",
+              "pip install -r requirements.txt",
               "py.test -x -s verify.py --domain=$DOMAIN --app-archive-path=$APP_ARCHIVE_PATH --device-host=nextcloud.device.com --app=" + name
             ]
         }] + ( if testUI then [
@@ -60,9 +60,9 @@ local build(arch, testUI, platform_image) = {
             image: "python:3.8-slim-buster",
             commands: [
               "apt-get update && apt-get install -y sshpass openssh-client libxml2-dev libxslt-dev build-essential libz-dev curl",
-              "pip install -r dev_requirements.txt",
               "DOMAIN=$(cat domain)",
               "cd integration",
+              "pip install -r requirements.txt",
               "py.test -x -s test-ui.py --ui-mode=desktop --domain=$DOMAIN --device-host=nextcloud.device.com --app=" + name + " --browser=" + browser,
             ],
             volumes: [{
@@ -75,9 +75,9 @@ local build(arch, testUI, platform_image) = {
             image: "python:3.8-slim-buster",
             commands: [
               "apt-get update && apt-get install -y sshpass openssh-client libxml2-dev libxslt-dev build-essential libz-dev curl",
-              "pip install -r dev_requirements.txt",
               "DOMAIN=$(cat domain)",
               "cd integration",
+              "pip install -r requirements.txt",
               "py.test -x -s test-ui.py --ui-mode=mobile --domain=$DOMAIN --device-host=nextcloud.device.com --app=" + name + " --browser=" + browser,
             ],
             volumes: [{

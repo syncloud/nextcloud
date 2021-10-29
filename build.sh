@@ -39,8 +39,6 @@ wget --progress=dot:giga https://download.nextcloud.com/server/releases/${NAME}-
 tar xf ${NAME}-${NEXTCLOUD_VERSION}.tar.bz2
 mv nextcloud ${BUILD_DIR}/
 
-${BUILD_DIR}/python/bin/pip install -r ${DIR}/requirements.txt
-
 cp -r bin ${BUILD_DIR}
 cp -r config ${BUILD_DIR}/config.templates
 cp -r hooks ${BUILD_DIR}
