@@ -261,7 +261,7 @@ class Installer:
 
     def on_domain_change(self):
         app_domain = urls.get_app_domain_name(APP_NAME)
-        local_ip = check_output(["hostname", "-I"]).split(" ")[0]
+        local_ip = check_output(["hostname", "-I"]).decode().split(" ")[0]
         self.oc_config.set_value('trusted_domains', "localhost {0} {1}".format(local_ip, app_domain))
         self.oc_config.set_value('trusted_proxies', app_domain)
 
