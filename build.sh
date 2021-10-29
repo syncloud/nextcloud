@@ -8,8 +8,6 @@ if [[ -z "$2" ]]; then
     exit 1
 fi
 
-export TMPDIR=/tmp
-export TMP=/tmp
 
 NAME=$1
 NEXTCLOUD_VERSION=22.2.0
@@ -20,9 +18,7 @@ DB_MAJOR_VERSION=10
 apt update
 apt -y install wget squashfs-tools dpkg-dev
 
-rm -rf build
 BUILD_DIR=${DIR}/build/${NAME}
-mkdir -p ${BUILD_DIR}
 
 DOWNLOAD_URL=https://github.com/syncloud/3rdparty/releases/download
 
@@ -38,10 +34,6 @@ wget --progress=dot:giga ${DOWNLOAD_URL}/postgresql-${DB_MAJOR_VERSION}/postgres
 tar xf postgresql-${DB_MAJOR_VERSION}-${ARCH}.tar.gz
 mv postgresql-${DB_MAJOR_VERSION} ${BUILD_DIR}/postgresql
 echo "${DB_MAJOR_VERSION}" > ${BUILD_DIR}/db.major.version
-
-wget --progress=dot:giga ${DOWNLOAD_URL}/python3/python3-${ARCH}.tar.gz
-tar xf python-${ARCH}.tar.gz
-mv python ${BUILD_DIR}/
 
 wget --progress=dot:giga https://download.nextcloud.com/server/releases/${NAME}-${NEXTCLOUD_VERSION}.tar.bz2
 tar xf ${NAME}-${NEXTCLOUD_VERSION}.tar.bz2

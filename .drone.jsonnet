@@ -18,6 +18,23 @@ local build(arch, testUI, platform_image) = {
                 "echo device.com > domain"
             ]
         },
+       {
+            name: "build python",
+            image: "debian:buster-slim",
+            commands: [
+                "./build-python.sh"
+            ],
+            volumes: [
+                {
+                    name: "docker",
+                    path: "/usr/bin/docker"
+                },
+                {
+                    name: "docker.sock",
+                    path: "/var/run/docker.sock"
+                }
+            ]
+        },
         {
             name: "build",
             image: "debian:buster-slim",
