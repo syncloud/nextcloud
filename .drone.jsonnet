@@ -22,7 +22,7 @@ local build(arch, testUI, platform_image) = {
             name: "build python",
             image: "debian:buster-slim",
             commands: [
-                "./build-python.sh"
+                "./python/build.sh"
             ],
             volumes: [
                 {
