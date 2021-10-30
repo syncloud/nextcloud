@@ -164,7 +164,7 @@ def test_caldav(app_domain, artifact_dir, device_user, device_password):
         f.write(str(response.headers).replace(',', '\n'))
 
 
-def test_disk(device_session, app_domain, device, device_host, device_user, device_password, artifact_dir):
+def test_disk(app_domain, device, device_host, device_user, device_password, artifact_dir):
     loop_device_cleanup(device_host, '/tmp/test0', device_password)
     loop_device_cleanup(device_host, '/tmp/test1', device_password)
 
@@ -173,19 +173,19 @@ def test_disk(device_session, app_domain, device, device_host, device_user, devi
     __check_test_dir(device_user, device_password, 'test00', app_domain, artifact_dir)
 
     device0 = loop_device_add(device_host, 'ext4', '/tmp/test0', device_password)
-    __activate_disk(device_session, device0, device, device_host)
+    __activate_disk(device0, device, device_host)
     __create_test_dir('test0', app_domain, device_user, device_password, artifact_dir)
     __check_test_dir(device_user, device_password, 'test0', app_domain, artifact_dir)
 
     device1 = loop_device_add(device_host, 'ext2', '/tmp/test1', device_password)
-    __activate_disk(device_session, device1, device, device_host)
+    __activate_disk(device1, device, device_host)
     __create_test_dir('test1', app_domain, device_user, device_password, artifact_dir)
     __check_test_dir(device_user, device_password, 'test1', app_domain, artifact_dir)
 
-    __activate_disk(device_session, device0, device, device_host)
+    __activate_disk(device0, device, device_host)
     __check_test_dir(device_user, device_password, 'test0', app_domain, artifact_dir)
 
-    __deactivate_disk(device_session, device, device_host)
+    __deactivate_disk(device, device_host)
 
 
 def __log_data_dir(device):
@@ -195,19 +195,18 @@ def __log_data_dir(device):
     device.run_ssh('ls -la /data/nextcloud')
 
 
-def __activate_disk(device_session, loop_device, device, device_host):
+def __activate_disk(loop_device, device, device_host):
     __log_data_dir(device)
-    response = device_session.post('https://{0}/rest/settings/disk_activate'.format(device_host),
-                                   json={'device': loop_device}, allow_redirects=False, verify=False)
+    response = device.login().post('https://{0}/rest/settings/disk_activate'.format(device_host),
+                                   json={'device': loop_device}, allow_redirects=False, verify=False)  
+    assert response.status_code == 200, response.text
     __log_data_dir(device)
     files_scan(device)
-    assert response.status_code == 200, response.text
-
     device.run_ssh('snap run nextcloud.occ > {0}/occ.activate.log'.format(TMP_DIR))
 
 
-def __deactivate_disk(device_session, device, device_host):
-    response = device_session.post('https://{0}/rest/settings/disk_deactivate'.format(device_host),
+def __deactivate_disk(device, device_host):
+    response = device.login().post('https://{0}/rest/settings/disk_deactivate'.format(device_host),
                                    allow_redirects=False, verify=False)
     files_scan(device)
     assert response.status_code == 200, response.text
