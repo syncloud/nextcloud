@@ -70,7 +70,7 @@ def test_settings_user(selenium, app_domain):
 
 def test_settings_ldap(selenium, app_domain):
     selenium.driver.get("https://{0}/settings/admin/ldap".format(app_domain))
-    selenium.find_by_xpath("//h2[text()='LDAP / AD integration']")
+    selenium.find_by_xpath("//h2[text()='LDAP/AD integration']")
     selenium.screenshot('admin-ldap')
 
 
