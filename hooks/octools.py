@@ -10,7 +10,7 @@ class OCConsole:
     def run(self, args):
 
         try:
-            output = check_output('{0} {1}'.format(self.occ_runner_path, args), shell=True).strip()
+            output = check_output('{0} {1}'.format(self.occ_runner_path, args), shell=True).decode().strip()
             if output:
                 self.log.info(output)
             return output
@@ -30,7 +30,7 @@ class OCConfig:
             output = check_output('{0} {1} {2}'.format(
                 self.oc_config_path,
                 key,
-                value), shell=True).strip()
+                value), shell=True).decode().strip()
             if output:
                 self.log.info(output)
         except CalledProcessError as e:
