@@ -7,7 +7,7 @@ from os.path import join
 from requests.auth import HTTPBasicAuth
 from requests.packages.urllib3.exceptions import InsecureRequestWarning
 from subprocess import check_output
-from syncloudlib.integration.hosts import add_host_alias_by_ip
+from syncloudlib.integration.hosts import add_host_alias
 from syncloudlib.integration.installer import local_install, wait_for_installer
 from syncloudlib.integration.loop import loop_device_add, loop_device_cleanup
 
@@ -54,19 +54,18 @@ def module_setup(request, device, platform_data_dir, app_dir, artifact_dir):
 
 
 def test_start(module_setup, device, device_host, app, domain):
-    add_host_alias_by_ip(app, domain, device_host)
+    add_host_alias(app, device_host, domain)
     device.run_ssh('date', retries=100)
     device.run_ssh('mkdir {0}'.format(TMP_DIR))
 
 
 def test_activate_device(device):
-    response = device.activate()
+    response = device.activate_custom()
     assert response.status_code == 200, response.text
 
 
 def test_install(app_archive_path, device_session, device_host, device_password):
     local_install(device_host, device_password, app_archive_path)
-    wait_for_installer(device_session, device_host)
 
 
 # noinspection PyUnresolvedReferences
@@ -165,28 +164,28 @@ def test_caldav(app_domain, artifact_dir, device_user, device_password):
         f.write(str(response.headers).replace(',', '\n'))
 
 
-def test_disk(device_session, app_domain, device, device_host, device_user, device_password, artifact_dir):
-    loop_device_cleanup(device_host, '/tmp/test0', device_password)
-    loop_device_cleanup(device_host, '/tmp/test1', device_password)
+def test_disk(app_domain, device, domain, device_user, device_password, artifact_dir):
+    loop_device_cleanup(domain, '/tmp/test0', device_password)
+    loop_device_cleanup(domain, '/tmp/test1', device_password)
 
     __create_test_dir('test00', app_domain, device_user, device_password, artifact_dir)
     files_scan(device)
     __check_test_dir(device_user, device_password, 'test00', app_domain, artifact_dir)
 
-    device0 = loop_device_add(device_host, 'ext4', '/tmp/test0', device_password)
-    __activate_disk(device_session, device0, device, device_host)
+    device0 = loop_device_add(domain, 'ext4', '/tmp/test0', device_password)
+    __activate_disk(device0, device, domain)
     __create_test_dir('test0', app_domain, device_user, device_password, artifact_dir)
     __check_test_dir(device_user, device_password, 'test0', app_domain, artifact_dir)
 
-    device1 = loop_device_add(device_host, 'ext2', '/tmp/test1', device_password)
-    __activate_disk(device_session, device1, device, device_host)
+    device1 = loop_device_add(domain, 'ext2', '/tmp/test1', device_password)
+    __activate_disk(device1, device, domain)
     __create_test_dir('test1', app_domain, device_user, device_password, artifact_dir)
     __check_test_dir(device_user, device_password, 'test1', app_domain, artifact_dir)
 
-    __activate_disk(device_session, device0, device, device_host)
+    __activate_disk(device0, device, domain)
     __check_test_dir(device_user, device_password, 'test0', app_domain, artifact_dir)
 
-    __deactivate_disk(device_session, device, device_host)
+    __deactivate_disk(device, domain)
 
 
 def __log_data_dir(device):
@@ -196,20 +195,19 @@ def __log_data_dir(device):
     device.run_ssh('ls -la /data/nextcloud')
 
 
-def __activate_disk(device_session, loop_device, device, device_host):
+def __activate_disk(loop_device, device, domain):
     __log_data_dir(device)
-    response = device_session.post('https://{0}/rest/settings/disk_activate'.format(device_host),
-                                   json={'device': loop_device}, allow_redirects=False)
+    response = device.login().post('https://{0}/rest/settings/disk_activate'.format(domain),
+                                   json={'device': loop_device}, allow_redirects=False, verify=False)  
+    assert response.status_code == 200, response.text
     __log_data_dir(device)
     files_scan(device)
-    assert response.status_code == 200, response.text
-
     device.run_ssh('snap run nextcloud.occ > {0}/occ.activate.log'.format(TMP_DIR))
 
 
-def __deactivate_disk(device_session, device, device_host):
-    response = device_session.post('https://{0}/rest/settings/disk_deactivate'.format(device_host),
-                                   allow_redirects=False)
+def __deactivate_disk(device, domain):
+    response = device.login().post('https://{0}/rest/settings/disk_deactivate'.format(domain),
+                                   allow_redirects=False, verify=False)
     files_scan(device)
     assert response.status_code == 200, response.text
 

@@ -38,7 +38,7 @@ class Database:
 
     def init(self):
         cmd = join(self.app_dir, 'bin/initdb.sh')
-        self.log.info(check_output([cmd, self.database_dir]))
+        self.log.info(check_output([cmd, self.database_dir]).decode())
 
     def init_config(self):
         shutil.copy(self.postgresql_config, self.database_dir)
@@ -46,15 +46,15 @@ class Database:
     def execute(self, database, user, sql):
         self.log.info("executing: {0}".format(sql))
         cmd = 'snap run nextcloud.psql -U {0} -d {1} -c "{2}"'.format(user, database, sql)
-        self.log.info(check_output(cmd, shell=True))
+        self.log.info(check_output(cmd, shell=True).decode())
 
     def restore(self):
         cmd = 'snap run nextcloud.psql -f {0} postgres'.format(self.backup_file)
         self.log.info("executing: {0}".format(cmd))
-        self.log.info(check_output(cmd, shell=True))
+        self.log.info(check_output(cmd, shell=True).decode())
 
     def backup(self):
         cmd = 'snap run nextcloud.pgdumpall -f {0}'.format(self.backup_file)
         self.log.info("executing: {0}".format(cmd))
-        self.log.info(check_output(cmd, shell=True))
+        self.log.info(check_output(cmd, shell=True).decode())
         shutil.copy(self.new_major_version_file, self.old_major_version_file)

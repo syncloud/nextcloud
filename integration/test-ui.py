@@ -6,7 +6,7 @@ from selenium.webdriver.common.action_chains import ActionChains
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support import expected_conditions as EC
-from syncloudlib.integration.hosts import add_host_alias_by_ip
+from syncloudlib.integration.hosts import add_host_alias
 
 DIR = dirname(__file__)
 TMP_DIR = '/tmp/syncloud/ui'
@@ -26,7 +26,7 @@ def module_setup(request, device, artifact_dir, ui_mode):
 
 
 def test_start(module_setup, app, domain, device_host):
-    add_host_alias_by_ip(app, domain, device_host)
+    add_host_alias(app, device_host, domain)
 
 
 def test_login(selenium):
@@ -64,13 +64,13 @@ def test_settings(selenium, app_domain):
 
 def test_settings_user(selenium, app_domain):
     selenium.driver.get("https://{0}/settings/user".format(app_domain))
-    selenium.find_by_xpath("//label[text()='Profile picture']")
+    selenium.find_by_xpath("//h3[contains(.,'Profile picture')]")
     selenium.screenshot('user')
 
 
 def test_settings_ldap(selenium, app_domain):
     selenium.driver.get("https://{0}/settings/admin/ldap".format(app_domain))
-    selenium.find_by_xpath("//h2[text()='LDAP / AD integration']")
+    selenium.find_by_xpath("//h2[text()='LDAP/AD integration']")
     selenium.screenshot('admin-ldap')
 
 

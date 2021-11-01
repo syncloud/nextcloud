@@ -175,7 +175,7 @@ class Installer:
             try:
                 self.occ.run('upgrade')
                 self.occ.run('app:update --all')
-            except CalledProcessError, e:
+            except CalledProcessError as e:
                 self.log.warn('unable to upgrade')
                 self.log.warn(e.output)
 
@@ -187,7 +187,7 @@ class Installer:
 
         self.db.execute('postgres', DB_USER, "ALTER USER {0} WITH PASSWORD '{1}';".format(DB_USER, DB_PASSWORD))
         real_app_storage_dir = realpath(app_storage_dir)
-        INSTALL_USER_PASSWORD = unicode(uuid.uuid4().hex)
+        INSTALL_USER_PASSWORD = uuid.uuid4().hex
         self.occ.run('maintenance:install  --database pgsql --database-host {0}:{1}'
                      ' --database-name nextcloud --database-user {2} --database-pass {3}'
                      ' --admin-user {4} --admin-pass {5} --data-dir {6}'
@@ -261,7 +261,7 @@ class Installer:
 
     def on_domain_change(self):
         app_domain = urls.get_app_domain_name(APP_NAME)
-        local_ip = check_output(["hostname", "-I"]).split(" ")[0]
+        local_ip = check_output(["hostname", "-I"]).decode().split(" ")[0]
         self.oc_config.set_value('trusted_domains', "localhost {0} {1}".format(local_ip, app_domain))
         self.oc_config.set_value('trusted_proxies', app_domain)
 
