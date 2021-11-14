@@ -11,13 +11,13 @@ fi
 
 case $1 in
 start)
-    exec ${DIR}/postgresql/bin/pg_ctl -w -s -D ${PSQL_DATABASE} start
+    exec ${DIR}/postgresql/bin/pg_ctl.sh -w -s -D ${PSQL_DATABASE} start
     ;;
 reload)
-    exec ${DIR}/postgresql/bin/pg_ctl -s -D ${PSQL_DATABASE} reload
+    exec ${DIR}/postgresql/bin/pg_ctl.sh -s -D ${PSQL_DATABASE} reload
     ;;
 stop)
-    exec ${DIR}/postgresql/bin/pg_ctl -s -D ${PSQL_DATABASE} stop -m fast
+    exec ${DIR}/postgresql/bin/pg_ctl.sh -s -D ${PSQL_DATABASE} stop -m fast
     ;;
 *)
     echo "not valid command"
