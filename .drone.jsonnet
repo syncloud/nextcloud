@@ -182,8 +182,8 @@ local build(arch, testUI, platform_image) = {
 };
 
 [
-    build("arm", "platform-jessie-arm"),
-    build("amd64", "platform-jessie-amd64"),
+    build("arm", false, "platform-jessie-arm"),
+    build("amd64", true, "platform-jessie-amd64"),
     build("arm", false, "platform-buster-arm:21.10"),
     build("amd64", true, "platform-buster-amd64:21.10"),
     build("arm64", false, "platform-buster-arm64:21.10")
