@@ -58,5 +58,5 @@ class Database:
             output = check_output(cmd, shell=True).decode()
             self.log.info(output)
         except CalledProcessError as e:
-            self.log.error("postgres error: " + e.output)
+            self.log.error("postgres error: " + e.output.decode())
             raise e
