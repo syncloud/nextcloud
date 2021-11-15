@@ -9,10 +9,9 @@ fi
 
 # shellcheck source=config/env
 . "${SNAP_DATA}/config/env"
-export LD_LIBRARY_PATH=${DIR}/postgresql/lib
 
 if [[ "$(whoami)" == "nextcloud" ]]; then
-    ${DIR}/postgresql/bin/psql -p ${PSQL_PORT} -h ${PSQL_DATABASE} "$@"
+    ${DIR}/postgresql/bin/psql.sh -p ${PSQL_PORT} -h ${PSQL_DATABASE} "$@"
 else
-    sudo -E -H -u nextcloud LD_LIBRARY_PATH=${LD_LIBRARY_PATH} ${DIR}/postgresql/bin/psql -p ${PSQL_PORT} -h ${PSQL_DATABASE} "$@"
+    sudo -E -H -u nextcloud ${DIR}/postgresql/bin/psql.sh -p ${PSQL_PORT} -h ${PSQL_DATABASE} "$@"
 fi
