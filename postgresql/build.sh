@@ -24,7 +24,5 @@ rm -rf postgres.tar
 ls -la 
 ls -la bin
 ls -la usr/bin
+ldd usr/bin/pg_dump
 
-DIR}/postgres ${BUILD_DIR}/bin/postgresql
-ls -la ${BUILD_DIR}/bin
-rm -rf ${BUILD_DIR}/usr/src
