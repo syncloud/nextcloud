@@ -8,7 +8,7 @@ apt install -y libltdl7 libnss3
 BUILD_DIR=${DIR}/../build/nextcloud/python
 docker ps -a -q --filter ancestor=python:syncloud --format="{{.ID}}" | xargs docker stop | xargs docker rm || true
 docker rmi python:syncloud || true
-docker build -t python:syncloud -f Dockerfile.python .
+docker build -t python:syncloud .
 docker run python:syncloud python --help
 docker create --name=python python:syncloud
 mkdir -p ${BUILD_DIR}

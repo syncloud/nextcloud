@@ -13,7 +13,7 @@ NAME=$1
 NEXTCLOUD_VERSION=22.2.0
 ARCH=$(uname -m)
 VERSION=$2
-DB_MAJOR_VERSION=10
+#DB_MAJOR_VERSION=10
 
 apt update
 apt -y install wget squashfs-tools dpkg-dev
@@ -30,10 +30,10 @@ wget --progress=dot:giga ${DOWNLOAD_URL}/nginx/nginx-${ARCH}.tar.gz
 tar xf nginx-${ARCH}.tar.gz
 mv nginx ${BUILD_DIR}/
 
-wget --progress=dot:giga ${DOWNLOAD_URL}/postgresql-${DB_MAJOR_VERSION}/postgresql-${DB_MAJOR_VERSION}-${ARCH}.tar.gz
-tar xf postgresql-${DB_MAJOR_VERSION}-${ARCH}.tar.gz
-mv postgresql-${DB_MAJOR_VERSION} ${BUILD_DIR}/postgresql
-echo "${DB_MAJOR_VERSION}" > ${BUILD_DIR}/db.major.version
+#wget --progress=dot:giga ${DOWNLOAD_URL}/postgresql-${DB_MAJOR_VERSION}/postgresql-${DB_MAJOR_VERSION}-${ARCH}.tar.gz
+#tar xf postgresql-${DB_MAJOR_VERSION}-${ARCH}.tar.gz
+#mv postgresql-${DB_MAJOR_VERSION} ${BUILD_DIR}/postgresql
+#echo "${DB_MAJOR_VERSION}" > ${BUILD_DIR}/db.major.version
 
 wget --progress=dot:giga https://download.nextcloud.com/server/releases/${NAME}-${NEXTCLOUD_VERSION}.tar.bz2
 tar xf ${NAME}-${NEXTCLOUD_VERSION}.tar.bz2
