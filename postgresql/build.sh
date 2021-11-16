@@ -24,5 +24,6 @@ rm -rf postgres.tar
 ls -la 
 ls -la bin
 ls -la usr/bin
+ls -ls usr/share/postgresql-common/pg_wrapper
 ldd usr/bin/pg_dump
 
