@@ -25,6 +25,4 @@ ls -la
 ls -la bin
 ls -la usr/bin
 ls -ls usr/share/postgresql-common/pg_wrapper
-cat usr/share/postgresql-common/pg_wrapper
-ldd usr/share/postgresql-common/pg_wrapper
-
+ldd usr/lib/postgresql/10/bin/initdb
