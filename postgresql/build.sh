@@ -21,8 +21,9 @@ echo "${MAJOR_VERSION}" > ${BUILD_DIR}/db.major.version
 docker export postgres -o postgres.tar
 tar xf postgres.tar
 rm -rf postgres.tar
-ls -la
-ls -la ${DIR}/postgres
-mv ${DIR}/postgres ${BUILD_DIR}/bin/postgresql
+ls -la 
+ls -la bin
+rm -rf  usr/src
+DIR}/postgres ${BUILD_DIR}/bin/postgresql
 ls -la ${BUILD_DIR}/bin
 rm -rf ${BUILD_DIR}/usr/src
