@@ -19,6 +19,23 @@ local build(arch, test_ui, upload, platform_image) = {
             ]
         },
        {
+            name: "build postgresql",
+            image: "debian:buster-slim",
+            commands: [
+                "./postgresql/build.sh"
+            ],
+            volumes: [
+                {
+                    name: "docker",
+                    path: "/usr/bin/docker"
+                },
+                {
+                    name: "docker.sock",
+                    path: "/var/run/docker.sock"
+                }
+            ]
+        },
+       {
             name: "build python",
             image: "debian:buster-slim",
             commands: [

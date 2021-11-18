@@ -1,0 +1,2 @@
+ARG MAJOR_VERSION
+FROM postgres:$MAJOR_VERSION-bullseye
