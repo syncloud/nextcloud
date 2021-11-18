@@ -8,6 +8,7 @@ MAJOR_VERSION=10
 apt update
 apt install -y libltdl7 libnss3
 
+
 BUILD_DIR=${DIR}/../build/nextcloud/postgresql
 
 docker ps -a -q --filter ancestor=postgres:syncloud --format="{{.ID}}" | xargs docker stop | xargs docker rm || true
@@ -17,7 +18,7 @@ docker run postgres:syncloud postgres --help
 docker create --name=postgres postgres:syncloud
 mkdir -p ${BUILD_DIR}
 cd ${BUILD_DIR}
-echo "${MAJOR_VERSION}" > ${BUILD_DIR}/db.major.version
+echo "${MAJOR_VERSION}" > ${BUILD_DIR}/../db.major.version
 docker export postgres -o postgres.tar
 tar xf postgres.tar
 rm -rf postgres.tar
