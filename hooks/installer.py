@@ -177,7 +177,7 @@ class Installer:
                 self.occ.run('app:update --all')
             except CalledProcessError as e:
                 self.log.warn('unable to upgrade')
-                self.log.warn(e.output)
+                self.log.warn(e.output.decode())
 
             self.occ.run('maintenance:mode --off')
             self.occ.run('db:add-missing-indices')

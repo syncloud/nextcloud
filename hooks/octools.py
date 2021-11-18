@@ -15,7 +15,7 @@ class OCConsole:
                 self.log.info(output)
             return output
         except CalledProcessError as e:
-            self.log.error("occ error: " + e.output)
+            self.log.error("occ error: " + e.output.decode())
             raise e
 
 
@@ -34,5 +34,5 @@ class OCConfig:
             if output:
                 self.log.info(output)
         except CalledProcessError as e:
-            self.log.error("occ config error: " + e.output)
+            self.log.error("occ config error: " + e.output.decode())
             raise e
