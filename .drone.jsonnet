@@ -256,5 +256,3 @@ local build(arch, test_ui) = {
     build("amd64", true),
     build("arm64", false)
 ]
-false)
-]
