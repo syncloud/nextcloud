@@ -1,7 +1,7 @@
 local name = "nextcloud";
 local browser = "firefox";
 
-local build(arch, test_ui, version) = {
+local build(arch, test_ui) = {
     kind: "pipeline",
     type: "docker",
     name: arch,
@@ -255,4 +255,6 @@ local build(arch, test_ui, version) = {
     build("arm", false),
     build("amd64", true),
     build("arm64", false)
+]
+false)
 ]
