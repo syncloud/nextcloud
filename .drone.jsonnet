@@ -182,7 +182,7 @@ local build(arch, test_ui, version) = {
     services: ( if arch != "arm64" then [ 
         {
             name: "nextcloud.jessie.com",
-            image: "syncloud/platform-jessie-" + arch + version,
+            image: "syncloud/platform-jessie-" + arch,
             privileged: true,
             volumes: [
                 {
@@ -197,7 +197,7 @@ local build(arch, test_ui, version) = {
         }] else []) + [
         {
             name: "nextcloud.buster.com",
-            image: "syncloud/platform-buster-" + arch + version,
+            image: "syncloud/platform-buster-" + arch + ":21.10",
             privileged: true,
             volumes: [
                 {
@@ -252,9 +252,7 @@ local build(arch, test_ui, version) = {
 };
 
 [
-    build("arm", false, ""),
-    build("amd64", true, ""),
-    build("arm", false, ":21.10"),
-    build("amd64", true, ":21.10"),
-    build("arm64", false, ":21.10")
+    build("arm", false),
+    build("amd64", true),
+    build("arm64", false)
 ]
