@@ -1,10 +1,10 @@
 local name = "nextcloud";
 local browser = "firefox";
 
-local build(arch, test_ui, upload, platform_image) = {
+local build(arch, test_ui, version) = {
     kind: "pipeline",
     type: "docker",
-    name: platform_image,
+    name: arch,
     platform: {
         os: "linux",
         arch: arch
@@ -14,8 +14,7 @@ local build(arch, test_ui, upload, platform_image) = {
             name: "version",
             image: "debian:buster-slim",
             commands: [
-                "echo $(date +%y%m%d)$DRONE_BUILD_NUMBER > version",
-                "echo device.com > domain"
+                "echo $(date +%y%m%d)$DRONE_BUILD_NUMBER > version"
             ]
         },
        {
@@ -59,28 +58,37 @@ local build(arch, test_ui, upload, platform_image) = {
                 "VERSION=$(cat version)",
                 "./build.sh " + name + " $VERSION"
             ]
-        },
+        }] + ( if arch != "arm64" then [
         {
-            name: "test-integration",
+            name: "test-integration-jessie",
             image: "python:3.8-slim-buster",
             commands: [
               "apt-get update && apt-get install -y sshpass openssh-client netcat rustc file libxml2-dev libxslt-dev build-essential libz-dev curl",
               "APP_ARCHIVE_PATH=$(realpath $(cat package.name))",
-              "DOMAIN=$(cat domain)",
               "cd integration",
               "pip install -r requirements.txt",
-              "py.test -x -s verify.py --domain=$DOMAIN --app-archive-path=$APP_ARCHIVE_PATH --device-host=nextcloud.device.com --app=" + name
+              "py.test -x -s verify.py --domain=jessie.com --app-archive-path=$APP_ARCHIVE_PATH --device-host=nextcloud.jessie.com --app=" + name
+            ]
+        }] else []) + [
+        {
+            name: "test-integration-buster",
+            image: "python:3.8-slim-buster",
+            commands: [
+              "apt-get update && apt-get install -y sshpass openssh-client netcat rustc file libxml2-dev libxslt-dev build-essential libz-dev curl",
+              "APP_ARCHIVE_PATH=$(realpath $(cat package.name))",
+              "cd integration",
+              "pip install -r requirements.txt",
+              "py.test -x -s verify.py --domain=buster.com --app-archive-path=$APP_ARCHIVE_PATH --device-host=nextcloud.buster.com --app=" + name
             ]
         }] + ( if test_ui then [
         {
-            name: "test-ui-desktop",
+            name: "test-ui-desktop-jessie",
             image: "python:3.8-slim-buster",
             commands: [
               "apt-get update && apt-get install -y sshpass openssh-client libxml2-dev libxslt-dev build-essential libz-dev curl",
-              "DOMAIN=$(cat domain)",
               "cd integration",
               "pip install -r requirements.txt",
-              "py.test -x -s test-ui.py --ui-mode=desktop --domain=$DOMAIN --device-host=nextcloud.device.com --app=" + name + " --browser=" + browser,
+              "py.test -x -s test-ui.py --distro=jessie --ui-mode=desktop --domain=jessie.com --device-host=nextcloud.jessie.com --app=" + name + " --browser=" + browser,
             ],
             volumes: [{
                 name: "shm",
@@ -88,21 +96,49 @@ local build(arch, test_ui, upload, platform_image) = {
             }]
         },
         {
-            name: "test-ui-mobile",
+            name: "test-ui-mobile-jessie",
             image: "python:3.8-slim-buster",
             commands: [
               "apt-get update && apt-get install -y sshpass openssh-client libxml2-dev libxslt-dev build-essential libz-dev curl",
-              "DOMAIN=$(cat domain)",
               "cd integration",
               "pip install -r requirements.txt",
-              "py.test -x -s test-ui.py --ui-mode=mobile --domain=$DOMAIN --device-host=nextcloud.device.com --app=" + name + " --browser=" + browser,
+              "py.test -x -s test-ui.py --distro=jessie --ui-mode=mobile --domain=jessie.com --device-host=nextcloud.jessie.com --app=" + name + " --browser=" + browser,
             ],
             volumes: [{
                 name: "shm",
                 path: "/dev/shm"
             }]
-        }] else [] ) +
-        if upload then [
+        },
+        {
+            name: "test-ui-desktop-buster",
+            image: "python:3.8-slim-buster",
+            commands: [
+              "apt-get update && apt-get install -y sshpass openssh-client libxml2-dev libxslt-dev build-essential libz-dev curl",
+              "cd integration",
+              "pip install -r requirements.txt",
+              "py.test -x -s test-ui.py --distro=buster --ui-mode=desktop --domain=buster.com --device-host=nextcloud.buster.com --app=" + name + " --browser=" + browser,
+            ],
+            volumes: [{
+                name: "shm",
+                path: "/dev/shm"
+            }]
+        },
+        {
+            name: "test-ui-mobile-buster",
+            image: "python:3.8-slim-buster",
+            commands: [
+              "apt-get update && apt-get install -y sshpass openssh-client libxml2-dev libxslt-dev build-essential libz-dev curl",
+              "cd integration",
+              "pip install -r requirements.txt",
+              "py.test -x -s test-ui.py --distro=buster --ui-mode=mobile --domain=buster.com --device-host=nextcloud.buster.com --app=" + name + " --browser=" + browser,
+            ],
+            volumes: [{
+                name: "shm",
+                path: "/dev/shm"
+            }]
+        }
+
+] else [] ) +[
         {
             name: "upload",
             image: "python:3.8-slim-buster",
@@ -120,7 +156,7 @@ local build(arch, test_ui, upload, platform_image) = {
               "pip install syncloud-lib s3cmd",
               "syncloud-upload.sh " + name + " $DRONE_BRANCH $VERSION $PACKAGE"
             ]
-        }] else [] + [
+        }] + [
         {
             name: "artifact",
             image: "appleboy/drone-scp:1.6.2",
@@ -143,10 +179,25 @@ local build(arch, test_ui, upload, platform_image) = {
             }
         }
     ],
-    services: [
+    services: ( if arch != "arm64" then [ 
         {
-            name: "nextcloud.device.com",
-            image: "syncloud/" + platform_image,
+            name: "nextcloud.jessie.com",
+            image: "syncloud/platform-jessie-" + arch + version,
+            privileged: true,
+            volumes: [
+                {
+                    name: "dbus",
+                    path: "/var/run/dbus"
+                },
+                {
+                    name: "dev",
+                    path: "/dev"
+                }
+            ]
+        }] else []) + [
+        {
+            name: "nextcloud.buster.com",
+            image: "syncloud/platform-buster-" + arch + version,
             privileged: true,
             volumes: [
                 {
@@ -159,14 +210,15 @@ local build(arch, test_ui, upload, platform_image) = {
                 }
             ]
         }
-    ] + ( if test_ui then [{
+    ] + ( if testUI then [{
             name: "selenium",
             image: "selenium/standalone-" + browser + ":4.0.0-beta-3-prerelease-20210402",
             volumes: [{
                 name: "shm",
                 path: "/dev/shm"
             }]
-        }] else [] ),
+        }
+    ] else [] ),
     volumes: [
         {
             name: "dbus",
@@ -200,9 +252,9 @@ local build(arch, test_ui, upload, platform_image) = {
 };
 
 [
-    build("arm", false, false, "platform-jessie-arm"),
-    build("amd64", true, false, "platform-jessie-amd64"),
-    build("arm", false, true, "platform-buster-arm:21.10"),
-    build("amd64", true, true, "platform-buster-amd64:21.10"),
-    build("arm64", false, true, "platform-buster-arm64:21.10")
+    build("arm", false, ""),
+    build("amd64", true, ""),
+    build("arm", false, ":21.10"),
+    build("amd64", true, ":21.10"),
+    build("arm64", false, ":21.10")
 ]
