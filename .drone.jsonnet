@@ -67,7 +67,7 @@ local build(arch, test_ui) = {
               "APP_ARCHIVE_PATH=$(realpath $(cat package.name))",
               "cd integration",
               "pip install -r requirements.txt",
-              "py.test -x -s verify.py --distro=jessie--domain=jessie.com --app-archive-path=$APP_ARCHIVE_PATH --device-host=nextcloud.jessie.com --app=" + name
+              "py.test -x -s verify.py --distro=jessie --domain=jessie.com --app-archive-path=$APP_ARCHIVE_PATH --device-host=nextcloud.jessie.com --app=" + name
             ]
         }] else []) + [
         {
