@@ -58,7 +58,7 @@ local build(arch, test_ui) = {
                 "VERSION=$(cat version)",
                 "./build.sh " + name + " $VERSION"
             ]
-        }] + ( if arch != "arm64" then [
+        }] + ( if arch == "amd64" then [
         {
             name: "test-integration-jessie",
             image: "python:3.8-slim-buster",
@@ -179,7 +179,7 @@ local build(arch, test_ui) = {
             }
         }
     ],
-    services: ( if arch != "arm64" then [ 
+    services: ( if arch == "amd64" then [ 
         {
             name: "nextcloud.jessie.com",
             image: "syncloud/platform-jessie-" + arch,
