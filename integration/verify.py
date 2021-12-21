@@ -69,7 +69,7 @@ def test_install(app_archive_path, device_session, device_host, device_password)
 
 
 # noinspection PyUnresolvedReferences
-@pytest.mark.parametrize("megabytes", [1, 300])
+@pytest.mark.parametrize("megabytes", [1, 50])
 def test_sync(app_domain, megabytes, device, device_user, device_password):
     sync_file = 'test.file-{0}'.format(megabytes)
     if os.path.isfile(sync_file):
@@ -258,3 +258,4 @@ def test_reinstall(app_archive_path, device_host, device_password):
 
 def test_upgrade(app_archive_path, device_host, device_password):
     local_install(device_host, device_password, app_archive_path)
+
