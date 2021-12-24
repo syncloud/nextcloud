@@ -170,7 +170,8 @@ class Installer:
             self.db.restore()
         status = self.occ.run('status')
         self.log.info('status: {0}'.format(status))
-        if 'require upgrade' in self.occ.run('status'):
+        if 'require upgrade' in status:
+            self.log.info('upgrading nextcloud')
             self.occ.run('maintenance:mode --on')
 
             try:
@@ -183,6 +184,8 @@ class Installer:
             self.occ.run('maintenance:mode --off')
             self.occ.run('db:add-missing-indices')
             self.occ.run('db:add-missing-columns')
+        else:
+            self.log.info('not upgrading nextcloud')
 
     def initialize(self, app_storage_dir):
 
