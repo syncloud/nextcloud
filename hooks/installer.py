@@ -168,7 +168,8 @@ class Installer:
     def upgrade(self):
         if self.db.requires_upgrade():
             self.db.restore()
-
+        status = self.occ.run('status')
+        self.log.info('status: {0}'.format(status))
         if 'require upgrade' in self.occ.run('status'):
             self.occ.run('maintenance:mode --on')
 
