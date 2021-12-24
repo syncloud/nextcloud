@@ -259,3 +259,10 @@ def test_reinstall(app_archive_path, device_host, device_password):
 def test_upgrade(app_archive_path, device_host, device_password):
     local_install(device_host, device_password, app_archive_path)
 
+
+def test_upgrade_from_store(device, app, app_archive_path, device_host, device_password):
+    response = device.app_remove(app)
+    assert response.status_code == 200, response.text
+    response = device.app_install(app)
+    assert response.status_code == 200, response.text
+    local_install(device_host, device_password, app_archive_path)
