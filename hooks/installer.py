@@ -238,6 +238,7 @@ class Installer:
         # cron takes a lot of time and fails the installation on big existing file storage
         self.cron.run()
 
+        self.db.execute(DB_NAME, DB_USER, "select * from oc_ldap_group_mapping;")
         self.db.execute(DB_NAME, DB_USER, "update oc_ldap_group_mapping set owncloud_name = 'admin';")
         self.db.execute(DB_NAME, DB_USER, "update oc_ldap_group_members set owncloudname = 'admin';")
 
