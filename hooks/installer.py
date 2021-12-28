@@ -238,8 +238,9 @@ class Installer:
         # cron takes a lot of time and fails the installation on big existing file storage
         self.cron.run()
 
-        self.db.execute(DB_NAME, DB_USER, "update oc_ldap_group_mapping set owncloud_name = 'admin';")
-        self.db.execute(DB_NAME, DB_USER, "update oc_ldap_group_members set owncloudname = 'admin';")
+        self.db.execute(DB_NAME, DB_USER, "select * from oc_ldap_group_mapping;")
+        self.db.execute(DB_NAME, DB_USER, "update oc_ldap_group_mapping set owncloud_name = 'admin' where owncloud_name = 'syncloud';")
+        # self.db.execute(DB_NAME, DB_USER, "update oc_ldap_group_members set owncloudname = 'admin';")
 
         self.occ.run('user:delete {0}'.format(INSTALL_USER))
         self.occ.run('db:add-missing-indices')
@@ -267,7 +268,7 @@ class Installer:
         app_domain = urls.get_app_domain_name(APP_NAME)
         local_ip = check_output(["hostname", "-I"]).decode().split(" ")[0]
         self.oc_config.set_value('trusted_domains', "localhost {0} {1}".format(local_ip, app_domain))
-        self.oc_config.set_value('trusted_proxies', app_domain)
+        self.oc_config.set_value('trusted_proxies', "localhost {0}".format(app_domain))
 
 
 class Cron:
