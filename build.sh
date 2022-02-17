@@ -21,10 +21,6 @@ BUILD_DIR=${DIR}/build/${NAME}
 
 DOWNLOAD_URL=https://github.com/syncloud/3rdparty/releases/download
 
-wget --progress=dot:giga ${DOWNLOAD_URL}/php7/php7-${ARCH}.tar.gz
-tar xf php7-${ARCH}.tar.gz
-mv php ${BUILD_DIR}/
-
 wget --progress=dot:giga ${DOWNLOAD_URL}/nginx/nginx-${ARCH}.tar.gz
 tar xf nginx-${ARCH}.tar.gz
 mv nginx ${BUILD_DIR}/
