@@ -28,7 +28,7 @@ RUN apt-get update && apt-get install -y \
 
 RUN mkdir -p /usr/src/php/ext/memcached
 WORKDIR /usr/src/php/ext/memcached
-RUN wget https://github.com/php-memcached-dev/php-memcached/archive/v3.1.3.zip; unzip /usr/src/php/ext/memcached/v*.zip
+RUN wget https://github.com/php-memcached-dev/php-memcached/archive/v3.1.5.zip; unzip /usr/src/php/ext/memcached/v*.zip
 RUN mv /usr/src/php/ext/memcached/php-memcached-*/* /usr/src/php/ext/memcached/
 
 RUN docker-php-ext-configure memcached
