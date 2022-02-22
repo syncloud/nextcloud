@@ -52,6 +52,24 @@ local build(arch, test_ui) = [{
             ]
         },
         {
+            name: "build php",
+            image: "debian:buster-slim",
+            commands: [
+                "./php/build.sh"
+            ],
+            volumes: [
+                {
+                    name: "docker",
+                    path: "/usr/bin/docker"
+                },
+                {
+                    name: "docker.sock",
+                    path: "/var/run/docker.sock"
+                }
+            ]
+        },
+
+        {
             name: "build",
             image: "debian:buster-slim",
             commands: [
@@ -155,7 +173,10 @@ local build(arch, test_ui) = [{
               "PACKAGE=$(cat package.name)",
               "pip install syncloud-lib s3cmd",
               "syncloud-upload.sh " + name + " $DRONE_BRANCH $VERSION $PACKAGE"
-            ]
+            ],
+           when: {
+            branch: ["stable", "master"]
+        }
         }] + [
         {
             name: "artifact",
