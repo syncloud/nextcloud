@@ -224,7 +224,7 @@ local build(arch, test_ui) = [{
         }] else []) + [
         {
             name: "nextcloud.buster.com",
-            image: "syncloud/platform-buster-" + arch + ":21.10",
+            image: "syncloud/platform-buster-" + arch + ":22.02",
             privileged: true,
             volumes: [
                 {
