@@ -159,22 +159,23 @@ local build(arch, test_ui) = [{
 ] else [] ) +[
         {
             name: "upload",
-            image: "python:3.8-slim-buster",
-            environment: {
-                AWS_ACCESS_KEY_ID: {
-                    from_secret: "AWS_ACCESS_KEY_ID"
-                },
-                AWS_SECRET_ACCESS_KEY: {
-                    from_secret: "AWS_SECRET_ACCESS_KEY"
-                }
+        image: "debian:buster-slim",
+        environment: {
+            AWS_ACCESS_KEY_ID: {
+                from_secret: "AWS_ACCESS_KEY_ID"
             },
-            commands: [
-              "VERSION=$(cat version)",
-              "PACKAGE=$(cat package.name)",
-              "pip install syncloud-lib s3cmd",
-              "syncloud-upload.sh " + name + " $DRONE_BRANCH $VERSION $PACKAGE"
-            ],
-           when: {
+            AWS_SECRET_ACCESS_KEY: {
+                from_secret: "AWS_SECRET_ACCESS_KEY"
+            }
+        },
+        commands: [
+          "PACKAGE=$(cat package.name)",
+          "apt update && apt install -y wget",
+          "wget https://github.com/syncloud/snapd/releases/download/1/syncloud-release-" + arch,
+          "chmod +x syncloud-release-*",
+          "./syncloud-release-* publish -f $PACKAGE -b $DRONE_BRANCH"
+         ],
+        when: {
             branch: ["stable", "master"]
         }
         }] + [
