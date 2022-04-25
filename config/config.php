@@ -11,7 +11,7 @@ $CONFIG = array (
  		'writable' => false,
  	),
  	array(
- 		'path'=> '{{ data_dir }}/extra-apps',
+ 		'path'=> '{{ app_dir }}/nextcloud/extra-apps',
  		'url' => '/extra-apps',
  		'writable' => true,
  	),

@@ -3,7 +3,7 @@
 DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
 cd ${DIR}
 
-BUILD_DIR=${DIR}/../build/nextcloud/php
+BUILD_DIR=${DIR}/../build/snap/php
 
 ARCH=$(uname -m)
 docker ps -a -q --filter ancestor=php:syncloud --format="{{.ID}}" | xargs docker stop | xargs docker rm || true
