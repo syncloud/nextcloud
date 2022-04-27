@@ -75,15 +75,23 @@ local build(arch, test_ui) = [{
             "./download.sh "
         ]
     },
-
         {
             name: "build",
             image: "debian:buster-slim",
             commands: [
-                "VERSION=$(cat version)",
-                "./build.sh " + name + " $VERSION"
+                "./build.sh"
             ]
-        }] + ( if arch == "amd64" then [
+        },
+    {
+        name: "package",
+        image: "debian:buster-slim",
+        commands: [
+            "VERSION=$(cat version)",
+            "./package.sh " + name + " $VERSION "
+        ]
+    }
+
+] + ( if arch == "amd64" then [
         {
             name: "test-integration-jessie",
             image: "python:3.8-slim-buster",
