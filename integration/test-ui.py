@@ -112,3 +112,7 @@ def test_users(selenium, app_domain):
     selenium.screenshot('users')
     source = selenium.driver.page_source
     assert 'Server Error' not in source
+
+
+def test_teardown(driver):
+    driver.quit()
