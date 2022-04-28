@@ -16,4 +16,4 @@ rm -r ${BUILD_DIR}/nextcloud/apps/updatenotification
 cat ${BUILD_DIR}/nextcloud/.user.ini
 sed -i 's/upload_max_filesize=.*/upload_max_filesize=10G/g' ${BUILD_DIR}/nextcloud/.user.ini
 sed -i 's/post_max_size=.*/post_max_size=10G/g' ${BUILD_DIR}/nextcloud/.user.ini
-
+ln -s /var/snap/nextcloud/current/extra-apps ${BUILD_DIR}/nextcloud/extra-apps
