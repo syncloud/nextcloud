@@ -11,7 +11,7 @@ BUILD_DIR=${DIR}/build/snap
 mkdir -p $BUILD_DIR
 
 apt update
-apt -y install wget
+apt -y install wget bzip2
 
 cd ${DIR}/build
 wget -c --progress=dot:giga ${DOWNLOAD_URL}/nginx/nginx-${ARCH}.tar.gz
