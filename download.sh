@@ -19,5 +19,5 @@ tar xf nginx-${ARCH}.tar.gz
 mv nginx ${BUILD_DIR}
 
 wget --progress=dot:giga https://download.nextcloud.com/server/releases/nextcloud-${NEXTCLOUD_VERSION}.tar.bz2 -O nexcloud.tar.bz2
-tar xf nexcloud.tar.bz2
+tar xf nextcloud.tar.bz2
 mv nextcloud ${BUILD_DIR}
