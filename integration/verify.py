@@ -266,3 +266,11 @@ def test_upgrade_from_store(device, app, app_archive_path, device_host, device_p
     response = device.app_install(app)
     assert response.status_code == 200, response.text
     local_install(device_host, device_password, app_archive_path)
+
+def test_install_office(device):
+    device.run_ssh('snap run nextcloud.occ apps:install richdocuments')
+    device.run_ssh('snap run nextcloud.occ apps:install richdocumentscode')
+
+
+
+

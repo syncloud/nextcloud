@@ -9,7 +9,7 @@ apt update
 apt install -y libltdl7 libnss3
 
 
-BUILD_DIR=${DIR}/../build/nextcloud/postgresql
+BUILD_DIR=${DIR}/../build/snap/postgresql
 
 docker ps -a -q --filter ancestor=postgres:syncloud --format="{{.ID}}" | xargs docker stop | xargs docker rm || true
 docker rmi postgres:syncloud || true
