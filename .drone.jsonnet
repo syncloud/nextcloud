@@ -118,7 +118,8 @@ local build(arch, test_ui) = [{
         image: "selenium/video:ffmpeg-4.3.1-20220208",
         detach: true,
         environment: {
-            "DISPLAY_CONTAINER_NAME": "selenium",
+            DISPLAY_CONTAINER_NAME: "selenium",
+            FILE_NAME: "video.mkv"
         },
         volumes: [
             {
