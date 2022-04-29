@@ -116,7 +116,7 @@ def test_users(selenium, app_domain):
 
 def test_(selenium, app_domain):
     selenium.driver.get('https://{0}/settings/admin/richdocuments'.format(app_domain))
-    selenium.find_by_xpath("//span[@text='Collabora Online server is reachable']")
+    selenium.find_by_xpath("//span[@text='Collabora Online server is reachable.']")
     selenium.screenshot('office')
 
 
