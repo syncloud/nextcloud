@@ -3,7 +3,6 @@ from subprocess import check_output
 from syncloudlib.integration.hosts import add_host_alias
 from syncloudlib.integration.installer import local_install
 from syncloudlib.http import wait_for_rest
-from selenium.webdriver.common.keys import Keys
 import requests
 
 TMP_DIR = '/tmp/syncloud'
@@ -27,7 +26,7 @@ def test_start(module_setup, app, device_host, domain, device):
     device.run_ssh('mkdir {0}'.format(TMP_DIR), throw=False)
 
 
-def test_upgrade(device, selenium, device_user, device_password, device_host, app_archive_path, app_domain, app_dir):
+def test_upgrade(device, device_user, device_password, device_host, app_archive_path, app_domain, app_dir):
     device.run_ssh('snap remove nextcloud')
     device.run_ssh('snap install nextcloud')
     local_install(device_host, device_password, app_archive_path)
