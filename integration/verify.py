@@ -270,6 +270,9 @@ def test_upgrade_from_store(device, app, app_archive_path, device_host, device_p
     local_install(device_host, device_password, app_archive_path)
 
 
-def test_install_office(device):
+def test_install_office(device, arch):
     device.run_ssh('snap run nextcloud.occ app:install richdocuments')
-    device.run_ssh('snap run nextcloud.occ app:install richdocumentscode')
+    if arch == "amd64":
+        device.run_ssh('snap run nextcloud.occ app:install richdocumentscode')
+    if arch == "arm64":
+        device.run_ssh('snap run nextcloud.occ app:install ichdocumentscode_arm64')
