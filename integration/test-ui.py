@@ -93,7 +93,7 @@ def test_settings_security(selenium, app_domain):
 
 # def test_apps_calendar(selenium, app_domain):
 #     selenium.driver.get("https://{0}/calendar".format(app_domain))
-#     selenium.find_by_xpath("//h2[text()='Maps routing settings']")
+#     selenium.find_by_xpath("//span[@text()='+ New calendar']")
 #     selenium.screenshot('calendar')
 
 
@@ -116,7 +116,7 @@ def test_users(selenium, app_domain):
 
 def test_(selenium, app_domain):
     selenium.driver.get('https://{0}/settings/admin/richdocuments'.format(app_domain))
-    selenium.find_by_xpath("//span[@text='Collabora Online server is reachable.']")
+    selenium.find_by_xpath("//span[@text()='Collabora Online server is reachable.']")
     selenium.screenshot('office')
 
 
