@@ -37,8 +37,9 @@ def module_setup(request, device, platform_data_dir, app_dir, artifact_dir):
         device.run_ssh('ls -la /snap/nextcloud > {0}/snap.nextcloud.ls.log'.format(TMP_DIR), throw=False)
         device.run_ssh('ls -la /var/snap > {0}/var.snap.ls.log'.format(TMP_DIR), throw=False)
         device.run_ssh('ls -la /var/snap/nextcloud > {0}/var.snap.nextcloud.ls.log'.format(TMP_DIR), throw=False)
-        device.run_ssh('ls -la /var/snap/nextcloud/current > {0}/var.snap.nextcloud.current.ls.log'.format(TMP_DIR), throw=False)
+        device.run_ssh('ls -la /var/snap/nextcloud/current/ > {0}/var.snap.nextcloud.current.ls.log'.format(TMP_DIR), throw=False)
         device.run_ssh('ls -la /var/snap/nextcloud/current/nextcloud > {0}/var.snap.nextcloud.current.nextcloud.ls.log'.format(TMP_DIR), throw=False)
+        device.run_ssh('ls -la /snap/nextcloud/current/nextcloud > {0}/snap.nextcloud.current.nextcloud.ls.log'.format(TMP_DIR), throw=False)
         device.run_ssh('ls -la /var/snap/nextcloud/common > {0}/var.snap.nextcloud.common.ls.log'.format(TMP_DIR),
                        throw=False)
         device.run_ssh('ls -la /data > {0}/data.ls.log'.format(TMP_DIR), throw=False)
