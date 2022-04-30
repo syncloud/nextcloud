@@ -283,4 +283,4 @@ def test_install_office(device, arch):
     if arch == "amd64":
         device.run_ssh('snap run nextcloud.occ app:install richdocumentscode')
     if arch == "arm64":
-        device.run_ssh('snap run nextcloud.occ app:install ichdocumentscode_arm64')
+        device.run_ssh('snap run nextcloud.occ app:install richdocumentscode_arm64')
