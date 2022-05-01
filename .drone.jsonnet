@@ -21,7 +21,7 @@ local build(arch, test_ui) = [{
             name: "build code",
             image: "debian:buster-slim",
             commands: [
-                "./cose/build.sh"
+                "./code/build.sh"
             ],
             volumes: [
                 {
