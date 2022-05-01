@@ -5,8 +5,6 @@ cd ${DIR}
 
 BUILD_DIR=${DIR}/../build/snap/code
 ARCH=$(uname -m)
-case $1 in
-start)
 if [[ $ARCH == "armv7l" ]]; then
     echo "$ARCH is not supported"
     exit 0
