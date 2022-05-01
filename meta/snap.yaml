@@ -30,7 +30,16 @@ apps:
     - network-bind
     restart-condition: always
     stop-command: bin/service.nginx.sh stop
-
+  
+  code:
+    command: bin/service.code.sh start
+    user: nextcloud
+    daemon: simple
+    plugs:
+    - network
+    - network-bind
+    restart-condition: always
+    
   occ:
     command: bin/occ-runner
 
