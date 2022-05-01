@@ -13,8 +13,7 @@ fi
 docker ps -a -q --filter ancestor=code:syncloud --format="{{.ID}}" | xargs docker stop | xargs docker rm || true
 docker rmi code:syncloud || true
 docker build -t code:syncloud .
-docker run code:syncloud code -i
-docker create --name=codw code:syncloud
+docker create --name=code code:syncloud
 mkdir -p ${BUILD_DIR}
 cd ${BUILD_DIR}
 docker export code -o app.tar
