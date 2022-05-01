@@ -18,6 +18,24 @@ local build(arch, test_ui) = [{
             ]
         },
        {
+            name: "build code",
+            image: "debian:buster-slim",
+            commands: [
+                "./cose/build.sh"
+            ],
+            volumes: [
+                {
+                    name: "docker",
+                    path: "/usr/bin/docker"
+                },
+                {
+                    name: "docker.sock",
+                    path: "/var/run/docker.sock"
+                }
+            ]
+        },
+
+       {
             name: "build postgresql",
             image: "debian:buster-slim",
             commands: [
