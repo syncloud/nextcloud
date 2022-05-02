@@ -71,7 +71,18 @@ class Installer:
         fs.makepath(self.nextcloud_config_path)
         fs.makepath(join(self.common_dir, 'log'))
         fs.makepath(join(self.common_dir, 'nginx'))
+        cool_fileserver_path = join(self.data_dir, 'code', 'coolwsd')
+        fs.makepath(cool_fileserver_path)
+        fs.makepath(join(self.data_dir, 'code', 'systemplate'))
+        fs.makepath(join(self.data_dir, 'code', 'child-roots'))
+
         fs.makepath(self.extra_apps_dir)
+        
+        
+        shutil.copy(
+            join(self.config_dir, 'code', 'discovery.xml'), 
+            join(cool_fileserver_path, 'discovery.xml')
+        )
 
         fs.chownpath(self.common_dir, USER_NAME, recursive=True)
         fs.chownpath(self.data_dir, USER_NAME, recursive=True)
