@@ -19,5 +19,7 @@ cd ${BUILD_DIR}
 docker export code -o app.tar
 tar xf app.tar
 cp ${DIR}/code.sh ${BUILD_DIR}/bin
+cp ${BUILD_DIR}/usr/bin/coolforkit ${BUILD_DIR}/usr/bin/coolforkit.bin
+cp ${DIR}/coolforkit ${BUILD_DIR}/usr/bin/coolforkit
 rm -rf app.tar
 rm -rf ${BUILD_DIR}/usr/src
