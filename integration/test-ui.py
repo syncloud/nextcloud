@@ -118,6 +118,11 @@ def test_(selenium, app_domain):
     selenium.driver.get('https://{0}/settings/admin/richdocuments'.format(app_domain))
     #selenium.find_by_xpath("//label[normalize-space(text())='Use the built-in CODE - Collabora Online Development Edition']").click()
     selenium.find_by_xpath("//label[normalize-space(text())='Use your own server']").click()
+    //url = selenium.find_by_xpath("//input[@id='wopi_url']")
+    //url.clear()
+    //url.send_keys("localhost:9980")
+
+    selenium.find_by_xpath("//input[@value='Save']").click()
     selenium.find_by_xpath("//span[normalize-space(text())='Collabora Online server is reachable.']")
     selenium.screenshot('office')
 
