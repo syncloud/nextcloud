@@ -122,7 +122,7 @@ def test_(selenium, app_domain):
     url = selenium.find_by_xpath("//input[@id='wopi_url']")
     url.clear()
     url.send_keys("https://{0}".format(app_domain))
-
+    selenium.screenshot('office-own-url')
     selenium.find_by_xpath("//input[@value='Save']").click()
     selenium.find_by_xpath("//span[normalize-space(text())='Collabora Online server is reachable.']")
     selenium.screenshot('office-status')
