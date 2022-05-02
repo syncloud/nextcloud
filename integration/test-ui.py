@@ -119,9 +119,9 @@ def test_(selenium, app_domain):
     #selenium.find_by_xpath("//label[normalize-space(text())='Use the built-in CODE - Collabora Online Development Edition']").click()
     selenium.find_by_xpath("//label[normalize-space(text())='Use your own server']").click()
     selenium.screenshot('office-own')
-    #url = selenium.find_by_xpath("//input[@id='wopi_url']")
-    #url.clear()
-    #url.send_keys("localhost:9980")
+    url = selenium.find_by_xpath("//input[@id='wopi_url']")
+    url.clear()
+    url.send_keys("https://{0}".format(app_domain))
 
     selenium.find_by_xpath("//input[@value='Save']").click()
     selenium.find_by_xpath("//span[normalize-space(text())='Collabora Online server is reachable.']")
