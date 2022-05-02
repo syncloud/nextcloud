@@ -74,8 +74,6 @@ class Installer:
         
         fs.makepath(self.extra_apps_dir)
         
-        check_output('chown {0}. {1}'.format(USER_NAME, ocdata), shell=True)
-
         self.install_cool()
 
         fs.chownpath(self.common_dir, USER_NAME, recursive=True)
