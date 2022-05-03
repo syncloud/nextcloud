@@ -33,6 +33,7 @@ apps:
   
   code:
     command: bin/service.code.sh start
+    user: nextcloud
     daemon: simple
     plugs:
     - network
