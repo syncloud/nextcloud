@@ -146,7 +146,7 @@ class Installer:
         self.on_domain_change()
 
         fs.chownpath(self.common_dir, USER_NAME, recursive=True)
-        check_output('chown -R {0}.{0} {1}'.format(self.data_dir, USER_NAME), shell=True)
+        check_output('chown -R {0}.{0} {1}'.format(USER_NAME, self.data_dir), shell=True)
 
     def migrate_nextcloud_config_file(self):
         if not isfile(self.nextcloud_config_file):
