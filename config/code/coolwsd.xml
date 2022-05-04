@@ -58,13 +58,13 @@
     <ver_suffix desc="Appended to etags to allow easy refresh of changed files during development" type="string" default=""></ver_suffix>
 
     <logging>
-        <color type="bool">true</color>
+        <color type="bool">false</color>
         <!--
              Note to developers: When you do "make run", the logging.level will be set on the
              coolwsd command line, so if you want to change it for your testing, do it in
              Makefile.am, not here.
         -->
-        <level type="string" desc="Can be 0-8 (with the lowest numbers being the least verbose), or none (turns off logging), fatal, critical, error, warning, notice, information, debug, trace" default="@COOLWSD_LOGLEVEL@">@COOLWSD_LOGLEVEL@</level>
+        <level type="string" desc="Can be 0-8 (with the lowest numbers being the least verbose), or none (turns off logging), fatal, critical, error, warning, notice, information, debug, trace" default="information">information</level>
         <most_verbose_level_settable_from_client type="string" desc="A loggingleveloverride message from the client can not set a more verbose log level than this" default="notice">notice</most_verbose_level_settable_from_client>
         <least_verbose_level_settable_from_client type="string" desc="A loggingleveloverride message from a client can not set a less verbose log level than this" default="fatal">fatal</least_verbose_level_settable_from_client>
         <protocol type="bool" desc="Enable minimal client-site JS protocol logging from the start">true</protocol>
