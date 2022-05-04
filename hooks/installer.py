@@ -75,8 +75,7 @@ class Installer:
         
         self.install_cool()
 
-        fs.chownpath(self.common_dir, USER_NAME, recursive=True)
-        fs.chownpath(self.data_dir, USER_NAME, recursive=True)
+        self.fix_permissions()
 
     def install_cool(self):
         cool_fileserver_path = join(self.data_dir, 'code', 'coolwsd')
@@ -145,7 +144,10 @@ class Installer:
         
         self.on_domain_change()
 
-        fs.chownpath(self.common_dir, USER_NAME, recursive=True)
+        self.fix_permissions()
+
+    def fix_permissions(self):
+        check_output('chown -R {0}.{0} {1}'.format(USER_NAME, self.common_dir), shell=True)
         check_output('chown -R {0}.{0} {1}'.format(USER_NAME, self.data_dir), shell=True)
 
     def migrate_nextcloud_config_file(self):
