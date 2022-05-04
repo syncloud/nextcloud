@@ -148,7 +148,7 @@ class Installer:
 
     def fix_permissions(self):
         check_output('chown -R {0}.{0} {1}'.format(USER_NAME, self.common_dir), shell=True)
-        check_output('find {0} -path {0}/code -prune -o -exec chown {1}.{1} {{}} +'.format(self.data_dir, USER_NAME),
+        check_output('find {0}/ -path {0}/code -prune -o -exec chown {1}.{1} {{}} +'.format(self.data_dir, USER_NAME),
                      shell=True)
 
     def migrate_nextcloud_config_file(self):
