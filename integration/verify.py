@@ -285,5 +285,3 @@ def test_upload_office_file(device, arch, device_user, device_password, app_doma
     if arch == "arm":
         webdav_upload(device_user, device_password, 'test.odt', 'test.odt', app_domain)
         files_scan(device)
-fice():
-   webdav_upload(device_user, device_password, sync_file, sync_file, app_domain)
