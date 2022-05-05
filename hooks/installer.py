@@ -30,7 +30,7 @@ PSQL_PORT = 5436
 SYSTEMD_NGINX = '{0}.nginx'.format(APP_NAME)
 SYSTEMD_PHP_FPM = '{0}.php-fpm'.format(APP_NAME)
 SYSTEMD_POSTGRESQL = '{0}.postgresql'.format(APP_NAME)
-
+SYSTEMD_COLLABORA = '{0}.code'.format(APP_NAME)
 
 class Installer:
     def __init__(self):
@@ -64,6 +64,7 @@ class Installer:
             'db_psql_port': PSQL_PORT,
             'database_dir': self.db.database_dir,
             'config_dir': self.config_dir,
+            'domain': urls.get_app_domain_name(APP_NAME)
         }
         gen.generate_files(templates_path, self.config_dir, variables)
 
@@ -283,7 +284,12 @@ class Installer:
         local_ip = check_output(["hostname", "-I"]).decode().split(" ")[0]
         self.oc_config.set_value('trusted_domains', "localhost {0} {1}".format(local_ip, app_domain))
         self.oc_config.set_value('trusted_proxies', "localhost {0}".format(app_domain))
-
+        gen.generate_file_jinja(
+            join(self.app_dir, 'config', 'code', 'coolwsd.xml'),
+            join(self.data_dir, 'config', 'code', 'coolwsd.xml'),
+            {'domain': app_domain}
+        )
+        service.restart(SYSTEMD_COLLABORA)
 
 class Cron:
 

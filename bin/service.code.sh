@@ -13,7 +13,7 @@ start)
         echo "$ARCH is not supported"
         exit 0
     fi
-    exec $DIR/code/bin/code.sh --disable-cool-user-checking --lo-template-path=$SNAP/code/opt/collaboraoffice --version --config-file=$SNAP/config/code/coolwsd.xml
+    exec $DIR/code/bin/code.sh --disable-cool-user-checking --lo-template-path=$SNAP/code/opt/collaboraoffice --version --config-file=$SNAP_DATA/config/code/coolwsd.xml
     ;;
 *)
     echo "not valid command"
