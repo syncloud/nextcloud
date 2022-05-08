@@ -100,7 +100,7 @@ local build(arch, test_ui) = [{
               "APP_ARCHIVE_PATH=$(realpath $(cat package.name))",
               "cd integration",
               "./deps.sh",
-              "py.test -x -s verify.py --distro=jessie --domain=jessie.com --app-archive-path=$APP_ARCHIVE_PATH --device-host=nextcloud.jessie.com --app=" + name + " --arch=" + arch
+              "py.test -x -s verify.py --distro=jessie --domain=jessie.com --app-archive-path=$APP_ARCHIVE_PATH --device-host=" + name + ".jessie.com --app=" + name + " --arch=" + arch
             ]
         }] else []) + [
         {
@@ -110,7 +110,7 @@ local build(arch, test_ui) = [{
               "APP_ARCHIVE_PATH=$(realpath $(cat package.name))",
               "cd integration",
               "./deps.sh",
-              "py.test -x -s verify.py --distro=buster --domain=buster.com --app-archive-path=$APP_ARCHIVE_PATH --device-host=nextcloud.buster.com --app=" + name + " --arch=" + arch
+              "py.test -x -s verify.py --distro=buster --domain=buster.com --app-archive-path=$APP_ARCHIVE_PATH --device-host=" + name + ".buster.com --app=" + name + " --arch=" + arch
             ]
         }] + ( if test_ui then [
     {
@@ -138,7 +138,7 @@ local build(arch, test_ui) = [{
             commands: [
               "cd integration",
               "./deps.sh",
-              "py.test -x -s test-ui.py --distro=jessie --ui-mode=desktop --domain=jessie.com --device-host=nextcloud.jessie.com --app=" + name + " --browser=" + browser,
+              "py.test -x -s test-ui.py --distro=jessie --ui-mode=desktop --domain=jessie.com --device-host=" + name + ".jessie.com --app=" + name + " --browser=" + browser,
             ],
             volumes: [{
                 name: "shm",
@@ -151,7 +151,7 @@ local build(arch, test_ui) = [{
             commands: [
               "cd integration",
               "./deps.sh",
-              "py.test -x -s test-ui.py --distro=jessie --ui-mode=mobile --domain=jessie.com --device-host=nextcloud.jessie.com --app=" + name + " --browser=" + browser,
+              "py.test -x -s test-ui.py --distro=jessie --ui-mode=mobile --domain=jessie.com --device-host=" + name + ".jessie.com --app=" + name + " --browser=" + browser,
             ],
             volumes: [{
                 name: "shm",
@@ -164,7 +164,7 @@ local build(arch, test_ui) = [{
             commands: [
               "cd integration",
               "./deps.sh",
-              "py.test -x -s test-ui.py --distro=buster --ui-mode=desktop --domain=buster.com --device-host=nextcloud.buster.com --app=" + name + " --browser=" + browser,
+              "py.test -x -s test-ui.py --distro=buster --ui-mode=desktop --domain=buster.com --device-host=" + name + ".buster.com --app=" + name + " --browser=" + browser,
             ],
             volumes: [{
                 name: "shm",
@@ -177,7 +177,7 @@ local build(arch, test_ui) = [{
             commands: [
               "cd integration",
               "./deps.sh",
-              "py.test -x -s test-ui.py --distro=buster --ui-mode=mobile --domain=buster.com --device-host=nextcloud.buster.com --app=" + name + " --browser=" + browser,
+              "py.test -x -s test-ui.py --distro=buster --ui-mode=mobile --domain=buster.com --device-host=" + name + ".buster.com --app=" + name + " --browser=" + browser,
             ],
             volumes: [{
                 name: "shm",
@@ -253,7 +253,7 @@ local build(arch, test_ui) = [{
      },
     services: ( if arch == "amd64" then [ 
         {
-            name: "nextcloud.jessie.com",
+            name: name + ".jessie.com",
             image: "syncloud/platform-jessie-" + arch,
             privileged: true,
             volumes: [
@@ -268,7 +268,7 @@ local build(arch, test_ui) = [{
             ]
         }] else []) + [
         {
-            name: "nextcloud.buster.com",
+            name: name + ".buster.com",
             image: "syncloud/platform-buster-" + arch + ":22.02",
             privileged: true,
             volumes: [
