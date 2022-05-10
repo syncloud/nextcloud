@@ -22,7 +22,6 @@ def module_setup(request, device, platform_data_dir, app_dir, artifact_dir):
         platform_log_dir = join(artifact_dir, 'platform_log')
         os.mkdir(platform_log_dir)
         device.scp_from_device('{0}/log/*'.format(platform_data_dir), platform_log_dir)
-        device.run_ssh('ls -la /var/snap/nextcloud/current > {0}/app.data.ls.log'.format(TMP_DIR), throw=False)
         device.run_ssh('ls -la /var/snap/nextcloud/current/nextcloud/config > {0}/config.ls.log'.format(TMP_DIR), throw=False)
         device.run_ssh('cp /var/snap/nextcloud/current/nextcloud/config/config.php {0}'.format(TMP_DIR), throw=False)
         device.run_ssh('snap run nextcloud.occ > {1}/occ.help.log'.format(app_dir, TMP_DIR), throw=False)
@@ -31,13 +30,16 @@ def module_setup(request, device, platform_data_dir, app_dir, artifact_dir):
         device.run_ssh('systemctl status snap.nextcloud.php-fpm > {0}/nextcloud.php-fpm.status.log'.format(TMP_DIR),
                        throw=False)
         device.run_ssh('netstat -nlp > {0}/netstat.log'.format(TMP_DIR), throw=False)
-        device.run_ssh('journalctl | tail -500 > {0}/journalctl.log'.format(TMP_DIR), throw=False)
+        device.run_ssh('journalctl | tail -1000 > {0}/journalctl.log'.format(TMP_DIR), throw=False)
         device.run_ssh('tail -500 /var/log/syslog > {0}/syslog.log'.format(TMP_DIR), throw=False)
         device.run_ssh('tail -500 /var/log/messages > {0}/messages.log'.format(TMP_DIR), throw=False)
         device.run_ssh('ls -la /snap > {0}/snap.ls.log'.format(TMP_DIR), throw=False)
         device.run_ssh('ls -la /snap/nextcloud > {0}/snap.nextcloud.ls.log'.format(TMP_DIR), throw=False)
         device.run_ssh('ls -la /var/snap > {0}/var.snap.ls.log'.format(TMP_DIR), throw=False)
         device.run_ssh('ls -la /var/snap/nextcloud > {0}/var.snap.nextcloud.ls.log'.format(TMP_DIR), throw=False)
+        device.run_ssh('ls -la /var/snap/nextcloud/current/ > {0}/var.snap.nextcloud.current.ls.log'.format(TMP_DIR), throw=False)
+        device.run_ssh('ls -la /var/snap/nextcloud/current/nextcloud > {0}/var.snap.nextcloud.current.nextcloud.ls.log'.format(TMP_DIR), throw=False)
+        device.run_ssh('ls -la /snap/nextcloud/current/nextcloud > {0}/snap.nextcloud.current.nextcloud.ls.log'.format(TMP_DIR), throw=False)
         device.run_ssh('ls -la /var/snap/nextcloud/common > {0}/var.snap.nextcloud.common.ls.log'.format(TMP_DIR),
                        throw=False)
         device.run_ssh('ls -la /data > {0}/data.ls.log'.format(TMP_DIR), throw=False)
@@ -75,13 +77,12 @@ def test_sync(app_domain, megabytes, device, device_user, device_password):
     if os.path.isfile(sync_file):
         os.remove(sync_file)
     print(check_output('dd if=/dev/zero of={0} count={1} bs=1M'.format(sync_file, megabytes), shell=True))
-    print(check_output(webdav_upload(device_user, device_password, sync_file, sync_file, app_domain), shell=True))
+    webdav_upload(device_user, device_password, sync_file, sync_file, app_domain)
 
     sync_file_download = 'test.file.download'
     if os.path.isfile(sync_file_download):
         os.remove(sync_file_download)
-    print(check_output(webdav_download(device_user, device_password, sync_file, sync_file_download, app_domain),
-                       shell=True))
+    webdav_download(device_user, device_password, sync_file, sync_file_download, app_domain)
 
     assert os.path.isfile(sync_file_download)
     device.run_ssh('rm /data/nextcloud/{0}/files/{1}'.format(device_user, sync_file))
@@ -89,13 +90,13 @@ def test_sync(app_domain, megabytes, device, device_user, device_password):
 
 
 def webdav_upload(user, password, file_from, file_to, app_domain):
-    return 'curl -k -T {2} https://{0}:{1}@{4}/remote.php/webdav/{3}'.format(user, password, file_from, file_to,
-                                                                             app_domain)
+    print(check_output('curl -k -T {2} https://{0}:{1}@{4}/remote.php/webdav/{3}'.format(user, password, file_from, file_to,
+                                                                             app_domain), shell=True))
 
 
 def webdav_download(user, password, file_from, file_to, app_domain):
-    return 'curl -k -o {3} https://{0}:{1}@{4}/remote.php/webdav/{2}'.format(user, password, file_from, file_to,
-                                                                             app_domain)
+    print(check_output('curl -k -o {3} https://{0}:{1}@{4}/remote.php/webdav/{2}'.format(user, password, file_from, file_to,
+                                                                             app_domain), shell=True))
 
 
 def files_scan(device):
@@ -266,3 +267,21 @@ def test_upgrade_from_store(device, app, app_archive_path, device_host, device_p
     response = device.app_install(app)
     assert response.status_code == 200, response.text
     local_install(device_host, device_password, app_archive_path)
+
+
+def test_install_calendar(device):
+    device.run_ssh('snap run nextcloud.occ app:install calendar')
+
+
+def test_install_contacts(device):
+    device.run_ssh('snap run nextcloud.occ app:install contacts')
+
+
+def test_install_office(device, arch):
+    device.run_ssh('snap run nextcloud.occ app:install richdocuments')
+
+
+def test_upload_office_file(device, arch, device_user, device_password, app_domain):
+    if arch == "arm":
+        webdav_upload(device_user, device_password, 'test.odt', 'test.odt', app_domain)
+        files_scan(device)

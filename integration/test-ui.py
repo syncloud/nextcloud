@@ -93,7 +93,7 @@ def test_settings_security(selenium, app_domain):
 
 # def test_apps_calendar(selenium, app_domain):
 #     selenium.driver.get("https://{0}/calendar".format(app_domain))
-#     selenium.find_by_xpath("//h2[text()='Maps routing settings']")
+#     selenium.find_by_xpath("//span[@text()='+ New calendar']")
 #     selenium.screenshot('calendar')
 
 
@@ -112,3 +112,22 @@ def test_users(selenium, app_domain):
     selenium.screenshot('users')
     source = selenium.driver.page_source
     assert 'Server Error' not in source
+
+
+def test_office(selenium, app_domain):
+    selenium.driver.get('https://{0}/settings/admin/richdocuments'.format(app_domain))
+    selenium.find_by_xpath("//label[normalize-space(text())='Use your own server']").click()
+    selenium.screenshot('office-own')
+    url = selenium.find_by_xpath("//input[@id='wopi_url']")
+    url.clear()
+    url.send_keys("https://{0}".format(app_domain))
+    selenium.find_by_xpath("//*[normalize-space(text())='Disable certificate verification (insecure)']").click()
+    selenium.screenshot('office-own-url')
+    selenium.find_by_xpath("//input[@value='Save']").click()
+    #selenium.find_by_xpath("//span[normalize-space(text())='Collabora Online server is reachable.']")
+    selenium.screenshot('office-status')
+
+
+def test_teardown(driver):
+    driver.quit()
+

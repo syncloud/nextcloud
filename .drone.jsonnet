@@ -68,15 +68,30 @@ local build(arch, test_ui) = [{
                 }
             ]
         },
-
+    {
+        name: "download",
+        image: "debian:buster-slim",
+        commands: [
+            "./download.sh "
+        ]
+    },
         {
             name: "build",
             image: "debian:buster-slim",
             commands: [
-                "VERSION=$(cat version)",
-                "./build.sh " + name + " $VERSION"
+                "./build.sh"
             ]
-        }] + ( if arch == "amd64" then [
+        },
+    {
+        name: "package",
+        image: "debian:buster-slim",
+        commands: [
+            "VERSION=$(cat version)",
+            "./package.sh " + name + " $VERSION "
+        ]
+    }
+
+] + ( if arch == "amd64" then [
         {
             name: "test-integration-jessie",
             image: "python:3.8-slim-buster",
@@ -84,29 +99,46 @@ local build(arch, test_ui) = [{
               "apt-get update && apt-get install -y sshpass openssh-client netcat rustc file libxml2-dev libxslt-dev build-essential libz-dev curl",
               "APP_ARCHIVE_PATH=$(realpath $(cat package.name))",
               "cd integration",
-              "pip install -r requirements.txt",
-              "py.test -x -s verify.py --distro=jessie --domain=jessie.com --app-archive-path=$APP_ARCHIVE_PATH --device-host=nextcloud.jessie.com --app=" + name
+              "./deps.sh",
+              "py.test -x -s verify.py --distro=jessie --domain=jessie.com --app-archive-path=$APP_ARCHIVE_PATH --device-host=" + name + ".jessie.com --app=" + name + " --arch=" + arch
             ]
         }] else []) + [
         {
             name: "test-integration-buster",
             image: "python:3.8-slim-buster",
             commands: [
-              "apt-get update && apt-get install -y sshpass openssh-client netcat rustc file libxml2-dev libxslt-dev build-essential libz-dev curl",
               "APP_ARCHIVE_PATH=$(realpath $(cat package.name))",
               "cd integration",
-              "pip install -r requirements.txt",
-              "py.test -x -s verify.py --distro=buster --domain=buster.com --app-archive-path=$APP_ARCHIVE_PATH --device-host=nextcloud.buster.com --app=" + name
+              "./deps.sh",
+              "py.test -x -s verify.py --distro=buster --domain=buster.com --app-archive-path=$APP_ARCHIVE_PATH --device-host=" + name + ".buster.com --app=" + name + " --arch=" + arch
             ]
         }] + ( if test_ui then [
+    {
+        name: "selenium-video",
+        image: "selenium/video:ffmpeg-4.3.1-20220208",
+        detach: true,
+        environment: {
+            DISPLAY_CONTAINER_NAME: "selenium",
+            FILE_NAME: "video.mkv"
+        },
+        volumes: [
+            {
+                name: "shm",
+                path: "/dev/shm"
+            },
+           {
+                name: "videos",
+                path: "/videos"
+            }
+        ]
+    },
         {
             name: "test-ui-desktop-jessie",
             image: "python:3.8-slim-buster",
             commands: [
-              "apt-get update && apt-get install -y sshpass openssh-client libxml2-dev libxslt-dev build-essential libz-dev curl",
               "cd integration",
-              "pip install -r requirements.txt",
-              "py.test -x -s test-ui.py --distro=jessie --ui-mode=desktop --domain=jessie.com --device-host=nextcloud.jessie.com --app=" + name + " --browser=" + browser,
+              "./deps.sh",
+              "py.test -x -s test-ui.py --distro=jessie --ui-mode=desktop --domain=jessie.com --device-host=" + name + ".jessie.com --app=" + name + " --browser=" + browser,
             ],
             volumes: [{
                 name: "shm",
@@ -117,10 +149,9 @@ local build(arch, test_ui) = [{
             name: "test-ui-mobile-jessie",
             image: "python:3.8-slim-buster",
             commands: [
-              "apt-get update && apt-get install -y sshpass openssh-client libxml2-dev libxslt-dev build-essential libz-dev curl",
               "cd integration",
-              "pip install -r requirements.txt",
-              "py.test -x -s test-ui.py --distro=jessie --ui-mode=mobile --domain=jessie.com --device-host=nextcloud.jessie.com --app=" + name + " --browser=" + browser,
+              "./deps.sh",
+              "py.test -x -s test-ui.py --distro=jessie --ui-mode=mobile --domain=jessie.com --device-host=" + name + ".jessie.com --app=" + name + " --browser=" + browser,
             ],
             volumes: [{
                 name: "shm",
@@ -131,10 +162,9 @@ local build(arch, test_ui) = [{
             name: "test-ui-desktop-buster",
             image: "python:3.8-slim-buster",
             commands: [
-              "apt-get update && apt-get install -y sshpass openssh-client libxml2-dev libxslt-dev build-essential libz-dev curl",
               "cd integration",
-              "pip install -r requirements.txt",
-              "py.test -x -s test-ui.py --distro=buster --ui-mode=desktop --domain=buster.com --device-host=nextcloud.buster.com --app=" + name + " --browser=" + browser,
+              "./deps.sh",
+              "py.test -x -s test-ui.py --distro=buster --ui-mode=desktop --domain=buster.com --device-host=" + name + ".buster.com --app=" + name + " --browser=" + browser,
             ],
             volumes: [{
                 name: "shm",
@@ -145,10 +175,9 @@ local build(arch, test_ui) = [{
             name: "test-ui-mobile-buster",
             image: "python:3.8-slim-buster",
             commands: [
-              "apt-get update && apt-get install -y sshpass openssh-client libxml2-dev libxslt-dev build-essential libz-dev curl",
               "cd integration",
-              "pip install -r requirements.txt",
-              "py.test -x -s test-ui.py --distro=buster --ui-mode=mobile --domain=buster.com --device-host=nextcloud.buster.com --app=" + name + " --browser=" + browser,
+              "./deps.sh",
+              "py.test -x -s test-ui.py --distro=buster --ui-mode=mobile --domain=buster.com --device-host=" + name + ".buster.com --app=" + name + " --browser=" + browser,
             ],
             volumes: [{
                 name: "shm",
@@ -157,6 +186,21 @@ local build(arch, test_ui) = [{
         }
 
 ] else [] ) +[
+    {
+        name: "test-upgrade",
+        image: "python:3.8-slim-buster",
+        commands: [
+          "APP_ARCHIVE_PATH=$(realpath $(cat package.name))",
+          "cd integration",
+          "./deps.sh",
+          "py.test -x -s test-upgrade.py --distro=buster --ui-mode=desktop --domain=buster.com --app-archive-path=$APP_ARCHIVE_PATH --device-host=" + name + ".buster.com --app=" + name + " --browser=" + browser,
+        ],
+        privileged: true,
+        volumes: [{
+            name: "videos",
+            path: "/videos"
+        }]
+    },
         {
             name: "upload",
         image: "debian:buster-slim",
@@ -209,7 +253,7 @@ local build(arch, test_ui) = [{
      },
     services: ( if arch == "amd64" then [ 
         {
-            name: "nextcloud.jessie.com",
+            name: name + ".jessie.com",
             image: "syncloud/platform-jessie-" + arch,
             privileged: true,
             volumes: [
@@ -224,7 +268,7 @@ local build(arch, test_ui) = [{
             ]
         }] else []) + [
         {
-            name: "nextcloud.buster.com",
+            name: name + ".buster.com",
             image: "syncloud/platform-buster-" + arch + ":22.02",
             privileged: true,
             volumes: [
@@ -275,8 +319,12 @@ local build(arch, test_ui) = [{
             host: {
                 path: "/var/run/docker.sock"
             }
-        }
-    ]
+        },
+        {
+            name: "videos",
+            temp: {}
+        },
+      ]
 },
  {
       kind: "pipeline",
@@ -313,6 +361,6 @@ local build(arch, test_ui) = [{
       }
   }];
 
-build("arm", false) +
 build("amd64", true) +
+build("arm", false) +
 build("arm64", false)

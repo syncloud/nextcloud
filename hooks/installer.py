@@ -1,5 +1,4 @@
 import logging
-import os
 import shutil
 import uuid
 import re
@@ -32,7 +31,6 @@ SYSTEMD_NGINX = '{0}.nginx'.format(APP_NAME)
 SYSTEMD_PHP_FPM = '{0}.php-fpm'.format(APP_NAME)
 SYSTEMD_POSTGRESQL = '{0}.postgresql'.format(APP_NAME)
 
-
 class Installer:
     def __init__(self):
         if not logger.factory_instance:
@@ -56,7 +54,7 @@ class Installer:
         home_folder = join('/home', USER_NAME)
         linux.useradd(USER_NAME, home_folder=home_folder)
         storage.init_storage(APP_NAME, USER_NAME)
-        templates_path = join(self.app_dir, 'config.templates')
+        templates_path = join(self.app_dir, 'config')
 
         variables = {
             'app_dir': self.app_dir,
@@ -65,16 +63,17 @@ class Installer:
             'db_psql_port': PSQL_PORT,
             'database_dir': self.db.database_dir,
             'config_dir': self.config_dir,
+            'domain': urls.get_app_domain_name(APP_NAME)
         }
         gen.generate_files(templates_path, self.config_dir, variables)
 
         fs.makepath(self.nextcloud_config_path)
         fs.makepath(join(self.common_dir, 'log'))
         fs.makepath(join(self.common_dir, 'nginx'))
+        
         fs.makepath(self.extra_apps_dir)
-
-        fs.chownpath(self.common_dir, USER_NAME, recursive=True)
-        fs.chownpath(self.data_dir, USER_NAME, recursive=True)
+        
+        self.fix_permissions()
 
     def install(self):
         self.install_config()
@@ -131,20 +130,21 @@ class Installer:
         
         self.on_domain_change()
 
-        fs.chownpath(self.common_dir, USER_NAME, recursive=True)
-        fs.chownpath(self.data_dir, USER_NAME, recursive=True)
+        self.fix_permissions()
+
+    def fix_permissions(self):
+        check_output('chown -R {0}.{0} {1}'.format(USER_NAME, self.common_dir), shell=True)
+        check_output('chown -R {0}.{0} {1}/'.format(USER_NAME, self.data_dir), shell=True)
 
     def migrate_nextcloud_config_file(self):
-         if not isfile(self.nextcloud_config_file):
+        if not isfile(self.nextcloud_config_file):
             old_nextcloud_config_file = join(self.common_dir, 'nextcloud', 'config', 'config.php')
             if isfile(old_nextcloud_config_file):
                 shutil.copy(old_nextcloud_config_file, self.nextcloud_config_file)
                 self.fix_config_permission()
 
-
     def fix_config_permission(self):
         fs.chownpath(self.nextcloud_config_file, USER_NAME)
-
 
     def fix_version_specific_dbhost(self):
         content = self.read_nextcloud_config()
@@ -191,18 +191,16 @@ class Installer:
 
         self.db.execute('postgres', DB_USER, "ALTER USER {0} WITH PASSWORD '{1}';".format(DB_USER, DB_PASSWORD))
         real_app_storage_dir = realpath(app_storage_dir)
-        INSTALL_USER_PASSWORD = uuid.uuid4().hex
+        install_user_password = uuid.uuid4().hex
         self.occ.run('maintenance:install  --database pgsql --database-host {0}:{1}'
                      ' --database-name nextcloud --database-user {2} --database-pass {3}'
                      ' --admin-user {4} --admin-pass {5} --data-dir {6}'
                      .format(self.db.get_database_path(), PSQL_PORT, DB_USER, DB_PASSWORD,
-                             INSTALL_USER, INSTALL_USER_PASSWORD, real_app_storage_dir))
+                             INSTALL_USER, install_user_password, real_app_storage_dir))
 
         self.occ.run('app:enable user_ldap')
 
         # https://doc.owncloud.org/server/8.0/admin_manual/configuration_server/occ_command.html
-        # This is a holdover from the early days, when there was no option to create additional configurations.
-        # The second, and all subsequent, configurations that you create are automatically assigned IDs:
         self.occ.run('ldap:create-empty-config')
         self.occ.run('ldap:create-empty-config')
 
@@ -239,7 +237,8 @@ class Installer:
         self.cron.run()
 
         self.db.execute(DB_NAME, DB_USER, "select * from oc_ldap_group_mapping;")
-        self.db.execute(DB_NAME, DB_USER, "update oc_ldap_group_mapping set owncloud_name = 'admin' where owncloud_name = 'syncloud';")
+        self.db.execute(DB_NAME, DB_USER,
+                        "update oc_ldap_group_mapping set owncloud_name = 'admin' where owncloud_name = 'syncloud';")
         # self.db.execute(DB_NAME, DB_USER, "update oc_ldap_group_members set owncloudname = 'admin';")
 
         self.occ.run('user:delete {0}'.format(INSTALL_USER))
@@ -269,7 +268,6 @@ class Installer:
         local_ip = check_output(["hostname", "-I"]).decode().split(" ")[0]
         self.oc_config.set_value('trusted_domains', "localhost {0} {1}".format(local_ip, app_domain))
         self.oc_config.set_value('trusted_proxies', "localhost {0}".format(app_domain))
-
 
 class Cron:
 
