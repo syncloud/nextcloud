@@ -133,7 +133,7 @@ def test_occ_check(device):
 
 
 def test_occ_status(device):
-    device.run_ssh('snap run nextcloud.occ status   ')
+    device.run_ssh('snap run nextcloud.occ status')
 
 
 def test_webdav(app_domain, artifact_dir, device_user, device_password):
@@ -270,15 +270,15 @@ def test_upgrade_from_store(device, app, app_archive_path, device_host, device_p
 
 
 def test_install_calendar(device):
-    device.run_ssh('snap run nextcloud.occ app:install calendar', retries=100)
+    device.run_ssh('snap run nextcloud.occ app:install calendar', retries=100, sleep=10)
 
 
 def test_install_contacts(device):
-    device.run_ssh('snap run nextcloud.occ app:install contacts', retries=100)
+    device.run_ssh('snap run nextcloud.occ app:install contacts', retries=100, sleep=10)
 
 
 def test_install_office(device, arch):
-    device.run_ssh('snap run nextcloud.occ app:install richdocuments', retries=100)
+    device.run_ssh('snap run nextcloud.occ app:install richdocuments', retries=100, sleep=10)
 
 
 def test_upload_office_file(device, arch, device_user, device_password, app_domain):
