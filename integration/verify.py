@@ -198,8 +198,8 @@ def __log_data_dir(device):
 
 def __activate_disk(loop_device, device, domain):
     __log_data_dir(device)
-    response = device.login().post('https://{0}/rest/storage/disk/activate'.format(domain),
-                                   json={'device': loop_device}, allow_redirects=False, verify=False)  
+    response = device.login().post('https://{0}/rest/storage/disk/activate/disk'.format(domain),
+                                   json={'devices': [loop_device]}, allow_redirects=False, verify=False)
     assert response.status_code == 200, response.text
     __log_data_dir(device)
     files_scan(device)
