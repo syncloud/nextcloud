@@ -256,7 +256,7 @@ class Installer:
         ocdata = join(app_storage_dir, '.ocdata')
         fs.touchfile(ocdata)
         check_output('chown {0}. {1}'.format(USER_NAME, ocdata), shell=True)
-        check_output('chmod 770 {0}'.format(app_storage_dir), shell=True)
+        check_output('chmod 777 {0}'.format(app_storage_dir), shell=True)
         tmp_storage_path = join(app_storage_dir, 'tmp')
         fs.makepath(tmp_storage_path)
         fs.chownpath(tmp_storage_path, USER_NAME)
@@ -268,6 +268,16 @@ class Installer:
         local_ip = check_output(["hostname", "-I"]).decode().split(" ")[0]
         self.oc_config.set_value('trusted_domains', "localhost {0} {1}".format(local_ip, app_domain))
         self.oc_config.set_value('trusted_proxies', "localhost {0}".format(app_domain))
+
+    def backup_pre_stop(self):
+        self.db.backup()
+
+    def restore_pre_start(self):
+        self.db.remove()
+        self.db.init()
+
+    def restore_post_start(self):
+        self.db.restore()
 
 class Cron:
 
