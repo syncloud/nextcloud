@@ -275,6 +275,7 @@ class Installer:
     def restore_pre_start(self):
         self.db.remove()
         self.db.init()
+        self.db.init_config()
 
     def restore_post_start(self):
         self.db.restore()
