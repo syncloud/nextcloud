@@ -93,9 +93,8 @@ class Installer:
         self.migrate_nextcloud_config_file()
         self.fix_version_specific_dbhost()
 
-        if self.db.requires_upgrade():
-            self.db.remove()
-            self.db.init()
+        self.db.remove()
+        self.db.init()
         
         self.db.init_config()
 
@@ -166,8 +165,7 @@ class Installer:
         return 'installed' in open(self.nextcloud_config_file).read().strip()
 
     def upgrade(self):
-        if self.db.requires_upgrade():
-            self.db.restore()
+        self.db.restore()
         status = self.occ.run('status')
         self.log.info('status: {0}'.format(status))
         # if 'require upgrade' in status:
@@ -270,15 +268,13 @@ class Installer:
         self.oc_config.set_value('trusted_proxies', "localhost {0}".format(app_domain))
 
     def backup_pre_stop(self):
-        self.db.backup()
+        self.pre_refresh()
 
     def restore_pre_start(self):
-        self.db.remove()
-        self.db.init()
-        self.db.init_config()
+        self.post_refresh()
 
     def restore_post_start(self):
-        self.db.restore()
+        self.configure()
 
 class Cron:
 
