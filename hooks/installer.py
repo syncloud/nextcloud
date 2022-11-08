@@ -99,14 +99,14 @@ class Installer:
         self.db.init_config()
 
     def configure(self):
-        self.prepare_storage()
-        app_storage_dir = storage.init_storage(APP_NAME, USER_NAME)
-
+        
+        
         if self.installed():
             self.upgrade()
         else:
-            self.initialize(app_storage_dir)
+            self.initialize()
         
+        app_storage_dir = storage.init_storage(APP_NAME, USER_NAME)
         self.occ.run('ldap:set-config s01 ldapEmailAttribute mail')
         self.occ.run('config:system:set apps_paths 1 path --value="{0}"'.format(self.extra_apps_dir))
         self.occ.run('config:system:set dbhost --value="{0}"'.format(self.db.database_host))
@@ -166,6 +166,7 @@ class Installer:
 
     def upgrade(self):
         self.db.restore()
+        self.prepare_storage()
         status = self.occ.run('status')
         self.log.info('status: {0}'.format(status))
         # if 'require upgrade' in status:
@@ -185,8 +186,9 @@ class Installer:
         # else:
         #     self.log.info('not upgrading nextcloud')
 
-    def initialize(self, app_storage_dir):
-
+    def initialize(self):
+        self.prepare_storage()
+        app_storage_dir = storage.init_storage(APP_NAME, USER_NAME)
         self.db.execute('postgres', DB_USER, "ALTER USER {0} WITH PASSWORD '{1}';".format(DB_USER, DB_PASSWORD))
         real_app_storage_dir = realpath(app_storage_dir)
         install_user_password = uuid.uuid4().hex
