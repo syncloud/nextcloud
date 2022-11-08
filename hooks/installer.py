@@ -261,8 +261,8 @@ class Installer:
         fs.makepath(tmp_storage_path)
         fs.chownpath(tmp_storage_path, USER_NAME)
         real_app_storage_dir = realpath(app_storage_dir)
-        self.oc_config.set_value('datadirectory', real_app_storage_dir)
-
+        self.fix_datadirectory(real_app_storage_dir)
+        
     def on_domain_change(self):
         app_domain = urls.get_app_domain_name(APP_NAME)
         local_ip = check_output(["hostname", "-I"]).decode().split(" ")[0]
@@ -277,6 +277,15 @@ class Installer:
 
     def restore_post_start(self):
         self.configure()
+    
+    def fix_datadirectory(self, dir):
+        content = self.read_nextcloud_config()
+        pattern = r"'datadirectory'\s*=>\s*'.*?'"
+        replacement = "'datadirectory' => '{0}'".format(dir)
+        new_content = re.sub(pattern, replacement, content)
+        self.write_nextcloud_config(new_content)
+        self.fix_config_permission()
+
 
 class Cron:
 
