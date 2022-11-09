@@ -93,21 +93,20 @@ class Installer:
         self.migrate_nextcloud_config_file()
         self.fix_version_specific_dbhost()
 
-        if self.db.requires_upgrade():
-            self.db.remove()
-            self.db.init()
+        self.db.remove()
+        self.db.init()
         
         self.db.init_config()
 
     def configure(self):
-        self.prepare_storage()
-        app_storage_dir = storage.init_storage(APP_NAME, USER_NAME)
-
+        
+        
         if self.installed():
             self.upgrade()
         else:
-            self.initialize(app_storage_dir)
+            self.initialize()
         
+        app_storage_dir = storage.init_storage(APP_NAME, USER_NAME)
         self.occ.run('ldap:set-config s01 ldapEmailAttribute mail')
         self.occ.run('config:system:set apps_paths 1 path --value="{0}"'.format(self.extra_apps_dir))
         self.occ.run('config:system:set dbhost --value="{0}"'.format(self.db.database_host))
@@ -166,8 +165,8 @@ class Installer:
         return 'installed' in open(self.nextcloud_config_file).read().strip()
 
     def upgrade(self):
-        if self.db.requires_upgrade():
-            self.db.restore()
+        self.db.restore()
+        self.prepare_storage()
         status = self.occ.run('status')
         self.log.info('status: {0}'.format(status))
         # if 'require upgrade' in status:
@@ -187,8 +186,9 @@ class Installer:
         # else:
         #     self.log.info('not upgrading nextcloud')
 
-    def initialize(self, app_storage_dir):
-
+    def initialize(self):
+        self.prepare_storage()
+        app_storage_dir = storage.init_storage(APP_NAME, USER_NAME)
         self.db.execute('postgres', DB_USER, "ALTER USER {0} WITH PASSWORD '{1}';".format(DB_USER, DB_PASSWORD))
         real_app_storage_dir = realpath(app_storage_dir)
         install_user_password = uuid.uuid4().hex
@@ -256,18 +256,36 @@ class Installer:
         ocdata = join(app_storage_dir, '.ocdata')
         fs.touchfile(ocdata)
         check_output('chown {0}. {1}'.format(USER_NAME, ocdata), shell=True)
-        check_output('chmod 770 {0}'.format(app_storage_dir), shell=True)
+        check_output('chmod 777 {0}'.format(app_storage_dir), shell=True)
         tmp_storage_path = join(app_storage_dir, 'tmp')
         fs.makepath(tmp_storage_path)
         fs.chownpath(tmp_storage_path, USER_NAME)
         real_app_storage_dir = realpath(app_storage_dir)
-        self.oc_config.set_value('datadirectory', real_app_storage_dir)
-
+        self.fix_datadirectory(real_app_storage_dir)
+        
     def on_domain_change(self):
         app_domain = urls.get_app_domain_name(APP_NAME)
         local_ip = check_output(["hostname", "-I"]).decode().split(" ")[0]
         self.oc_config.set_value('trusted_domains', "localhost {0} {1}".format(local_ip, app_domain))
         self.oc_config.set_value('trusted_proxies', "localhost {0}".format(app_domain))
+
+    def backup_pre_stop(self):
+        self.pre_refresh()
+
+    def restore_pre_start(self):
+        self.post_refresh()
+
+    def restore_post_start(self):
+        self.configure()
+    
+    def fix_datadirectory(self, dir):
+        content = self.read_nextcloud_config()
+        pattern = r"'datadirectory'\s*=>\s*'.*?'"
+        replacement = "'datadirectory' => '{0}'".format(dir)
+        new_content = re.sub(pattern, replacement, content)
+        self.write_nextcloud_config(new_content)
+        self.fix_config_permission()
+
 
 class Cron:
 
