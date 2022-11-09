@@ -1,4 +1,5 @@
 import os
+import json
 import pytest
 import requests
 import shutil
@@ -10,6 +11,7 @@ from subprocess import check_output
 from syncloudlib.integration.hosts import add_host_alias
 from syncloudlib.integration.installer import local_install, wait_for_installer
 from syncloudlib.integration.loop import loop_device_add, loop_device_cleanup
+from syncloudlib.http import wait_for_response
 
 TMP_DIR = '/tmp/syncloud'
 
@@ -198,9 +200,15 @@ def __log_data_dir(device):
 
 def __activate_disk(loop_device, device, domain):
     __log_data_dir(device)
-    response = device.login().post('https://{0}/rest/storage/disk/activate'.format(domain),
-                                   json={'device': loop_device}, allow_redirects=False, verify=False)  
+    session = device.login()
+    response = session.post('https://{0}/rest/storage/disk/activate/disk'.format(domain),
+                                   json={'devices': [loop_device]}, allow_redirects=False, verify=False)
     assert response.status_code == 200, response.text
+
+    wait_for_response(session, 'https://{0}/rest/job/status'.format(domain),
+                      lambda r: json.loads(r.text)['data']['status'] == 'Idle',
+                      attempts=100)
+
     __log_data_dir(device)
     files_scan(device)
     device.run_ssh('snap run nextcloud.occ > {0}/occ.activate.log'.format(TMP_DIR))

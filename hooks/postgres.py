@@ -19,13 +19,6 @@ class Database:
         self.backup_file = join(self.data_dir, 'database.dump')
         self.database_host = '{0}:{1}'.format(self.database_dir, port)
 
-    def requires_upgrade(self):
-        if not isfile(self.old_major_version_file):
-            return True
-        old_version = open(self.old_major_version_file).read().strip()
-        new_version = open(self.new_major_version_file).read().strip()
-        return old_version != new_version
-
     def get_database_path(self):
         return self.database_dir
 
