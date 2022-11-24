@@ -58,7 +58,7 @@ def test_main(selenium, device_user, device_password, ui_mode, screenshot_dir):
 
 def test_settings(selenium, app_domain):
     selenium.driver.get("https://{0}/settings/admin".format(app_domain))
-    selenium.find_by_xpath("//h2[text()='Background jobs']")
+    selenium.find_by_xpath("//h2[contains(.,'Background jobs')]")
     selenium.screenshot('admin')
 
 

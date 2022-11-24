@@ -5,7 +5,7 @@ cd ${DIR}
 
 ARCH=$(uname -m)
 DOWNLOAD_URL=https://github.com/syncloud/3rdparty/releases/download/
-NEXTCLOUD_VERSION=24.0.2
+NEXTCLOUD_VERSION=25.0.1
 
 BUILD_DIR=${DIR}/build/snap
 mkdir -p $BUILD_DIR
