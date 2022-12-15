@@ -1,5 +1,6 @@
 local name = "nextcloud";
 local browser = "firefox";
+local nextcloud = "25.0.2";
 
 local build(arch, test_ui) = [{
     kind: "pipeline",
@@ -72,7 +73,7 @@ local build(arch, test_ui) = [{
         name: "download",
         image: "debian:buster-slim",
         commands: [
-            "./download.sh "
+            "./download.sh " + nextcloud
         ]
     },
         {
