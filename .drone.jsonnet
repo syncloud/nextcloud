@@ -71,27 +71,14 @@ local build(arch, test_ui, dind) = [{
                 "./build.sh"
             ]
         },
-    {
-        name: "package",
-        image: "debian:buster-slim",
-        commands: [
-            "VERSION=$(cat version)",
-            "./package.sh " + name + " $VERSION "
-        ]
-    }
-
-] + ( if arch == "amd64" then [
         {
-            name: "test-integration-jessie",
-            image: "python:3.8-slim-buster",
+            name: "package",
+            image: "debian:buster-slim",
             commands: [
-              "apt-get update && apt-get install -y sshpass openssh-client netcat rustc file libxml2-dev libxslt-dev build-essential libz-dev curl",
-              "APP_ARCHIVE_PATH=$(realpath $(cat package.name))",
-              "cd integration",
-              "./deps.sh",
-              "py.test -x -s verify.py --distro=jessie --domain=jessie.com --app-archive-path=$APP_ARCHIVE_PATH --device-host=" + name + ".jessie.com --app=" + name + " --arch=" + arch
+                "VERSION=$(cat version)",
+                "./package.sh " + name + " $VERSION "
             ]
-        }] else []) + [
+        },
         {
             name: "test-integration-buster",
             image: "python:3.8-slim-buster",
@@ -102,25 +89,25 @@ local build(arch, test_ui, dind) = [{
               "py.test -x -s verify.py --distro=buster --domain=buster.com --app-archive-path=$APP_ARCHIVE_PATH --device-host=" + name + ".buster.com --app=" + name + " --arch=" + arch
             ]
         }] + ( if test_ui then [
-    {
-        name: "selenium-video",
-        image: "selenium/video:ffmpeg-4.3.1-20220208",
-        detach: true,
-        environment: {
-            DISPLAY_CONTAINER_NAME: "selenium",
-            FILE_NAME: "video.mkv"
-        },
-        volumes: [
-            {
-                name: "shm",
-                path: "/dev/shm"
+        {
+            name: "selenium-video",
+            image: "selenium/video:ffmpeg-4.3.1-20220208",
+            detach: true,
+            environment: {
+                DISPLAY_CONTAINER_NAME: "selenium",
+                FILE_NAME: "video.mkv"
             },
-           {
-                name: "videos",
-                path: "/videos"
-            }
-        ]
-    },
+            volumes: [
+                {
+                    name: "shm",
+                    path: "/dev/shm"
+                },
+               {
+                    name: "videos",
+                    path: "/videos"
+                }
+            ]
+        },
         {
             name: "test-ui-desktop-jessie",
             image: "python:3.8-slim-buster",
