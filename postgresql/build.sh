@@ -1,10 +1,9 @@
-#!/bin/bash -ex
+#!/bin/sh -ex
 
-DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
+DIR=$( cd "$( dirname "$0" )" && pwd )
 cd ${DIR}
 
 MAJOR_VERSION=10
-
 
 BUILD_DIR=${DIR}/../build/snap/postgresql
 
