@@ -240,18 +240,19 @@ local build(arch, test_ui, dind) = [{
          "pull_request"
        ]
      },
-    services: ( if arch == "amd64" then [ 
-          {
-                name: "docker",
-                image: "docker:" + dind,
-                privileged: true,
-                volumes: [
-                    {
-                        name: "dockersock",
-                        path: "/var/run"
-                    }
-                ]
-            },
+    services: [
+        {
+            name: "docker",
+            image: "docker:" + dind,
+            privileged: true,
+            volumes: [
+                {
+                    name: "dockersock",
+                    path: "/var/run"
+                }
+            ]
+        },
+        ( if arch == "amd64" then [
        {
             name: name + ".jessie.com",
             image: "syncloud/platform-jessie-" + arch,
