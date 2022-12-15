@@ -18,6 +18,13 @@ local build(arch, test_ui, dind) = [{
                 "echo $DRONE_BUILD_NUMBER > version"
             ]
         },
+        {
+            name: "download",
+            image: "debian:buster-slim",
+            commands: [
+                "./download.sh " + nextcloud
+            ]
+        },
          {
             name: "package postgresql",
             image: "docker:" + dind,
@@ -57,13 +64,6 @@ local build(arch, test_ui, dind) = [{
                 }
             ]
         },
-    {
-        name: "download",
-        image: "debian:buster-slim",
-        commands: [
-            "./download.sh " + nextcloud
-        ]
-    },
         {
             name: "build",
             image: "debian:buster-slim",
