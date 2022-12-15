@@ -251,7 +251,8 @@ local build(arch, test_ui, dind) = [{
                     path: "/var/run"
                 }
             ]
-        },
+        }
+        ] +
         ( if arch == "amd64" then [
        {
             name: name + ".jessie.com",
