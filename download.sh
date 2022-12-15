@@ -11,7 +11,7 @@ BUILD_DIR=${DIR}/build/snap
 mkdir -p $BUILD_DIR
 
 cd ${DIR}/build
-wget -c --progress=dot:giga ${DOWNLOAD_URL}/nginx/nginx-${ARCH}.tar.gz
+wget ${DOWNLOAD_URL}/nginx/nginx-${ARCH}.tar.gz
 tar xf nginx-${ARCH}.tar.gz
 mv nginx ${BUILD_DIR}
 
