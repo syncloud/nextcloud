@@ -23,7 +23,7 @@ ls -la bin
 ls -la usr/bin
 ls -ls usr/share/postgresql-common/pg_wrapper
 PGBIN=$(echo usr/lib/postgresql/*/bin)
-ldd $PGBIN/initdb
+ldd $PGBIN/initdb || true
 mv $PGBIN/postgres $PGBIN/postgres.bin
 mv $PGBIN/pg_dump $PGBIN/pg_dump.bin
 cp $DIR/bin/* bin
