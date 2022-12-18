@@ -6,6 +6,8 @@ cd ${DIR}
 ARCH=$(uname -m)
 DOWNLOAD_URL=https://github.com/syncloud/3rdparty/releases/download/
 VERSION=$1
+apt update
+apt install -y wget
 
 BUILD_DIR=${DIR}/build/snap
 mkdir -p $BUILD_DIR

@@ -20,7 +20,7 @@ local build(arch, test_ui, dind) = [{
         },
         {
             name: "download",
-            image: "alpine:3.17.0",
+            image: "debian:buster-slim",
             commands: [
                 "./download.sh " + nextcloud
             ]
