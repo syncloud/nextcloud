@@ -1,13 +1,9 @@
-#!/bin/bash -ex
+#!/bin/sh -ex
 
-DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
+DIR=$( cd "$( dirname "$0" )" && pwd )
 cd ${DIR}
 
 MAJOR_VERSION=10
-
-apt update
-apt install -y libltdl7 libnss3
-
 
 BUILD_DIR=${DIR}/../build/snap/postgresql
 
@@ -27,7 +23,7 @@ ls -la bin
 ls -la usr/bin
 ls -ls usr/share/postgresql-common/pg_wrapper
 PGBIN=$(echo usr/lib/postgresql/*/bin)
-ldd $PGBIN/initdb
+ldd $PGBIN/initdb || true
 mv $PGBIN/postgres $PGBIN/postgres.bin
 mv $PGBIN/pg_dump $PGBIN/pg_dump.bin
 cp $DIR/bin/* bin
