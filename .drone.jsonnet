@@ -109,32 +109,6 @@ local build(arch, test_ui, dind) = [{
             ]
         },
         {
-            name: "test-ui-desktop-jessie",
-            image: "python:3.8-slim-buster",
-            commands: [
-              "cd integration",
-              "./deps.sh",
-              "py.test -x -s test-ui.py --distro=jessie --ui-mode=desktop --domain=jessie.com --device-host=" + name + ".jessie.com --app=" + name + " --browser=" + browser,
-            ],
-            volumes: [{
-                name: "shm",
-                path: "/dev/shm"
-            }]
-        },
-        {
-            name: "test-ui-mobile-jessie",
-            image: "python:3.8-slim-buster",
-            commands: [
-              "cd integration",
-              "./deps.sh",
-              "py.test -x -s test-ui.py --distro=jessie --ui-mode=mobile --domain=jessie.com --device-host=" + name + ".jessie.com --app=" + name + " --browser=" + browser,
-            ],
-            volumes: [{
-                name: "shm",
-                path: "/dev/shm"
-            }]
-        },
-        {
             name: "test-ui-desktop-buster",
             image: "python:3.8-slim-buster",
             commands: [
@@ -238,24 +212,7 @@ local build(arch, test_ui, dind) = [{
                     path: "/var/run"
                 }
             ]
-        }
-        ] +
-        ( if arch == "amd64" then [
-       {
-            name: name + ".jessie.com",
-            image: "syncloud/platform-jessie-" + arch,
-            privileged: true,
-            volumes: [
-                {
-                    name: "dbus",
-                    path: "/var/run/dbus"
-                },
-                {
-                    name: "dev",
-                    path: "/dev"
-                }
-            ]
-        }] else []) + [
+        },
         {
             name: name + ".buster.com",
             image: "syncloud/platform-buster-" + arch + ":22.02",
