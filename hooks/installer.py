@@ -190,6 +190,9 @@ class Installer:
         self.prepare_storage()
         app_storage_dir = storage.init_storage(APP_NAME, USER_NAME)
         self.db.execute('postgres', DB_USER, "ALTER USER {0} WITH PASSWORD '{1}';".format(DB_USER, DB_PASSWORD))
+        self.db.execute('postgres', DB_USER, "CREATE DATABASE nextcloud OWNER {0} TEMPLATE template0 ENCODING 'UTF8';".format(DB_USER))
+        self.db.execute('postgres', DB_USER, "GRANT CREATE ON SCHEMA public TO {0};".format(DB_USER))
+
         real_app_storage_dir = realpath(app_storage_dir)
         install_user_password = uuid.uuid4().hex
         self.occ.run('maintenance:install  --database pgsql --database-host {0}:{1}'
