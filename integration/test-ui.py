@@ -18,8 +18,8 @@ def module_setup(request, device, artifact_dir, ui_mode):
         device.activated()
         device.run_ssh('mkdir -p {0}'.format(TMP_DIR), throw=False)
         device.run_ssh('journalctl > {0}/journalctl.ui.{1}.log'.format(TMP_DIR, ui_mode), throw=False)
-        device.run_ssh('cp /var/log/syslog {0}/syslog.ui.{1}.log'.format(TMP_DIR, ui_mode), throw=False)
         device.scp_from_device('{0}/*'.format(TMP_DIR), join(artifact_dir, 'log'))
+        check_output('cp /videos/* {0}'.format(artifact_dir), shell=True)
         check_output('chmod -R a+r {0}'.format(artifact_dir), shell=True)
 
     request.addfinalizer(module_teardown)
@@ -29,12 +29,8 @@ def test_start(module_setup, app, domain, device_host):
     add_host_alias(app, device_host, domain)
 
 
-def test_login(selenium):
+def test_login(selenium, device_user, device_password, ui_mode, screenshot_dir):
     selenium.open_app()
-
-
-def test_main(selenium, device_user, device_password, ui_mode, screenshot_dir):
-
     selenium.find_by_id("user").send_keys(device_user)
     password = selenium.find_by_id("password")
     password.send_keys(device_password)
