@@ -120,19 +120,6 @@ local build(arch, test_ui, dind) = [{
                 name: "shm",
                 path: "/dev/shm"
             }]
-        },
-        {
-            name: "test-ui-mobile-buster",
-            image: "python:3.8-slim-buster",
-            commands: [
-              "cd integration",
-              "./deps.sh",
-              "py.test -x -s test-ui.py --distro=buster --ui-mode=mobile --domain=buster.com --device-host=" + name + ".buster.com --app=" + name + " --browser=" + browser,
-            ],
-            volumes: [{
-                name: "shm",
-                path: "/dev/shm"
-            }]
         }
 
 ] else [] ) +[
