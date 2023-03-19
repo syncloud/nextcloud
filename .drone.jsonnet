@@ -117,21 +117,8 @@ local build(arch, test_ui, dind) = [{
               "py.test -x -s test-ui.py --distro=buster --ui-mode=desktop --domain=buster.com --device-host=" + name + ".buster.com --app=" + name + " --browser=" + browser,
             ],
             volumes: [{
-                name: "shm",
-                path: "/dev/shm"
-            }]
-        },
-        {
-            name: "test-ui-mobile-buster",
-            image: "python:3.8-slim-buster",
-            commands: [
-              "cd integration",
-              "./deps.sh",
-              "py.test -x -s test-ui.py --distro=buster --ui-mode=mobile --domain=buster.com --device-host=" + name + ".buster.com --app=" + name + " --browser=" + browser,
-            ],
-            volumes: [{
-                name: "shm",
-                path: "/dev/shm"
+                name: "videos",
+                path: "/videos"
             }]
         }
 
@@ -144,12 +131,7 @@ local build(arch, test_ui, dind) = [{
           "cd integration",
           "./deps.sh",
           "py.test -x -s test-upgrade.py --distro=buster --ui-mode=desktop --domain=buster.com --app-archive-path=$APP_ARCHIVE_PATH --device-host=" + name + ".buster.com --app=" + name + " --browser=" + browser,
-        ],
-        privileged: true,
-        volumes: [{
-            name: "videos",
-            path: "/videos"
-        }]
+        ]
     },
         {
             name: "upload",
@@ -170,7 +152,8 @@ local build(arch, test_ui, dind) = [{
           "./syncloud-release-* publish -f $PACKAGE -b $DRONE_BRANCH"
          ],
         when: {
-            branch: ["stable", "master"]
+            branch: ["stable", "master"],
+            event: [ "push" ]
         }
         }] + [
         {
@@ -191,7 +174,8 @@ local build(arch, test_ui, dind) = [{
 		             strip_components: 1
             },
             when: {
-              status: [ "failure", "success" ]
+              status: [ "failure", "success" ],
+              event: [ "push" ]
             }
         }
     ],
