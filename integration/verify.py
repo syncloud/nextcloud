@@ -3,7 +3,6 @@ import json
 import pytest
 import requests
 import shutil
-from bs4 import BeautifulSoup
 from os.path import join
 from requests.auth import HTTPBasicAuth
 from requests.packages.urllib3.exceptions import InsecureRequestWarning
@@ -232,7 +231,6 @@ def __create_test_dir(test_dir, app_domain, device_user, device_password, artifa
 def __check_test_dir(device_user, device_password, test_dir, app_domain, artifact_dir):
     response = requests.request('PROPFIND', 'https://{0}:{1}@{2}/remote.php/webdav/'.format(
         device_user, device_password, app_domain), verify=False)
-    info = BeautifulSoup(response.text, "xml")
     with open(join(artifact_dir, 'check.{0}.dir.log'.format(test_dir)), 'w') as f:
         f.write(response.text)
     #dirs = map(lambda v: v['name'], info['data']['files'])
