@@ -60,7 +60,7 @@ def test_settings(selenium, app_domain):
 
 def test_settings_user(selenium, app_domain):
     selenium.driver.get("https://{0}/settings/user".format(app_domain))
-    selenium.find_by_xpath("//h3[contains(.,'Profile picture')]")
+    selenium.find_by_xpath("//label[contains(.,'Profile picture')]")
     selenium.screenshot('user')
 
 
