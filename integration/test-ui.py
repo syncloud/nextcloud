@@ -36,17 +36,17 @@ def test_login(selenium, device_user, device_password, ui_mode, screenshot_dir):
     password.send_keys(device_password)
     selenium.screenshot('login')
     password.send_keys(Keys.RETURN)
+    selenium.find_by_xpath("//span[text()='Continue with this unsupported browser']").click()
     selenium.find_by_xpath("//span[text()='test00']")
 
     if ui_mode == "desktop":
-        close_css_selector = 'button.header-close'
-        wizard_close_button = selenium.find_by_css(close_css_selector)
+        wizard_close_button = selenium.find_by_xpath('//button[@aria-label="Close modal"]')
         selenium.screenshot('main_first_time')
-        hover = ActionChains(selenium.driver).move_to_element(wizard_close_button)
-        hover.perform()
-        selenium.screenshot('main_first_time-hover')
-        selenium.wait_driver.until(EC.element_to_be_clickable((By.CSS_SELECTOR, close_css_selector)))
-        selenium.screenshot('main_first_time-click')
+#        hover = ActionChains(selenium.driver).move_to_element(wizard_close_button)
+#        hover.perform()
+#        selenium.screenshot('main_first_time-hover')
+#        selenium.wait_driver.until(EC.element_to_be_clickable((By.CSS_SELECTOR, close_css_selector)))
+#        selenium.screenshot('main_first_time-click')
         wizard_close_button.click()
 
     selenium.screenshot('main')
@@ -60,7 +60,7 @@ def test_settings(selenium, app_domain):
 
 def test_settings_user(selenium, app_domain):
     selenium.driver.get("https://{0}/settings/user".format(app_domain))
-    selenium.find_by_xpath("//h3[contains(.,'Profile picture')]")
+    selenium.find_by_xpath("//label[contains(.,'Profile picture')]")
     selenium.screenshot('user')
 
 
@@ -105,7 +105,7 @@ def test_verification(selenium, app_domain):
 def test_users(selenium, app_domain, ui_mode):
     selenium.driver.get('https://{0}/settings/users'.format(app_domain))
     if ui_mode == "desktop":
-        selenium.find_by_xpath("//span[@title='Admins']")
+        selenium.find_by_xpath("//a[@title='Admins']")
     selenium.screenshot('users')
     source = selenium.driver.page_source
     assert 'Server Error' not in source
