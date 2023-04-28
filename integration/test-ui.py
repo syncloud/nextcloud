@@ -105,7 +105,7 @@ def test_verification(selenium, app_domain):
 def test_users(selenium, app_domain, ui_mode):
     selenium.driver.get('https://{0}/settings/users'.format(app_domain))
     if ui_mode == "desktop":
-        selenium.find_by_xpath("//span[@title='Admins']")
+        selenium.find_by_xpath("//div[@title='Admins']")
     selenium.screenshot('users')
     source = selenium.driver.page_source
     assert 'Server Error' not in source
