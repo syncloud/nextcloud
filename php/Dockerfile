@@ -51,6 +51,7 @@ RUN docker-php-ext-install opcache
 RUN docker-php-ext-install zip
 RUN docker-php-ext-install pcntl
 RUN docker-php-ext-install exif
+RUN docker-php-ext-install sysvsem
 RUN docker-php-ext-enable imagick
 RUN docker-php-ext-enable smbclient
 RUN docker-php-ext-install pdo pdo_pgsql
