@@ -31,4 +31,5 @@ $CONFIG = array (
     'OC\Preview\MarkDown',
     'OC\Preview\PDF'
   ),
-); 
+  'bulkupload.enabled' => false,
+);
