@@ -1,4 +1,4 @@
-FROM php:8.0.16-fpm-buster
+FROM php:8.2.8-fpm-buster
 RUN apt-get update && apt-get install -y \
 		libfreetype6-dev \
 		libjpeg62-turbo-dev \
@@ -58,3 +58,4 @@ RUN docker-php-ext-install pdo pdo_pgsql
 RUN docker-php-ext-configure gd --with-freetype --with-jpeg
 RUN docker-php-ext-install -j2 gd
 RUN rm -rf /var/lib/apt/lists/*
+
