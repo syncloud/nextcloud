@@ -7,10 +7,7 @@ BUILD_DIR=${DIR}/../build/snap/php
 
 docker ps -a -q --filter ancestor=php:syncloud --format="{{.ID}}" | xargs docker stop | xargs docker rm || true
 docker rmi php:syncloud || true
-while ! docker build -t php:syncloud .; do
-  sleep 1
-  echo "retry"
-done
+docker build -t php:syncloud .
 docker run php:syncloud php -i
 docker create --name=php php:syncloud
 mkdir -p ${BUILD_DIR}
