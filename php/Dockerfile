@@ -1,4 +1,4 @@
-FROM php:8.0.16-fpm-buster
+FROM php:8.2.8-fpm-bullseye
 RUN apt-get update && apt-get install -y \
 		libfreetype6-dev \
 		libjpeg62-turbo-dev \
@@ -37,7 +37,7 @@ RUN docker-php-ext-install gmp
 RUN pecl install imagick
 RUN pecl install smbclient
 RUN pecl install apcu
-RUN pecl install mcrypt-1.0.4
+RUN pecl install mcrypt-1.0.6
 RUN docker-php-ext-configure intl
 RUN docker-php-ext-install intl
 RUN docker-php-ext-enable apcu
@@ -58,3 +58,4 @@ RUN docker-php-ext-install pdo pdo_pgsql
 RUN docker-php-ext-configure gd --with-freetype --with-jpeg
 RUN docker-php-ext-install -j2 gd
 RUN rm -rf /var/lib/apt/lists/*
+
