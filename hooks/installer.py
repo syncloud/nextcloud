@@ -171,7 +171,7 @@ class Installer:
         self.log.info('status: {0}'.format(status))
         # if 'require upgrade' in status:
         self.log.info('upgrading nextcloud')
-        self.occ.run('maintenance:mode --on')
+        # self.occ.run('maintenance:mode --on')
         self.occ.run('upgrade')
         # self.occ.run('app:update --all')
         self.occ.run('maintenance:mode --off')
