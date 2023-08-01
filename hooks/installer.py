@@ -173,10 +173,11 @@ class Installer:
         self.log.info('upgrading nextcloud')
         self.occ.run('maintenance:mode --on')
         self.occ.run('upgrade')
-        self.occ.run('app:update --all')
+        # self.occ.run('app:update --all')
         self.occ.run('maintenance:mode --off')
         self.occ.run('db:add-missing-indices')
         self.occ.run('db:add-missing-columns')
+        self.occ.run('db:add-missing-primary-keys')
         # else:
         #     self.log.info('not upgrading nextcloud')
 
