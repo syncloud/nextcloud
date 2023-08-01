@@ -172,14 +172,8 @@ class Installer:
         # if 'require upgrade' in status:
         self.log.info('upgrading nextcloud')
         self.occ.run('maintenance:mode --on')
-
-        try:
-            self.occ.run('upgrade')
-            self.occ.run('app:update --all')
-        except CalledProcessError as e:
-            self.log.warn('unable to upgrade')
-            self.log.warn(e.output.decode())
-
+        self.occ.run('upgrade')
+        self.occ.run('app:update --all')
         self.occ.run('maintenance:mode --off')
         self.occ.run('db:add-missing-indices')
         self.occ.run('db:add-missing-columns')
