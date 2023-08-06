@@ -1,13 +1,13 @@
-import logging
-import shutil
-import uuid
-import re
 from os.path import isfile
 from os.path import join
 from os.path import realpath
-from subprocess import check_output, CalledProcessError
 
+import logging
+import re
+import shutil
+import uuid
 from crontab import CronTab
+from subprocess import check_output
 from syncloudlib import fs, linux, gen, logger
 from syncloudlib.application import paths, urls, storage, service
 
@@ -16,7 +16,6 @@ from postgres import Database
 
 APP_NAME = 'nextcloud'
 
-INSTALL_USER = 'installer'
 USER_NAME = APP_NAME
 DB_NAME = APP_NAME
 DB_USER = APP_NAME
@@ -189,12 +188,13 @@ class Installer:
         self.db.execute('postgres', DB_USER, "GRANT CREATE ON SCHEMA public TO {0};".format(DB_USER))
 
         real_app_storage_dir = realpath(app_storage_dir)
+        install_user_name = 'installer-{0}'.format(uuid.uuid4().hex)
         install_user_password = uuid.uuid4().hex
         self.occ.run('maintenance:install  --database pgsql --database-host {0}:{1}'
                      ' --database-name nextcloud --database-user {2} --database-pass {3}'
                      ' --admin-user {4} --admin-pass {5} --data-dir {6}'
                      .format(self.db.get_database_path(), PSQL_PORT, DB_USER, DB_PASSWORD,
-                             INSTALL_USER, install_user_password, real_app_storage_dir))
+                             install_user_name, install_user_password, real_app_storage_dir))
 
         self.occ.run('app:enable user_ldap')
 
@@ -239,7 +239,7 @@ class Installer:
                         "update oc_ldap_group_mapping set owncloud_name = 'admin' where owncloud_name = 'syncloud';")
         # self.db.execute(DB_NAME, DB_USER, "update oc_ldap_group_members set owncloudname = 'admin';")
 
-        self.occ.run('user:delete {0}'.format(INSTALL_USER))
+        self.occ.run('user:delete {0}'.format(install_user_name))
         self.occ.run('db:add-missing-indices')
 
     def on_disk_change(self):
