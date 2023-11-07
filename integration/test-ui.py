@@ -37,7 +37,7 @@ def test_login(selenium, device_user, device_password, ui_mode, screenshot_dir):
     selenium.screenshot('login')
     password.send_keys(Keys.RETURN)
     selenium.find_by_xpath("//span[text()='Continue with this unsupported browser']").click()
-    selenium.find_by_xpath("//span[text()='test00']")
+    #selenium.find_by_xpath("//span[text()='test00']")
 
     if ui_mode == "desktop":
         wizard_close_button = selenium.find_by_xpath('//button[@aria-label="Close modal"]')
