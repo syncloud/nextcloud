@@ -214,7 +214,7 @@ local build(arch, test_ui, dind) = [{
         }
     ] + ( if test_ui then [{
             name: "selenium",
-            image: "selenium/selenium/standalone-" + browser + ":4.14.1",
+            image: "selenium/standalone-" + browser + ":4.14.1",
             volumes: [{
                 name: "shm",
                 path: "/dev/shm"
