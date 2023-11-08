@@ -1,6 +1,6 @@
 local name = "nextcloud";
 local browser = "firefox";
-local nextcloud = "27.0.2";
+local nextcloud = "27.1.3";
 
 local build(arch, test_ui, dind) = [{
     kind: "pipeline",
@@ -214,7 +214,7 @@ local build(arch, test_ui, dind) = [{
         }
     ] + ( if test_ui then [{
             name: "selenium",
-            image: "selenium/standalone-" + browser + ":112.0",
+            image: "selenium/standalone-" + browser + ":4.14.1",
             volumes: [{
                 name: "shm",
                 path: "/dev/shm"
