@@ -22,15 +22,14 @@ apps:
     before: [nginx]
   
   nginx:
-    command: bin/service.nginx.sh start
+    command: bin/service.nginx.sh
     user: nextcloud
     daemon: simple
     plugs:
     - network
     - network-bind
     restart-condition: always
-    stop-command: bin/service.nginx.sh stop
-  
+    
   occ:
     command: bin/occ-runner
 
