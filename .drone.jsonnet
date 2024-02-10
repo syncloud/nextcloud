@@ -1,6 +1,6 @@
 local name = "nextcloud";
 local browser = "firefox";
-local nextcloud = "27.1.3";
+local nextcloud = "28.0.2";
 
 local build(arch, test_ui, dind) = [{
     kind: "pipeline",
