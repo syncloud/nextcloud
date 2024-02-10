@@ -237,7 +237,6 @@ class Installer:
         self.db.execute(DB_NAME, DB_USER, "select * from oc_ldap_group_mapping;")
         self.db.execute(DB_NAME, DB_USER,
                         "update oc_ldap_group_mapping set owncloud_name = 'admin' where owncloud_name = 'syncloud';")
-        # self.db.execute(DB_NAME, DB_USER, "update oc_ldap_group_members set owncloudname = 'admin';")
 
         self.occ.run('user:delete {0}'.format(install_user_name))
         self.occ.run('db:add-missing-indices')
