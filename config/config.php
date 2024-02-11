@@ -32,4 +32,11 @@ $CONFIG = array (
     'OC\Preview\PDF'
   ),
   'bulkupload.enabled' => false,
+  'memcache.local' => '\OC\Memcache\APCu',
+  'memcache.distributed' => '\OC\Memcache\Redis',
+  'memcache.locking' => '\OC\Memcache\Redis',
+  'redis' => [
+   'host'     => '/var/snap/nextcloud/current/redis.sock',
+   'port'     => 0,
+  ],
 );

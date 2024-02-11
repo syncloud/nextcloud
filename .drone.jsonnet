@@ -1,6 +1,7 @@
 local name = "nextcloud";
 local browser = "firefox";
 local nextcloud = "28.0.2";
+local redis = "7.0.15";
 
 local build(arch, test_ui, dind) = [{
     kind: "pipeline",
@@ -23,6 +24,13 @@ local build(arch, test_ui, dind) = [{
             image: "debian:buster-slim",
             commands: [
                 "./download.sh " + nextcloud
+            ]
+        },
+         {
+            name: "redis",
+            image: "redis:" + redis,
+            commands: [
+                "./redis/build.sh"
             ]
         },
          {

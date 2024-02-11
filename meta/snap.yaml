@@ -8,7 +8,12 @@ apps:
     - network-bind
     restart-condition: always
     before: [php-fpm]
-    
+
+  redis:
+    user: nextcloud
+    command: bin/service.redis.sh
+    restart-condition: always
+
   php-fpm:
     user: nextcloud
     command: bin/service.php-fpm.sh start
