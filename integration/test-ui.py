@@ -40,7 +40,7 @@ def test_login(selenium, device_user, device_password, ui_mode, screenshot_dir):
     #selenium.find_by_xpath("//span[text()='test00']")
 
     if ui_mode == "desktop":
-        wizard_close_button = selenium.find_by_xpath('//button[contains(.,"Close dialog")]')
+        wizard_close_button = selenium.find_by_xpath('//button[contains(@aria-label,"Close dialog")]')
         selenium.screenshot('main_first_time')
 #        hover = ActionChains(selenium.driver).move_to_element(wizard_close_button)
 #        hover.perform()
