@@ -99,7 +99,6 @@ class Installer:
 
     def configure(self):
         
-        
         if self.installed():
             self.upgrade()
         else:

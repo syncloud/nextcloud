@@ -11,6 +11,7 @@ apps:
 
   redis:
     user: nextcloud
+    daemon: simple
     command: bin/service.redis.sh
     restart-condition: always
 
