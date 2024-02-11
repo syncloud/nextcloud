@@ -37,17 +37,15 @@ def test_login(selenium, device_user, device_password, ui_mode, screenshot_dir):
     selenium.screenshot('login')
     password.send_keys(Keys.RETURN)
     selenium.find_by_xpath("//span[contains(.,'Continue with this unsupported browser')]").click()
-    #selenium.find_by_xpath("//span[text()='test00']")
 
-    if ui_mode == "desktop":
-        wizard_close_button = selenium.find_by_xpath('//button[contains(@aria-label,"Close dialog")]')
-        selenium.screenshot('main_first_time')
+    wizard_close_button = selenium.find_by_xpath('//button[contains(@class, "first-run-wizard__close-button")]')
+    selenium.screenshot('main_first_time')
 #        hover = ActionChains(selenium.driver).move_to_element(wizard_close_button)
 #        hover.perform()
 #        selenium.screenshot('main_first_time-hover')
 #        selenium.wait_driver.until(EC.element_to_be_clickable((By.CSS_SELECTOR, close_css_selector)))
 #        selenium.screenshot('main_first_time-click')
-        wizard_close_button.click()
+    wizard_close_button.click()
 
     selenium.screenshot('main')
 
