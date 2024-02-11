@@ -113,10 +113,10 @@ class Installer:
         self.cron.create()
 
         self.occ.run("config:system:set memcache.local --value='\\OC\\Memcache\\APCu'")
-        self.occ.run("config:system:set memcache.distributed --value='\\OC\\Memcache\\Redis'")
-        self.occ.run("config:system:set memcache.locking --value='\\OC\\Memcache\\Redis'")
         self.occ.run("config:system:set redis host --value=/var/snap/nextcloud/current/redis.sock")
         self.occ.run("config:system:set redis port --value=0")
+        self.occ.run("config:system:set memcache.distributed --value='\\OC\\Memcache\\Redis'")
+        self.occ.run("config:system:set memcache.locking --value='\\OC\\Memcache\\Redis'")
         self.oc_config.set_value('loglevel', '2')
         self.oc_config.set_value('logfile', join(self.common_dir, LOG_PATH))
         real_app_storage_dir = realpath(app_storage_dir)
