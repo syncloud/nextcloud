@@ -14,6 +14,7 @@ apps:
     daemon: simple
     command: bin/service.redis.sh
     restart-condition: always
+    before: [php-fpm]
 
   php-fpm:
     user: nextcloud

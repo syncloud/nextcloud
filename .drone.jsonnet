@@ -34,6 +34,13 @@ local build(arch, test_ui, dind) = [{
             ]
         },
          {
+            name: "redis test",
+            image: "debian:buster-slim",
+            commands: [
+                "./redis/test.sh"
+            ]
+        },
+         {
             name: "package postgresql",
             image: "docker:" + dind,
             commands: [
