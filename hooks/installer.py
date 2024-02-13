@@ -117,6 +117,7 @@ class Installer:
         self.occ.run("config:system:set redis port --value=0")
         self.occ.run("config:system:set memcache.distributed --value='\\OC\\Memcache\\Redis'")
         self.occ.run("config:system:set memcache.locking --value='\\OC\\Memcache\\Redis'")
+        self.occ.run("config:system:set maintenance_window_start --value=1")
         self.oc_config.set_value('loglevel', '2')
         self.oc_config.set_value('logfile', join(self.common_dir, LOG_PATH))
         real_app_storage_dir = realpath(app_storage_dir)

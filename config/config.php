@@ -39,4 +39,5 @@ $CONFIG = array (
    'host'     => '/var/snap/nextcloud/current/redis.sock',
    'port'     => 0,
   ],
+  'maintenance_window_start' => 1,
 );

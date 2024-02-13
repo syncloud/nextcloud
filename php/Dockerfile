@@ -17,20 +17,23 @@ RUN apt-get update && apt-get install -y \
 		libtiff5-dev \
 		libwebp-dev \
 		libmemcached-dev \
-        libmcrypt-dev \
+ libmcrypt-dev \
 		zip \
 		wget \
 		unzip \
-        libgmp-dev \
-        libonig-dev \
-	libicu-dev \
-        libmagickwand-dev --no-install-recommends
+ libgmp-dev \
+ libonig-dev \
+ libicu-dev \
+ libmagickwand-dev \
+ bzip2-dev \
+  --no-install-recommends
 
 RUN mkdir -p /usr/src/php/ext/memcached
 WORKDIR /usr/src/php/ext/memcached
 RUN wget https://github.com/php-memcached-dev/php-memcached/archive/v3.1.5.zip; unzip /usr/src/php/ext/memcached/v*.zip
 RUN mv /usr/src/php/ext/memcached/php-memcached-*/* /usr/src/php/ext/memcached/
 
+RUN docker-php-ext-install bz2
 RUN docker-php-ext-configure memcached
 RUN docker-php-ext-install memcached
 RUN docker-php-ext-install gmp
