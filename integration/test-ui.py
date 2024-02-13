@@ -37,8 +37,8 @@ def test_login(selenium, device_user, device_password, ui_mode, screenshot_dir):
     selenium.screenshot('login')
     password.send_keys(Keys.RETURN)
     selenium.find_by_xpath("//span[contains(.,'Continue with this unsupported browser')]").click()
-
     wizard_close_button = selenium.find_by_xpath('//button[contains(@class, "first-run-wizard__close-button")]')
+    #wizard_close_button = selenium.find_by_xpath('//button[contains(@class, "close-button")]')
     selenium.screenshot('main_first_time')
 #        hover = ActionChains(selenium.driver).move_to_element(wizard_close_button)
 #        hover.perform()
