@@ -25,7 +25,7 @@ RUN apt-get update && apt-get install -y \
  libonig-dev \
  libicu-dev \
  libmagickwand-dev \
- bzip2-dev \
+ libbzip2-dev \
   --no-install-recommends
 
 RUN mkdir -p /usr/src/php/ext/memcached
