@@ -25,7 +25,7 @@ RUN apt-get update && apt-get install -y \
  libonig-dev \
  libicu-dev \
  libmagickwand-dev \
- libbzip2-dev \
+ libbz2-dev \
   --no-install-recommends
 
 RUN mkdir -p /usr/src/php/ext/memcached
@@ -63,4 +63,6 @@ RUN docker-php-ext-install pdo pdo_pgsql
 RUN docker-php-ext-configure gd --with-freetype --with-jpeg
 RUN docker-php-ext-install -j2 gd
 RUN rm -rf /var/lib/apt/lists/*
+
+
 
