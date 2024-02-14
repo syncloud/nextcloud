@@ -2,7 +2,6 @@ from os.path import dirname, join
 from subprocess import check_output
 
 import pytest
-from selenium.webdriver.common.action_chains import ActionChains
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support import expected_conditions as EC
@@ -29,7 +28,7 @@ def test_start(module_setup, app, domain, device_host):
     add_host_alias(app, device_host, domain)
 
 
-def test_login(selenium, device_user, device_password, ui_mode, screenshot_dir):
+def test_login(selenium, device_user, device_password):
     selenium.open_app()
     selenium.find_by_id("user").send_keys(device_user)
     password = selenium.find_by_id("password")
