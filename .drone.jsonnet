@@ -1,6 +1,8 @@
 local name = "nextcloud";
 local browser = "firefox";
-local nextcloud = "27.1.3";
+local nextcloud = "28.0.2";
+local redis = "7.0.15";
+local nginx = "1.24.0";
 
 local build(arch, test_ui, dind) = [{
     kind: "pipeline",
@@ -23,6 +25,34 @@ local build(arch, test_ui, dind) = [{
             image: "debian:buster-slim",
             commands: [
                 "./download.sh " + nextcloud
+            ]
+        },
+{
+            name: "nginx",
+            image: "docker:" + dind,
+                commands: [
+                "./nginx/build.sh " + nginx
+            ],
+            volumes: [
+                {
+                    name: "dockersock",
+                    path: "/var/run"
+                }
+            ]
+        },
+ 
+         {
+            name: "redis",
+            image: "redis:" + redis,
+            commands: [
+                "./redis/build.sh"
+            ]
+        },
+         {
+            name: "redis test",
+            image: "debian:buster-slim",
+            commands: [
+                "./redis/test.sh"
             ]
         },
          {

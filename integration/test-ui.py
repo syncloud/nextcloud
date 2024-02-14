@@ -2,7 +2,6 @@ from os.path import dirname, join
 from subprocess import check_output
 
 import pytest
-from selenium.webdriver.common.action_chains import ActionChains
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support import expected_conditions as EC
@@ -29,25 +28,23 @@ def test_start(module_setup, app, domain, device_host):
     add_host_alias(app, device_host, domain)
 
 
-def test_login(selenium, device_user, device_password, ui_mode, screenshot_dir):
+def test_login(selenium, device_user, device_password):
     selenium.open_app()
     selenium.find_by_id("user").send_keys(device_user)
     password = selenium.find_by_id("password")
     password.send_keys(device_password)
     selenium.screenshot('login')
     password.send_keys(Keys.RETURN)
-    selenium.find_by_xpath("//span[text()='Continue with this unsupported browser']").click()
-    #selenium.find_by_xpath("//span[text()='test00']")
-
-    if ui_mode == "desktop":
-        wizard_close_button = selenium.find_by_xpath('//button[@aria-label="Close modal"]')
-        selenium.screenshot('main_first_time')
+    selenium.find_by_xpath("//span[contains(.,'Continue with this unsupported browser')]").click()
+    wizard_close_button = selenium.find_by_xpath('//button[contains(@class, "first-run-wizard__close-button")]')
+    #wizard_close_button = selenium.find_by_xpath('//button[contains(@class, "close-button")]')
+    selenium.screenshot('main_first_time')
 #        hover = ActionChains(selenium.driver).move_to_element(wizard_close_button)
 #        hover.perform()
 #        selenium.screenshot('main_first_time-hover')
 #        selenium.wait_driver.until(EC.element_to_be_clickable((By.CSS_SELECTOR, close_css_selector)))
 #        selenium.screenshot('main_first_time-click')
-        wizard_close_button.click()
+    wizard_close_button.click()
 
     selenium.screenshot('main')
 

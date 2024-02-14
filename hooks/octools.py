@@ -8,7 +8,7 @@ class OCConsole:
         self.log = logger.get_logger('nextcloud_occ')
 
     def run(self, args):
-
+        self.log.info(f'running: {self.occ_runner_path} {args}')
         try:
             output = check_output('{0} {1}'.format(self.occ_runner_path, args), shell=True).decode().strip()
             if output:
