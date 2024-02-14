@@ -1,3 +1,5 @@
 screenshot
 firefox
 *.xpi
+debug.py
+*.png

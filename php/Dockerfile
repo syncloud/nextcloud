@@ -17,20 +17,23 @@ RUN apt-get update && apt-get install -y \
 		libtiff5-dev \
 		libwebp-dev \
 		libmemcached-dev \
-        libmcrypt-dev \
+ libmcrypt-dev \
 		zip \
 		wget \
 		unzip \
-        libgmp-dev \
-        libonig-dev \
-	libicu-dev \
-        libmagickwand-dev --no-install-recommends
+ libgmp-dev \
+ libonig-dev \
+ libicu-dev \
+ libmagickwand-dev \
+ libbz2-dev \
+  --no-install-recommends
 
 RUN mkdir -p /usr/src/php/ext/memcached
 WORKDIR /usr/src/php/ext/memcached
 RUN wget https://github.com/php-memcached-dev/php-memcached/archive/v3.1.5.zip; unzip /usr/src/php/ext/memcached/v*.zip
 RUN mv /usr/src/php/ext/memcached/php-memcached-*/* /usr/src/php/ext/memcached/
 
+RUN docker-php-ext-install bz2
 RUN docker-php-ext-configure memcached
 RUN docker-php-ext-install memcached
 RUN docker-php-ext-install gmp
@@ -38,6 +41,8 @@ RUN pecl install imagick
 RUN pecl install smbclient
 RUN pecl install apcu
 RUN pecl install mcrypt-1.0.6
+RUN pecl install redis
+RUN docker-php-ext-enable redis
 RUN docker-php-ext-configure intl
 RUN docker-php-ext-install intl
 RUN docker-php-ext-enable apcu
@@ -58,4 +63,6 @@ RUN docker-php-ext-install pdo pdo_pgsql
 RUN docker-php-ext-configure gd --with-freetype --with-jpeg
 RUN docker-php-ext-install -j2 gd
 RUN rm -rf /var/lib/apt/lists/*
+
+
 

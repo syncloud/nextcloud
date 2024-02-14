@@ -110,10 +110,6 @@ def test_psql_oc_ldap_group_mapping(device):
     device.run_ssh("snap run nextcloud.psql -c 'select * from oc_ldap_group_mapping' > {0}/psql.oc_ldap_group_mapping.log".format(TMP_DIR))
 
 
-def test_psql_oc_ldap_group_members(device):
-    device.run_ssh("snap run nextcloud.psql -c 'select * from oc_ldap_group_members' > {0}/psql.oc_ldap_group_members.log".format(TMP_DIR))
-
-
 def test_cron(device):
     device.run_ssh('snap run nextcloud.cron')
 

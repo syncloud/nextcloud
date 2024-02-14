@@ -99,7 +99,6 @@ class Installer:
 
     def configure(self):
         
-        
         if self.installed():
             self.upgrade()
         else:
@@ -113,7 +112,12 @@ class Installer:
         self.cron.remove()
         self.cron.create()
 
-        self.oc_config.set_value('memcache.local', "'\\OC\\Memcache\\APCu'")
+        self.occ.run("config:system:set memcache.local --value='\\OC\\Memcache\\APCu'")
+        self.occ.run("config:system:set redis host --value=/var/snap/nextcloud/current/redis.sock")
+        self.occ.run("config:system:set redis port --value=0")
+        self.occ.run("config:system:set memcache.distributed --value='\\OC\\Memcache\\Redis'")
+        self.occ.run("config:system:set memcache.locking --value='\\OC\\Memcache\\Redis'")
+        self.occ.run("config:system:set maintenance_window_start --value=1")
         self.oc_config.set_value('loglevel', '2')
         self.oc_config.set_value('logfile', join(self.common_dir, LOG_PATH))
         real_app_storage_dir = realpath(app_storage_dir)
@@ -237,7 +241,6 @@ class Installer:
         self.db.execute(DB_NAME, DB_USER, "select * from oc_ldap_group_mapping;")
         self.db.execute(DB_NAME, DB_USER,
                         "update oc_ldap_group_mapping set owncloud_name = 'admin' where owncloud_name = 'syncloud';")
-        # self.db.execute(DB_NAME, DB_USER, "update oc_ldap_group_members set owncloudname = 'admin';")
 
         self.occ.run('user:delete {0}'.format(install_user_name))
         self.occ.run('db:add-missing-indices')
