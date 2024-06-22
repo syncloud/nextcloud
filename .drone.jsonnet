@@ -1,6 +1,6 @@
 local name = "nextcloud";
 local browser = "firefox";
-local nextcloud = "28.0.2";
+local nextcloud = "29.0.2";
 local redis = "7.0.15";
 local nginx = "1.24.0";
 local deployer = "https://github.com/syncloud/store/releases/download/4/syncloud-release";
