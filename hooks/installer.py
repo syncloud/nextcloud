@@ -268,7 +268,7 @@ class Installer:
         app_domain = urls.get_app_domain_name(APP_NAME)
         local_ip = check_output(["hostname", "-I"]).decode().split(" ")[0]
         self.oc_config.set_value('trusted_domains', "localhost {0} {1}".format(local_ip, app_domain))
-        self.oc_config.set_value('trusted_proxies', "localhost {0}".format(app_domain))
+        self.oc_config.set_value('trusted_proxies', "127.0.0.1 {0}".format(local_ip))
 
     def backup_pre_stop(self):
         self.pre_refresh()

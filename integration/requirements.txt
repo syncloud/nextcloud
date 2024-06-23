@@ -1,3 +1,0 @@
-pytest==6.2.4
-selenium==3.141.0
-syncloud-lib==303

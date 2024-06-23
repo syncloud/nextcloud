@@ -1,9 +1,11 @@
 local name = "nextcloud";
 local browser = "firefox";
-local nextcloud = "28.0.2";
+local nextcloud = "29.0.2";
 local redis = "7.0.15";
 local nginx = "1.24.0";
-local deployer = "https://github.com/syncloud/store/releases/download/4/syncloud-release";
+local platform = '22.02';
+local selenium = '4.21.0-20240517';
+local deployer = 'https://github.com/syncloud/store/releases/download/4/syncloud-release';
 
 local build(arch, test_ui, dind) = [{
     kind: "pipeline",
@@ -115,11 +117,31 @@ local build(arch, test_ui, dind) = [{
             image: "python:3.8-slim-buster",
             commands: [
               "APP_ARCHIVE_PATH=$(realpath $(cat package.name))",
-              "cd integration",
+              "cd test",
               "./deps.sh",
-              "py.test -x -s verify.py --distro=buster --domain=buster.com --app-archive-path=$APP_ARCHIVE_PATH --device-host=" + name + ".buster.com --app=" + name + " --arch=" + arch
+              "py.test -x -s test.py --distro=buster --domain=buster.com --app-archive-path=$APP_ARCHIVE_PATH --device-host=" + name + ".buster.com --app=" + name + " --arch=" + arch
             ]
         }] + ( if test_ui then [
+{
+            name: "selenium",
+            image: "selenium/standalone-" + browser + ":" + selenium,
+            detach: true,
+            environment: {
+                SE_NODE_SESSION_TIMEOUT: "999999",
+                START_XVFB: "true"
+            },
+               volumes: [{
+                name: "shm",
+                path: "/dev/shm"
+            }],
+            commands: [
+                "cat /etc/hosts",
+                "getent hosts " + name + ".buster.com | sed 's/" + name +".buster.com/auth.buster.com/g' | sudo tee -a /etc/hosts",
+                "cat /etc/hosts",
+                "/opt/bin/entry_point.sh"
+            ]
+         },
+
         {
             name: "selenium-video",
             image: "selenium/video:ffmpeg-4.3.1-20220208",
@@ -143,9 +165,9 @@ local build(arch, test_ui, dind) = [{
             name: "test-ui",
             image: "python:3.8-slim-buster",
             commands: [
-              "cd integration",
+              "cd test",
               "./deps.sh",
-              "py.test -x -s test-ui.py --distro=buster --ui-mode=desktop --domain=buster.com --device-host=" + name + ".buster.com --app=" + name + " --browser=" + browser,
+              "py.test -x -s ui.py --distro=buster --ui-mode=desktop --domain=buster.com --device-host=" + name + ".buster.com --app=" + name + " --browser=" + browser,
             ],
             volumes: [{
                 name: "videos",
@@ -159,9 +181,9 @@ local build(arch, test_ui, dind) = [{
         image: "python:3.8-slim-buster",
         commands: [
           "APP_ARCHIVE_PATH=$(realpath $(cat package.name))",
-          "cd integration",
+          "cd test",
           "./deps.sh",
-          "py.test -x -s test-upgrade.py --distro=buster --ui-mode=desktop --domain=buster.com --app-archive-path=$APP_ARCHIVE_PATH --device-host=" + name + ".buster.com --app=" + name + " --browser=" + browser,
+          "py.test -x -s upgrade.py --distro=buster --ui-mode=desktop --domain=buster.com --app-archive-path=$APP_ARCHIVE_PATH --device-host=" + name + ".buster.com --app=" + name + " --browser=" + browser,
         ]
     },
         {
@@ -258,7 +280,7 @@ local build(arch, test_ui, dind) = [{
         },
         {
             name: name + ".buster.com",
-            image: "syncloud/platform-buster-" + arch + ":22.02",
+            image: "syncloud/platform-buster-" + arch + ":" + platform,
             privileged: true,
             volumes: [
                 {
@@ -271,15 +293,7 @@ local build(arch, test_ui, dind) = [{
                 }
             ]
         }
-    ] + ( if test_ui then [{
-            name: "selenium",
-            image: "selenium/standalone-" + browser + ":4.14.1",
-            volumes: [{
-                name: "shm",
-                path: "/dev/shm"
-            }]
-        }
-    ] else [] ),
+    ],
     volumes: [
         {
             name: "dbus",
