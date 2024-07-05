@@ -3,7 +3,7 @@
 DIR=$( cd "$( dirname "$0" )" && pwd )
 cd ${DIR}
 
-MAJOR_VERSION=10
+MAJOR_VERSION=16
 
 BUILD_DIR=${DIR}/../build/snap/postgresql
 
