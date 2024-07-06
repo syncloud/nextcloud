@@ -12,7 +12,7 @@ TMP_DIR = '/tmp/syncloud/ui'
 
 
 @pytest.fixture(scope="session")
-def module_setup(request, device, artifact_dir, ui_mode):
+def module_setup(request, device, artifact_dir, ui_mode, selenium):
     def module_teardown():
         device.activated()
         device.run_ssh('mkdir -p {0}'.format(TMP_DIR), throw=False)
@@ -20,7 +20,7 @@ def module_setup(request, device, artifact_dir, ui_mode):
         device.scp_from_device('{0}/*'.format(TMP_DIR), join(artifact_dir, 'log'))
         check_output('cp /videos/* {0}'.format(artifact_dir), shell=True)
         check_output('chmod -R a+r {0}'.format(artifact_dir), shell=True)
-
+        selenium.log()
     request.addfinalizer(module_teardown)
 
 
@@ -107,7 +107,6 @@ def test_users(selenium, app_domain, ui_mode):
     source = selenium.driver.page_source
     assert 'Server Error' not in source
 
-
 def test_office(selenium, app_domain):
     selenium.driver.get('https://{0}/settings/admin/richdocuments'.format(app_domain))
     selenium.find_by_xpath("//label[normalize-space(text())='Use your own server']").click()
@@ -120,3 +119,10 @@ def test_office(selenium, app_domain):
     selenium.find_by_xpath("//input[@value='Save']").click()
     #selenium.find_by_xpath("//span[normalize-space(text())='Collabora Online server is reachable.']")
     selenium.screenshot('office-status')
+
+
+def test_app_install(selenium, app_domain):
+    selenium.driver.get('https://{0}/settings/apps/discover/memories'.format(app_domain))
+    selenium.find_by(By.XPATH, "//input[@value='Download and enable']").click()
+    assert not selenium.exists_by(By.XPATH, "//div[contains(.,'Error')]")
+    selenium.screenshot('install-app')
