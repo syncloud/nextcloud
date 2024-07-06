@@ -165,7 +165,7 @@ def test_relative_redirect(app_domain, artifact_dir, device_user, device_passwor
         'https://{0}/apps/files'.format(app_domain),
         allow_redirects=False,
         verify=False)
-    response.headers['Location'] == '/apps/files/'
+    assert response.headers['Location'] == '/apps/files/'
 
 
 def test_disk(app_domain, device, domain, device_user, device_password, artifact_dir):
