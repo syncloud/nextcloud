@@ -1,9 +1,9 @@
 local name = "nextcloud";
-local browser = "firefox";
+local browser = "chrome";
 local nextcloud = "29.0.2";
 local redis = "7.0.15";
 local nginx = "1.24.0";
-local platform = '22.02';
+local platform = '24.05';
 local selenium = '4.21.0-20240517';
 local deployer = 'https://github.com/syncloud/store/releases/download/4/syncloud-release';
 
@@ -324,3 +324,4 @@ local build(arch, test_ui, dind) = [{
 
 build("amd64", true, "20.10.21-dind") +
 build("arm64", false, "19.03.8-dind")
+

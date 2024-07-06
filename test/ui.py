@@ -20,7 +20,7 @@ def module_setup(request, device, artifact_dir, ui_mode):
         device.scp_from_device('{0}/*'.format(TMP_DIR), join(artifact_dir, 'log'))
         check_output('cp /videos/* {0}'.format(artifact_dir), shell=True)
         check_output('chmod -R a+r {0}'.format(artifact_dir), shell=True)
-
+        selenium.log()
     request.addfinalizer(module_teardown)
 
 
