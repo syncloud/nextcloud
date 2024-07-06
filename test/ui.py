@@ -123,6 +123,6 @@ def test_office(selenium, app_domain):
 
 def test_app_install(selenium, app_domain):
     selenium.driver.get('https://{0}/settings/apps/discover/memories'.format(app_domain))
-    selenium.find_by(By.XPATH, "//input[@value='Enable']").click()
+    selenium.find_by(By.XPATH, "//input[@value='Download and enable']").click()
     assert not selenium.exists_by(By.XPATH, "//div[contains(.,'Error')]")
     selenium.screenshot('install-app')
