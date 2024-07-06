@@ -160,6 +160,14 @@ def test_caldav(app_domain, artifact_dir, device_user, device_password):
         f.write(str(response.headers).replace(',', '\n'))
 
 
+def test_relative_redirect(app_domain, artifact_dir, device_user, device_password):
+    response = requests.get(
+        'https://{0}/apps/files'.format(app_domain),
+        allow_redirects=False,
+        verify=False)
+    response.headers['Location'] == '/apps/files/'
+
+
 def test_disk(app_domain, device, domain, device_user, device_password, artifact_dir):
     loop_device_cleanup(domain, '/tmp/test0', device_password)
     loop_device_cleanup(domain, '/tmp/test1', device_password)
