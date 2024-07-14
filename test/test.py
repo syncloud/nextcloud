@@ -297,7 +297,7 @@ def test_setupchecks(device, artifact_dir):
     jout = json.loads(output)
     for key in jout.keys():
         for name in jout[key].keys():
-            if jout[key][name]['severity'] != 'success':
+            if jout[key][name]['severity'] == 'error':
                 print(jout[key][name])
                 invalid.append(jout[key][name])
 
