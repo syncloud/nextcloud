@@ -290,7 +290,7 @@ def test_install_office(device, arch):
 
 
 def test_setupchecks(device, artifact_dir):
-    output = device.run_ssh('snap run nextcloud.occ setupchecks --output=json_pretty', retries=2, sleep=10)
+    output = device.run_ssh('snap run nextcloud.occ setupchecks --output=json_pretty', throw=False)
     with open(join(artifact_dir, 'setupchecks.log'), 'w') as f:
         f.write(output)
     invalid = []
