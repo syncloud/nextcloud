@@ -39,9 +39,20 @@ RUN docker-php-ext-configure memcached
 RUN docker-php-ext-install memcached
 RUN docker-php-ext-install gmp
 #RUN pecl install imagick
+RUN git clone https://github.com/Imagick/imagick.git --depth 1 /tmp/imagick && \
+    cd /tmp/imagick && \
+    git fetch origin master && \
+    git switch master && \
+    cd /tmp/imagick && \
+    phpize && \
+    ./configure && \
+    make && \
+    make install && \
+    docker-php-ext-enable imagick
+
 RUN pecl install smbclient
 RUN pecl install apcu
-RUN pecl install mcrypt-1.0.6
+RUN pecl install mcrypt-1.0.7
 RUN pecl install redis
 RUN docker-php-ext-enable redis
 RUN docker-php-ext-configure intl
@@ -59,16 +70,6 @@ RUN docker-php-ext-install pcntl
 RUN docker-php-ext-install exif
 RUN docker-php-ext-install sysvsem
 #RUN docker-php-ext-enable imagick
-RUN git clone https://github.com/Imagick/imagick.git --depth 1 /tmp/imagick && \
-    cd /tmp/imagick && \
-    git fetch origin master && \
-    git switch master && \
-    cd /tmp/imagick && \
-    phpize && \
-    ./configure && \
-    make && \
-    make install && \
-    docker-php-ext-enable imagick
 
 RUN docker-php-ext-enable smbclient
 RUN docker-php-ext-install pdo pdo_pgsql
