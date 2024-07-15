@@ -289,6 +289,21 @@ def test_install_office(device, arch):
     device.run_ssh('snap run nextcloud.occ app:install richdocuments', retries=100, sleep=10)
 
 
+def test_setupchecks(device, artifact_dir):
+    output = device.run_ssh('snap run nextcloud.occ setupchecks --output=json_pretty', throw=False)
+    with open(join(artifact_dir, 'setupchecks.log'), 'w') as f:
+        f.write(output)
+    invalid = []
+    jout = json.loads(output)
+    for key in jout.keys():
+        for name in jout[key].keys():
+            if jout[key][name]['severity'] == 'error':
+                print(jout[key][name])
+                invalid.append(jout[key][name])
+
+    assert len(invalid) == 0
+
+
 def test_upload_office_file(device, arch, device_user, device_password, app_domain):
     if arch == "arm":
         webdav_upload(device_user, device_password, 'test.odt', 'test.odt', app_domain)
