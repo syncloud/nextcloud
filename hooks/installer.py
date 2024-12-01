@@ -206,7 +206,6 @@ class Installer:
 
         # https://doc.owncloud.org/server/8.0/admin_manual/configuration_server/occ_command.html
         self.occ.run('ldap:create-empty-config')
-        self.occ.run('ldap:create-empty-config')
 
         self.occ.run('ldap:set-config s01 ldapHost ldap://localhost')
         self.occ.run('ldap:set-config s01 ldapPort 389')
@@ -246,6 +245,7 @@ class Installer:
 
         self.occ.run('user:delete {0}'.format(install_user_name))
         self.occ.run('db:add-missing-indices')
+        self.occ.run('ldap:promote-group admin')
 
     def on_disk_change(self):
         
