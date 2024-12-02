@@ -245,7 +245,7 @@ class Installer:
 
         self.occ.run('user:delete {0}'.format(install_user_name))
         self.occ.run('db:add-missing-indices')
-        self.occ.run('ldap:promote-group admin')
+        self.occ.run('ldap:promote-group admin -y')
 
     def on_disk_change(self):
         
