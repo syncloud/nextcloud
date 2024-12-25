@@ -256,9 +256,9 @@ class Installer:
 
     def prepare_storage(self):
         app_storage_dir = storage.init_storage(APP_NAME, USER_NAME)
-        ocdata = join(app_storage_dir, '.ocdata')
-        fs.touchfile(ocdata)
-        check_output('chown {0}. {1}'.format(USER_NAME, ocdata), shell=True)
+        ncdata = join(app_storage_dir, '.ncdata')
+        fs.touchfile(ncdata)
+        check_output('chown {0}. {1}'.format(USER_NAME, ncdata), shell=True)
         check_output('chmod 777 {0}'.format(app_storage_dir), shell=True)
         tmp_storage_path = join(app_storage_dir, 'tmp')
         fs.makepath(tmp_storage_path)
