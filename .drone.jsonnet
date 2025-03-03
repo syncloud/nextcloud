@@ -115,7 +115,7 @@ local build(arch, test_ui, dind) = [{
             ]
         }] + [
         {
-            name: "test",
+            name: "test " + distro,
             image: "python:3.8-slim-buster",
             commands: [
               "APP_ARCHIVE_PATH=$(realpath $(cat package.name))",
