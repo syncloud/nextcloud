@@ -3,9 +3,11 @@ local browser = "chrome";
 local nextcloud = "30.0.4";
 local redis = "7.0.15";
 local nginx = "1.24.0";
-local platform = '24.05';
+local platform = '25.02';
 local selenium = '4.21.0-20240517';
 local deployer = 'https://github.com/syncloud/store/releases/download/4/syncloud-release';
+local distro_default = "buster";
+local distros = ["bookworm", "buster"];
 
 local build(arch, test_ui, dind) = [{
     kind: "pipeline",
@@ -111,7 +113,7 @@ local build(arch, test_ui, dind) = [{
                 "VERSION=$(cat version)",
                 "./package.sh " + name + " $VERSION "
             ]
-        },
+        }] + [
         {
             name: "test",
             image: "python:3.8-slim-buster",
@@ -119,10 +121,11 @@ local build(arch, test_ui, dind) = [{
               "APP_ARCHIVE_PATH=$(realpath $(cat package.name))",
               "cd test",
               "./deps.sh",
-              "py.test -x -s test.py --distro=buster --domain=buster.com --app-archive-path=$APP_ARCHIVE_PATH --device-host=" + name + ".buster.com --app=" + name + " --arch=" + arch
+              "py.test -x -s test.py --distro=" + distro + " --domain=" + distro + ".com --app-archive-path=$APP_ARCHIVE_PATH --device-host=" + name + "." + distro + ".com --app=" + name + " --arch=" + arch
             ]
-        }] + ( if test_ui then [
-{
+        } for distro in distros 
+        ] + ( if test_ui then [
+        {
             name: "selenium",
             image: "selenium/standalone-" + browser + ":" + selenium,
             detach: true,
@@ -277,10 +280,10 @@ local build(arch, test_ui, dind) = [{
                     path: "/var/run"
                 }
             ]
-        },
+        }] + [
         {
-            name: name + ".buster.com",
-            image: "syncloud/platform-buster-" + arch + ":" + platform,
+            name: name + "."+distro+".com",
+            image: "syncloud/platform-"+distro+"-" + arch + ":" + platform,
             privileged: true,
             volumes: [
                 {
@@ -292,7 +295,7 @@ local build(arch, test_ui, dind) = [{
                     path: "/dev"
                 }
             ]
-        }
+        } for distro in distros
     ],
     volumes: [
         {
