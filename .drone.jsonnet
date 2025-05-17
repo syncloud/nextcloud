@@ -1,6 +1,6 @@
 local name = "nextcloud";
 local browser = "chrome";
-local nextcloud = "30.0.4";
+local nextcloud = "31.0.5";
 local redis = "7.0.15";
 local nginx = "1.24.0";
 local platform = '25.02';
