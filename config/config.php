@@ -40,4 +40,5 @@ $CONFIG = array (
    'port'     => 0,
   ],
   'maintenance_window_start' => 1,
+  'allow_local_remote_servers' => true,
 );
