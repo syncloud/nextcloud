@@ -104,7 +104,7 @@ class Installer:
         else:
             self.initialize()
         
-        app_storage_dir = storage.init_storage(APP_NAME, USER_NAME)
+        app_storage_dir = storage.get_storage_dir(APP_NAME)
         self.occ.run('ldap:set-config s01 ldapEmailAttribute mail')
         self.occ.run('config:system:set apps_paths 1 path --value="{0}"'.format(self.extra_apps_dir))
         self.occ.run('config:system:set dbhost --value="{0}"'.format(self.db.database_host))
@@ -188,7 +188,7 @@ class Installer:
 
     def initialize(self):
         self.prepare_storage()
-        app_storage_dir = storage.init_storage(APP_NAME, USER_NAME)
+        app_storage_dir = storage.get_storage_dir(APP_NAME)
         self.db.execute('postgres', DB_USER, "ALTER USER {0} WITH PASSWORD '{1}';".format(DB_USER, DB_PASSWORD))
         self.db.execute('postgres', DB_USER, "CREATE DATABASE nextcloud OWNER {0} TEMPLATE template0 ENCODING 'UTF8';".format(DB_USER))
         self.db.execute('postgres', DB_USER, "GRANT CREATE ON SCHEMA public TO {0};".format(DB_USER))
@@ -248,14 +248,14 @@ class Installer:
         self.occ.run('ldap:promote-group admin -y')
 
     def on_disk_change(self):
-        
+        storage.init_storage(APP_NAME, USER_NAME)
         self.prepare_storage()
         self.occ.run('config:system:delete instanceid')
         service.restart(SYSTEMD_PHP_FPM)
         service.restart(SYSTEMD_NGINX)
 
     def prepare_storage(self):
-        app_storage_dir = storage.init_storage(APP_NAME, USER_NAME)
+        app_storage_dir = storage.get_storage_dir(APP_NAME)
         ncdata = join(app_storage_dir, '.ncdata')
         fs.touchfile(ncdata)
         check_output('chown {0}. {1}'.format(USER_NAME, ncdata), shell=True)
