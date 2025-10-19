@@ -1,15 +1,18 @@
 local name = "nextcloud";
 local browser = "chrome";
-local nextcloud = "31.0.5";
+local nextcloud = "31.0.9";
 local redis = "7.0.15";
 local nginx = "1.24.0";
-local platform = '25.02';
+local platform = '25.08';
+local python = '3.12-slim-bookworm';
+local debian = 'bookworm-slim';
 local selenium = '4.21.0-20240517';
 local deployer = 'https://github.com/syncloud/store/releases/download/4/syncloud-release';
-local distro_default = "buster";
-local distros = ["bookworm", "buster"];
+local distro_default = "bookworm";
+local distros = ["bookworm"];
+local dind = '20.10.21-dind';
 
-local build(arch, test_ui, dind) = [{
+local build(arch, test_ui) = [{
     kind: "pipeline",
     type: "docker",
     name: arch,
@@ -20,14 +23,14 @@ local build(arch, test_ui, dind) = [{
     steps: [
         {
             name: "version",
-            image: "debian:buster-slim",
+            image: "debian:" + debian,
             commands: [
                 "echo $DRONE_BUILD_NUMBER > version"
             ]
         },
         {
             name: "download",
-            image: "debian:buster-slim",
+            image: "debian:" + debian,
             commands: [
                 "./download.sh " + nextcloud
             ]
@@ -55,7 +58,7 @@ local build(arch, test_ui, dind) = [{
         },
          {
             name: "redis test",
-            image: "debian:buster-slim",
+            image: "debian:" + debian,
             commands: [
                 "./redis/test.sh"
             ]
@@ -101,14 +104,14 @@ local build(arch, test_ui, dind) = [{
         },
         {
             name: "build",
-            image: "debian:buster-slim",
+            image: "debian:" + debian,
             commands: [
                 "./build.sh"
             ]
         },
         {
             name: "package",
-            image: "debian:buster-slim",
+            image: "debian:" + debian,
             commands: [
                 "VERSION=$(cat version)",
                 "./package.sh " + name + " $VERSION "
@@ -116,7 +119,7 @@ local build(arch, test_ui, dind) = [{
         }] + [
         {
             name: "test " + distro,
-            image: "python:3.8-slim-buster",
+            image: "python:" + python,
             commands: [
               "APP_ARCHIVE_PATH=$(realpath $(cat package.name))",
               "cd test",
@@ -166,7 +169,7 @@ local build(arch, test_ui, dind) = [{
         },
         {
             name: "test-ui",
-            image: "python:3.8-slim-buster",
+            image: "python:" + python,
             commands: [
               "cd test",
               "./deps.sh",
@@ -181,7 +184,7 @@ local build(arch, test_ui, dind) = [{
 ] else [] ) +[
     {
         name: "test-upgrade",
-        image: "python:3.8-slim-buster",
+        image: "python:" + python,
         commands: [
           "APP_ARCHIVE_PATH=$(realpath $(cat package.name))",
           "cd test",
@@ -191,7 +194,7 @@ local build(arch, test_ui, dind) = [{
     },
         {
         name: "upload",
-        image: "debian:buster-slim",
+        image: "debian:" + debian,
         environment: {
             AWS_ACCESS_KEY_ID: {
                 from_secret: "AWS_ACCESS_KEY_ID"
@@ -217,7 +220,7 @@ local build(arch, test_ui, dind) = [{
     },
     {
             name: "promote",
-            image: "debian:buster-slim",
+            image: "debian:" + debian,
             environment: {
                 AWS_ACCESS_KEY_ID: {
                     from_secret: "AWS_ACCESS_KEY_ID"
@@ -325,6 +328,5 @@ local build(arch, test_ui, dind) = [{
       ]
 }];
 
-build("amd64", true, "20.10.21-dind") +
-build("arm64", false, "19.03.8-dind")
-
+build("amd64", true) +
+build("arm64", false)
