@@ -124,8 +124,8 @@ local build(arch, test_ui) = [{
               "APP_ARCHIVE_PATH=$(realpath $(cat package.name))",
               "cd test",
               "./deps.sh",
-              "py.test -x -s test.py --distro=" + distro + " --domain=" + distro + ".com --app-archive-path=$APP_ARCHIVE_PATH --device-host=" + name + "." + distro + ".com --app=" + name + " --arch=" + arch
-            ]
+              'py.test -x -s test.py --distro=' + distro + ' --ver=$DRONE_BUILD_NUMBER --app=' + name,
+              ]
         } for distro in distros 
         ] + ( if test_ui then [
         {
@@ -173,8 +173,8 @@ local build(arch, test_ui) = [{
             commands: [
               "cd test",
               "./deps.sh",
-              "py.test -x -s ui.py --distro=buster --ui-mode=desktop --domain=buster.com --device-host=" + name + ".buster.com --app=" + name + " --browser=" + browser,
-            ],
+             'py.test -x -s ui.py --distro=' + distro_default + ' --ver=$DRONE_BUILD_NUMBER --app=' + name + ' --browser=' + browser,
+             ],
             volumes: [{
                 name: "videos",
                 path: "/videos"
@@ -189,8 +189,8 @@ local build(arch, test_ui) = [{
           "APP_ARCHIVE_PATH=$(realpath $(cat package.name))",
           "cd test",
           "./deps.sh",
-          "py.test -x -s upgrade.py --distro=buster --ui-mode=desktop --domain=buster.com --app-archive-path=$APP_ARCHIVE_PATH --device-host=" + name + ".buster.com --app=" + name + " --browser=" + browser,
-        ]
+          'py.test -x -s upgrade.py --distro=' + distro_default + ' --ver=$DRONE_BUILD_NUMBER --app=' + name + ' --browser=' + browser,
+         ]
     },
         {
         name: "upload",
