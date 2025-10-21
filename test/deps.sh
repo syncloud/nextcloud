@@ -5,5 +5,5 @@ while ! apt-get update; do
   sleep 1
   echo "retry"
 done
-apt-get install -y sshpass openssh-client wget
+apt-get install -y sshpass openssh-client wget curl
 pip install -r requirements.txt
