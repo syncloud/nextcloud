@@ -3,7 +3,7 @@ local browser = "chrome";
 local nextcloud = "31.0.9";
 local redis = "7.0.15";
 local nginx = "1.24.0";
-local platform = '25.08';
+local platform = '25.09';
 local python = '3.12-slim-bookworm';
 local debian = 'bookworm-slim';
 local selenium = '4.21.0-20240517';
@@ -121,7 +121,6 @@ local build(arch, test_ui) = [{
             name: "test " + distro,
             image: "python:" + python,
             commands: [
-              "APP_ARCHIVE_PATH=$(realpath $(cat package.name))",
               "cd test",
               "./deps.sh",
               'py.test -x -s test.py --distro=' + distro + ' --ver=$DRONE_BUILD_NUMBER --app=' + name,
@@ -186,7 +185,6 @@ local build(arch, test_ui) = [{
         name: "test-upgrade",
         image: "python:" + python,
         commands: [
-          "APP_ARCHIVE_PATH=$(realpath $(cat package.name))",
           "cd test",
           "./deps.sh",
           'py.test -x -s upgrade.py --distro=' + distro_default + ' --ver=$DRONE_BUILD_NUMBER --app=' + name + ' --browser=' + browser,
