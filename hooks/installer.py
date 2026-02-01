@@ -131,7 +131,7 @@ class Installer:
         # oc_config.set_value('mail_smtppassword', '')
        
         self.occ.run("app:disable logreader")
- 
+        self.occ.run("app:disable app_api")
         self.on_domain_change()
 
         self.fix_permissions()
