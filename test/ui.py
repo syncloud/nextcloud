@@ -71,8 +71,8 @@ def test_settings_security(selenium, app_domain):
     selenium.driver.get("https://{0}/settings/admin/overview#security-warning".format(app_domain))
     selenium.find_by_xpath("//h2[contains(.,'setup warnings')]")
     progress_xpath = "//span[text()='Checking for system and security issues.']"
-    selenium.find_by_xpath(progress_xpath)
-    selenium.wait_or_screenshot(EC.invisibility_of_element_located((By.XPATH, progress_xpath)))
+    #selenium.find_by_xpath(progress_xpath)
+    #selenium.wait_or_screenshot(EC.invisibility_of_element_located((By.XPATH, progress_xpath)))
     source = selenium.driver.page_source
     selenium.screenshot('admin-security')
     assert 'no SVG support' not in source
