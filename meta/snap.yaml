@@ -16,6 +16,26 @@ apps:
     restart-condition: always
     before: [php-fpm]
 
+  nats:
+    user: nextcloud
+    daemon: simple
+    command: bin/service.nats.sh
+    plugs:
+    - network
+    - network-bind
+    restart-condition: always
+    before: [signaling]
+
+  signaling:
+    user: nextcloud
+    daemon: simple
+    command: bin/service.signaling.sh
+    plugs:
+    - network
+    - network-bind
+    restart-condition: always
+    after: [nats]
+
   php-fpm:
     user: nextcloud
     command: bin/service.php-fpm.sh start

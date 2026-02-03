@@ -3,6 +3,7 @@ local browser = "firefox";
 local nextcloud = "32.0.5";
 local redis = "7.0.15";
 local nginx = "1.24.0";
+local nats = "2.10";
 local platform = '25.09';
 local python = '3.12-slim-bookworm';
 local debian = 'bookworm-slim';
@@ -61,6 +62,26 @@ local build(arch, test_ui) = [{
             image: "debian:" + debian,
             commands: [
                 "./redis/test.sh"
+            ]
+        },
+         {
+            name: "nats",
+            image: "nats:" + nats,
+            commands: [
+                "./nats/build.sh"
+            ]
+        },
+         {
+            name: "signaling",
+            image: "docker:" + dind,
+            commands: [
+                "./signaling/build.sh"
+            ],
+            volumes: [
+                {
+                    name: "dockersock",
+                    path: "/var/run"
+                }
             ]
         },
          {
