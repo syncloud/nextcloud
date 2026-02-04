@@ -30,10 +30,10 @@ local build(arch, test_ui) = [{
             ]
         },
         {
-            name: "download",
-            image: "debian:" + debian,
+            name: "nextcloud",
+            image: "nextcloud:" + nextcloud + "-fpm",
             commands: [
-                "./download.sh " + nextcloud
+                "./nextcloud/build.sh"
             ]
         },
 {
