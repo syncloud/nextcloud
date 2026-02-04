@@ -1,7 +1,7 @@
 apps:
   postgresql:
     user: nextcloud
-    command: bin/service.postgresql.sh start
+    command: bin/service.postgresql.sh
     daemon: forking
     plugs:
     - network
@@ -38,13 +38,13 @@ apps:
 
   php-fpm:
     user: nextcloud
-    command: bin/service.php-fpm.sh start
+    command: bin/service.php-fpm.sh
     daemon: forking
     plugs:
     - network
     - network-bind
     restart-condition: always
-    post-start-command: bin/service.php-fpm.sh post-start
+    start-timeout: 600s
     after: [postgresql]
     before: [nginx]
   
