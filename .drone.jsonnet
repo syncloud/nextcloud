@@ -4,6 +4,7 @@ local nextcloud = "32.0.5";
 local redis = "7.0.15";
 local nginx = "1.24.0";
 local nats = "2.10";
+local postgresql = "16-bullseye";
 local platform = '25.09';
 local python = '3.12-slim-bookworm';
 local debian = 'bookworm-slim';
@@ -100,15 +101,16 @@ local build(arch, test_ui) = [{
         },
          {
             name: "postgresql",
-            image: "docker:" + dind,
+            image: "postgres:" + postgresql,
             commands: [
                 "./postgresql/build.sh"
-            ],
-            volumes: [
-                {
-                    name: "dockersock",
-                    path: "/var/run"
-                }
+            ]
+        },
+        {
+            name: "postgresql test",
+            image: "syncloud/platform-" + distro_default + "-" + arch + ":" + platform,
+            commands: [
+                "./postgresql/test.sh"
             ]
         },
        {
