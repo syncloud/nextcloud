@@ -78,6 +78,13 @@ local build(arch, test_ui) = [{
             ]
         },
          {
+            name: "nats test",
+            image: "syncloud/platform-" + distro_default + "-" + arch + ":" + platform,
+            commands: [
+                "./nats/test.sh"
+            ]
+        },
+         {
             name: "signaling",
             image: "docker:" + dind,
             commands: [
