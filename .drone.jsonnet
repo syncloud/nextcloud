@@ -98,6 +98,13 @@ local build(arch, test_ui) = [{
             ]
         },
          {
+            name: "signaling test",
+            image: "syncloud/platform-" + distro_default + "-" + arch + ":" + platform,
+            commands: [
+                "./signaling/test.sh"
+            ]
+        },
+         {
             name: "postgresql",
             image: "docker:" + dind,
             commands: [
