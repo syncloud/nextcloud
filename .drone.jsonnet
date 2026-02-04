@@ -66,15 +66,9 @@ local build(arch, test_ui) = [{
         },
          {
             name: "nats",
-            image: "docker:" + dind,
+            image: "nats:" + nats + "-alpine",
             commands: [
-                "./nats/build.sh " + nats
-            ],
-            volumes: [
-                {
-                    name: "dockersock",
-                    path: "/var/run"
-                }
+                "./nats/build.sh"
             ]
         },
          {
