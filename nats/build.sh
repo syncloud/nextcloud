@@ -13,4 +13,4 @@ cd ${BUILD_DIR}
 docker export nats -o app.tar
 tar xf app.tar
 rm -rf app.tar
-cp ${DIR}/bin/* ${BUILD_DIR}/bin/
+cp -f ${DIR}/bin/* ${BUILD_DIR}/bin
