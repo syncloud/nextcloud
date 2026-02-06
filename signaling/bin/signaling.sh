@@ -1,3 +1,4 @@
 #!/bin/bash -e
 DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && cd .. && pwd )
-exec ${DIR}/usr/bin/nextcloud-spreed-signaling "$@"
+LIBS=$(echo ${DIR}/usr/lib/*-linux-gnu*)
+exec ${DIR}/usr/lib/*-linux*/ld-*.so.* --library-path $LIBS ${DIR}/usr/bin/nextcloud-spreed-signaling "$@"
