@@ -81,15 +81,9 @@ local build(arch, test_ui) = [{
         },
          {
             name: "signaling",
-            image: "docker:" + dind,
+            image: "debian:" + debian,
             commands: [
                 "./signaling/build.sh"
-            ],
-            volumes: [
-                {
-                    name: "dockersock",
-                    path: "/var/run"
-                }
             ]
         },
          {
