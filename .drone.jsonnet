@@ -67,7 +67,7 @@ local build(arch, test_ui) = [{
         },
          {
             name: "nats",
-            image: "nats:" + nats + "-alpine",
+            image: "debian:" + debian,
             commands: [
                 "./nats/build.sh"
             ]
