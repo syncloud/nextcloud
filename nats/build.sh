@@ -11,7 +11,7 @@ case $ARCH in
   x86_64) ARCH=amd64 ;;
   aarch64) ARCH=arm64 ;;
 esac
-wget -q https://github.com/cyberb/nats-server/releases/download/v2.14.0-unix/nats-server-linux-${ARCH} -O ${BUILD_DIR}/nats-server
+wget -q https://github.com/cyberb/nats-server/releases/download/v2.14.1-unix/nats-server-linux-${ARCH} -O ${BUILD_DIR}/nats-server
 chmod +x ${BUILD_DIR}/nats-server
 
 cp -r ${DIR}/bin ${BUILD_DIR}/
