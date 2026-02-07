@@ -17,7 +17,7 @@ case $ARCH in
   x86_64) ARCH=amd64 ;;
   aarch64) ARCH=arm64 ;;
 esac
-wget -q https://github.com/cyberb/nextcloud-spreed-signaling/releases/download/v2.0.0-unix/signaling-linux-${ARCH} -O ${BUILD_DIR}/usr/bin/nextcloud-spreed-signaling
+wget -q https://github.com/cyberb/nextcloud-spreed-signaling/releases/download/v2.0.0-unix2/signaling-linux-${ARCH} -O ${BUILD_DIR}/usr/bin/nextcloud-spreed-signaling
 chmod +x ${BUILD_DIR}/usr/bin/nextcloud-spreed-signaling
 
 cp ${DIR}/bin/* ${BUILD_DIR}/bin/
