@@ -1,7 +1,7 @@
 apps:
   postgresql:
     user: nextcloud
-    command: bin/service.postgresql.sh start
+    command: bin/service.postgresql.sh
     daemon: forking
     plugs:
     - network
@@ -16,15 +16,35 @@ apps:
     restart-condition: always
     before: [php-fpm]
 
+  nats:
+    user: nextcloud
+    daemon: simple
+    command: bin/service.nats.sh
+    plugs:
+    - network
+    - network-bind
+    restart-condition: always
+    before: [signaling]
+
+  signaling:
+    user: nextcloud
+    daemon: simple
+    command: bin/service.signaling.sh
+    plugs:
+    - network
+    - network-bind
+    restart-condition: always
+    after: [nats]
+
   php-fpm:
     user: nextcloud
-    command: bin/service.php-fpm.sh start
+    command: bin/service.php-fpm.sh
     daemon: forking
     plugs:
     - network
     - network-bind
     restart-condition: always
-    post-start-command: bin/service.php-fpm.sh post-start
+    start-timeout: 600s
     after: [postgresql]
     before: [nginx]
   

@@ -3,7 +3,9 @@ from os.path import join
 from os.path import realpath
 
 import logging
+import os
 import re
+import secrets
 import shutil
 import uuid
 from crontab import CronTab
@@ -30,6 +32,14 @@ SYSTEMD_NGINX = '{0}.nginx'.format(APP_NAME)
 SYSTEMD_PHP_FPM = '{0}.php-fpm'.format(APP_NAME)
 SYSTEMD_POSTGRESQL = '{0}.postgresql'.format(APP_NAME)
 
+SIGNALING_SECRETS_FILE = 'signaling.secrets'
+
+
+def generate_hex_secret():
+    """Generate a 16-byte hex-encoded secret (32 characters)."""
+    return secrets.token_hex(16)
+
+
 class Installer:
     def __init__(self):
         if not logger.factory_instance:
@@ -47,6 +57,33 @@ class Installer:
         self.cron = Cron(CRON_USER)
         self.db = Database(self.app_dir, self.data_dir, self.config_dir, PSQL_PORT)
         self.oc_config = OCConfig(join(self.app_dir, 'bin/nextcloud-config'))
+        self.signaling_secrets_path = join(self.data_dir, SIGNALING_SECRETS_FILE)
+
+    def get_signaling_secrets(self):
+        """Get or create signaling server secrets."""
+        if isfile(self.signaling_secrets_path):
+            # Load existing secrets
+            secrets_dict = {}
+            with open(self.signaling_secrets_path, 'r') as f:
+                for line in f:
+                    if '=' in line:
+                        key, value = line.strip().split('=', 1)
+                        secrets_dict[key] = value
+            return secrets_dict
+        else:
+            # Generate new secrets
+            secrets_dict = {
+                'signaling_session_hashkey': generate_hex_secret(),
+                'signaling_session_blockkey': generate_hex_secret(),
+                'signaling_internal_secret': generate_hex_secret(),
+                'signaling_backend_secret': generate_hex_secret()
+            }
+            # Save secrets to file
+            with open(self.signaling_secrets_path, 'w') as f:
+                for key, value in secrets_dict.items():
+                    f.write('{0}={1}\n'.format(key, value))
+            os.chmod(self.signaling_secrets_path, 0o600)
+            return secrets_dict
 
     def install_config(self):
 
@@ -55,6 +92,7 @@ class Installer:
         storage.init_storage(APP_NAME, USER_NAME)
         templates_path = join(self.app_dir, 'config')
 
+        signaling_secrets = self.get_signaling_secrets()
         variables = {
             'app_dir': self.app_dir,
             'common_dir': self.common_dir,
@@ -64,6 +102,7 @@ class Installer:
             'config_dir': self.config_dir,
             'domain': urls.get_app_domain_name(APP_NAME)
         }
+        variables.update(signaling_secrets)
         gen.generate_files(templates_path, self.config_dir, variables)
 
         fs.makepath(self.nextcloud_config_path)

@@ -1,30 +1,30 @@
-#!/bin/sh -ex
+#!/bin/sh -xe
 
 DIR=$( cd "$( dirname "$0" )" && pwd )
 cd ${DIR}
 
-MAJOR_VERSION=16
-
 BUILD_DIR=${DIR}/../build/snap/postgresql
 
-docker ps -a -q --filter ancestor=postgres:syncloud --format="{{.ID}}" | xargs docker stop | xargs docker rm || true
-docker rmi postgres:syncloud || true
-docker build --build-arg MAJOR_VERSION=$MAJOR_VERSION -t postgres:syncloud .
-docker run postgres:syncloud postgres --help
-docker create --name=postgres postgres:syncloud
 mkdir -p ${BUILD_DIR}
-cd ${BUILD_DIR}
+
+rm -rf usr/lib/*/perl
+rm -rf usr/lib/*/perl-base
+rm -rf usr/lib/*/dri
+rm -rf usr/lib/*/mfx
+rm -rf usr/lib/*/vdpau
+rm -rf usr/lib/*/gconv
+rm -rf usr/lib/*/lapack
+rm -rf usr/lib/gcc
+rm -rf usr/lib/git-core
+
+cp -r /usr ${BUILD_DIR}
+cp -r /lib ${BUILD_DIR}
+
+PGBIN=$(echo ${BUILD_DIR}/usr/lib/postgresql/*/bin)
+MAJOR_VERSION=$(basename $(dirname $PGBIN))
 echo "${MAJOR_VERSION}" > ${BUILD_DIR}/../db.major.version
-docker export postgres -o postgres.tar
-tar xf postgres.tar
-rm -rf postgres.tar
-ls -la 
-ls -la bin
-ls -la usr/bin
-ls -ls usr/share/postgresql-common/pg_wrapper
-PGBIN=$(echo usr/lib/postgresql/*/bin)
-ldd $PGBIN/initdb || true
 mv $PGBIN/postgres $PGBIN/postgres.bin
 mv $PGBIN/pg_dump $PGBIN/pg_dump.bin
-cp $DIR/bin/* bin
+mkdir ${BUILD_DIR}/bin
+cp $DIR/bin/* ${BUILD_DIR}/bin
 cp $DIR/pgbin/* $PGBIN

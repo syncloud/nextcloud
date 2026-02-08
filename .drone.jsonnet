@@ -3,6 +3,8 @@ local browser = "firefox";
 local nextcloud = "32.0.5";
 local redis = "7.0.15";
 local nginx = "1.24.0";
+local nats = "2.10";
+local postgresql = "16-bullseye";
 local platform = '25.09';
 local python = '3.12-slim-bookworm';
 local debian = 'bookworm-slim';
@@ -29,10 +31,10 @@ local build(arch, test_ui) = [{
             ]
         },
         {
-            name: "download",
-            image: "debian:" + debian,
+            name: "nextcloud",
+            image: "nextcloud:" + nextcloud + "-fpm",
             commands: [
-                "./download.sh " + nextcloud
+                "./nextcloud/build.sh"
             ]
         },
 {
@@ -64,16 +66,45 @@ local build(arch, test_ui) = [{
             ]
         },
          {
+            name: "nats",
+            image: "debian:" + debian,
+            commands: [
+                "./nats/build.sh"
+            ]
+        },
+         {
+            name: "nats test",
+            image: "syncloud/platform-" + distro_default + "-" + arch + ":" + platform,
+            commands: [
+                "./nats/test.sh"
+            ]
+        },
+         {
+            name: "signaling",
+            image: "debian:" + debian,
+            commands: [
+                "./signaling/build.sh"
+            ]
+        },
+         {
+            name: "signaling test",
+            image: "syncloud/platform-" + distro_default + "-" + arch + ":" + platform,
+            commands: [
+                "./signaling/test.sh"
+            ]
+        },
+         {
             name: "postgresql",
-            image: "docker:" + dind,
+            image: "postgres:" + postgresql,
             commands: [
                 "./postgresql/build.sh"
-            ],
-            volumes: [
-                {
-                    name: "dockersock",
-                    path: "/var/run"
-                }
+            ]
+        },
+        {
+            name: "postgresql test",
+            image: "syncloud/platform-" + distro_default + "-" + arch + ":" + platform,
+            commands: [
+                "./postgresql/test.sh"
             ]
         },
        {
