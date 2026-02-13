@@ -172,8 +172,8 @@ class Installer:
         self.occ.run("app:disable logreader")
         self.occ.run("app:disable app_api")
         self.on_domain_change()
-        self.occ.run("maintenance:repair --include-expensive")
-    
+        self.occ.run("maintenance:repair")
+
         self.fix_permissions()
 
     def fix_permissions(self):
