@@ -1,9 +1,23 @@
 local name = "nextcloud";
+local browser = "firefox";
+local nextcloud = "32.0.5";
+local redis = "7.0.15";
+local nginx = "1.24.0";
+local nats = "2.10";
+local postgresql = "16-bullseye";
+local platform = '25.09';
+local python = '3.12-slim-bookworm';
+local debian = 'bookworm-slim';
+local selenium = '4.35.0-20250828';
+local deployer = 'https://github.com/syncloud/store/releases/download/4/syncloud-release';
+local distro_default = "bookworm";
+local distros = ["bookworm"];
+local dind = '20.10.21-dind';
 
-local build(arch) = {
+local build(arch, test_ui) = [{
     kind: "pipeline",
+    type: "docker",
     name: arch,
-
     platform: {
         os: "linux",
         arch: arch
@@ -11,68 +25,256 @@ local build(arch) = {
     steps: [
         {
             name: "version",
-            image: "syncloud/build-deps-" + arch,
+            image: "debian:" + debian,
             commands: [
-                "echo $(date +%y%m%d)$DRONE_BUILD_NUMBER > version",
-                "echo " + arch + "$DRONE_BRANCH > domain"
+                "echo $DRONE_BUILD_NUMBER > version"
+            ]
+        },
+        {
+            name: "nextcloud",
+            image: "nextcloud:" + nextcloud + "-fpm",
+            commands: [
+                "./nextcloud/build.sh"
+            ]
+        },
+{
+            name: "nginx",
+            image: "docker:" + dind,
+                commands: [
+                "./nginx/build.sh " + nginx
+            ],
+            volumes: [
+                {
+                    name: "dockersock",
+                    path: "/var/run"
+                }
+            ]
+        },
+ 
+         {
+            name: "redis",
+            image: "redis:" + redis,
+            commands: [
+                "./redis/build.sh"
+            ]
+        },
+         {
+            name: "redis test",
+            image: "debian:" + debian,
+            commands: [
+                "./redis/test.sh"
+            ]
+        },
+         {
+            name: "nats",
+            image: "debian:" + debian,
+            commands: [
+                "./nats/build.sh"
+            ]
+        },
+         {
+            name: "nats test",
+            image: "syncloud/platform-" + distro_default + "-" + arch + ":" + platform,
+            commands: [
+                "./nats/test.sh"
+            ]
+        },
+         {
+            name: "signaling",
+            image: "debian:" + debian,
+            commands: [
+                "./signaling/build.sh"
+            ]
+        },
+         {
+            name: "signaling test",
+            image: "syncloud/platform-" + distro_default + "-" + arch + ":" + platform,
+            commands: [
+                "./signaling/test.sh"
+            ]
+        },
+         {
+            name: "postgresql",
+            image: "postgres:" + postgresql,
+            commands: [
+                "./postgresql/build.sh"
+            ]
+        },
+        {
+            name: "postgresql test",
+            image: "syncloud/platform-" + distro_default + "-" + arch + ":" + platform,
+            commands: [
+                "./postgresql/test.sh"
+            ]
+        },
+       {
+            name: "python",
+            image: "docker:" + dind,
+            commands: [
+                "./python/build.sh"
+            ],
+            volumes: [
+                {
+                    name: "dockersock",
+                    path: "/var/run"
+                }
+            ]
+        },
+        {
+            name: "php",
+            image: "docker:" + dind,
+            commands: [
+                "./php/build.sh"
+            ],
+            volumes: [
+                {
+                    name: "dockersock",
+                    path: "/var/run"
+                }
             ]
         },
         {
             name: "build",
-            image: "syncloud/build-deps-" + arch,
+            image: "debian:" + debian,
+            commands: [
+                "./build.sh"
+            ]
+        },
+        {
+            name: "package",
+            image: "debian:" + debian,
             commands: [
                 "VERSION=$(cat version)",
-                "./build.sh " + name + " $VERSION"
+                "./package.sh " + name + " $VERSION "
             ]
-        },
+        }] + [
         {
-            name: "test-intergation",
-            image: "syncloud/build-deps-" + arch,
+            name: "test " + distro,
+            image: "python:" + python,
             commands: [
-              "pip2 install -r dev_requirements.txt",
-              "APP_ARCHIVE_PATH=$(realpath $(cat package.name))",
-              "DOMAIN=$(cat domain)",
-              "cd integration",
-              "py.test -x -s verify.py --domain=$DOMAIN --app-archive-path=$APP_ARCHIVE_PATH --device-host=device --app=" + name
-            ]
-        },
-        if arch == "arm" then {} else
+              "cd test",
+              "./deps.sh",
+              'py.test -x -s test.py --distro=' + distro + ' --ver=$DRONE_BUILD_NUMBER --app=' + name,
+              ]
+        } for distro in distros 
+        ] + ( if test_ui then [
         {
-            name: "test-ui",
-            image: "syncloud/build-deps-" + arch,
-            commands: [
-              "pip2 install -r dev_requirements.txt",
-              "DOMAIN=$(cat domain)",
-              "cd integration",
-              "xvfb-run -l --server-args='-screen 0, 1024x4096x24' py.test -x -s test-ui.py --ui-mode=desktop --domain=$DOMAIN --device-host=device --app=" + name,
-              "xvfb-run -l --server-args='-screen 0, 1024x4096x24' py.test -x -s test-ui.py --ui-mode=mobile --domain=$DOMAIN --device-host=device --app=" + name,
-            ],
-            volumes: [{
+            name: "selenium",
+            image: "selenium/standalone-" + browser + ":" + selenium,
+            detach: true,
+            environment: {
+                SE_NODE_SESSION_TIMEOUT: "999999",
+                START_XVFB: "true"
+            },
+               volumes: [{
                 name: "shm",
                 path: "/dev/shm"
-            }]
+            }],
+            commands: [
+                "cat /etc/hosts",
+                "getent hosts " + name + ".buster.com | sed 's/" + name +".buster.com/auth.buster.com/g' | sudo tee -a /etc/hosts",
+                "cat /etc/hosts",
+                "/opt/bin/entry_point.sh"
+            ]
+         },
+
+        {
+            name: "selenium-video",
+            image: "selenium/video:ffmpeg-4.3.1-20220208",
+            detach: true,
+            environment: {
+                DISPLAY_CONTAINER_NAME: "selenium",
+                FILE_NAME: "video.mkv"
+            },
+            volumes: [
+                {
+                    name: "shm",
+                    path: "/dev/shm"
+                },
+               {
+                    name: "videos",
+                    path: "/videos"
+                }
+            ]
         },
         {
-            name: "upload",
-            image: "syncloud/build-deps-" + arch,
+            name: "test-ui",
+            image: "python:" + python,
+            commands: [
+              "cd test",
+              "./deps.sh",
+             'py.test -x -s ui.py --distro=' + distro_default + ' --ver=$DRONE_BUILD_NUMBER --app=' + name + ' --browser=' + browser,
+             ],
+            volumes: [{
+                name: "videos",
+                path: "/videos"
+            }]
+        }
+
+] else [] ) +[
+    {
+        name: "test-upgrade",
+        image: "python:" + python,
+        commands: [
+          "cd test",
+          "./deps.sh",
+          'py.test -x -s upgrade.py --distro=' + distro_default + ' --ver=$DRONE_BUILD_NUMBER --app=' + name + ' --browser=' + browser,
+         ]
+    },
+        {
+        name: "upload",
+        image: "debian:" + debian,
+        environment: {
+            AWS_ACCESS_KEY_ID: {
+                from_secret: "AWS_ACCESS_KEY_ID"
+            },
+            AWS_SECRET_ACCESS_KEY: {
+                from_secret: "AWS_SECRET_ACCESS_KEY"
+            },
+            SYNCLOUD_TOKEN: {
+                     from_secret: "SYNCLOUD_TOKEN"
+                 }
+        },
+        commands: [
+            "PACKAGE=$(cat package.name)",
+            "apt update && apt install -y wget",
+            "wget " + deployer + "-" + arch + " -O release --progress=dot:giga",
+            "chmod +x release",
+            "./release publish -f $PACKAGE -b $DRONE_BRANCH"
+        ],
+        when: {
+            branch: ["stable", "master"],
+	    event: [ "push" ]
+}
+    },
+    {
+            name: "promote",
+            image: "debian:" + debian,
             environment: {
                 AWS_ACCESS_KEY_ID: {
                     from_secret: "AWS_ACCESS_KEY_ID"
                 },
                 AWS_SECRET_ACCESS_KEY: {
                     from_secret: "AWS_SECRET_ACCESS_KEY"
-                }
+                },
+                 SYNCLOUD_TOKEN: {
+                     from_secret: "SYNCLOUD_TOKEN"
+                 }
             },
             commands: [
-              "VERSION=$(cat version)",
-              "PACKAGE=$(cat package.name)",
-              "pip2 install -r dev_requirements.txt",
-              "syncloud-upload.sh " + name + " $DRONE_BRANCH $VERSION $PACKAGE"
-            ]
-        },
+              "apt update && apt install -y wget",
+              "wget " + deployer + "-" + arch + " -O release --progress=dot:giga",
+              "chmod +x release",
+              "./release promote -n " + name + " -a $(dpkg --print-architecture)"
+            ],
+            when: {
+                branch: ["stable"],
+                event: ["push"]
+            }
+      },
         {
             name: "artifact",
-            image: "appleboy/drone-scp",
+            image: "appleboy/drone-scp:1.6.4",
             settings: {
                 host: {
                     from_secret: "artifact_host"
@@ -88,25 +290,45 @@ local build(arch) = {
 		             strip_components: 1
             },
             when: {
-              status: [ "failure", "success" ]
+              status: [ "failure", "success" ],
+              event: [ "push" ]
             }
         }
     ],
-    services: [{
-        name: "device",
-        image: "syncloud/systemd-" + arch,
-        privileged: true,
-        volumes: [
-            {
-                name: "dbus",
-                path: "/var/run/dbus"
-            },
-            {
-                name: "dev",
-                path: "/dev"
-            }
-        ]
-    }],
+     trigger: {
+       event: [
+         "push",
+         "pull_request"
+       ]
+     },
+    services: [
+        {
+            name: "docker",
+            image: "docker:" + dind,
+            privileged: true,
+            volumes: [
+                {
+                    name: "dockersock",
+                    path: "/var/run"
+                }
+            ]
+        }] + [
+        {
+            name: name + "."+distro+".com",
+            image: "syncloud/platform-"+distro+"-" + arch + ":" + platform,
+            privileged: true,
+            volumes: [
+                {
+                    name: "dbus",
+                    path: "/var/run/dbus"
+                },
+                {
+                    name: "dev",
+                    path: "/dev"
+                }
+            ]
+        } for distro in distros
+    ],
     volumes: [
         {
             name: "dbus",
@@ -123,11 +345,17 @@ local build(arch) = {
         {
             name: "shm",
             temp: {}
-        }
-    ]
-};
+        },
+        {
+            name: "dockersock",
+            temp: {}
+        },
+        {
+            name: "videos",
+            temp: {}
+        },
+      ]
+}];
 
-[
-    build("arm"),
-    build("amd64")
-]
+build("amd64", true) +
+build("arm64", false)

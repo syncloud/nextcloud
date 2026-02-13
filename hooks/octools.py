@@ -8,14 +8,14 @@ class OCConsole:
         self.log = logger.get_logger('nextcloud_occ')
 
     def run(self, args):
-
+        self.log.info(f'running: {self.occ_runner_path} {args}')
         try:
-            output = check_output('{0} {1}'.format(self.occ_runner_path, args), shell=True).strip()
+            output = check_output('{0} {1}'.format(self.occ_runner_path, args), shell=True).decode().strip()
             if output:
                 self.log.info(output)
             return output
-        except CalledProcessError, e:
-            self.log.error("occ error: " + e.output)
+        except CalledProcessError as e:
+            self.log.error("occ error: " + e.output.decode())
             raise e
 
 
@@ -30,9 +30,9 @@ class OCConfig:
             output = check_output('{0} {1} {2}'.format(
                 self.oc_config_path,
                 key,
-                value), shell=True).strip()
+                value), shell=True).decode().strip()
             if output:
                 self.log.info(output)
-        except CalledProcessError, e:
-            self.log.error("occ config error: " + e.output)
+        except CalledProcessError as e:
+            self.log.error("occ config error: " + e.output.decode())
             raise e

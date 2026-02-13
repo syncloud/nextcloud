@@ -1,17 +1,9 @@
 #!/bin/bash -e
 
-DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && cd .. && pwd )
-
-if [[ -z "$SNAP_DATA" ]]; then
-  echo "SNAP_DATA environment variable must be set"
-  exit 1
-fi
-
-export LD_LIBRARY_PATH=${DIR}/php/lib:${DIR}/postgresql/lib
-export NEXTCLOUD_CONFIG_DIR=${SNAP_DATA}/nextcloud/config
+DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
 
 if [[ "$(whoami)" == "nextcloud" ]]; then
-    ${DIR}/php/bin/php -c ${SNAP_DATA}/config/php.ini "$@"
+    ${DIR}/php.sh "$@"
 else
-    sudo -H -E -u nextcloud LD_LIBRARY_PATH=$LD_LIBRARY_PATH ${DIR}/php/bin/php -c ${SNAP_DATA}/config/php.ini "$@"
+    sudo -H -u nextcloud ${DIR}/php.sh "$@"
 fi
