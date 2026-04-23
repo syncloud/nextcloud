@@ -279,13 +279,11 @@ class Installer:
         # cron takes a lot of time and fails the installation on big existing file storage
         self.cron.run()
 
-        self.db.execute(DB_NAME, DB_USER, "select * from oc_ldap_group_mapping;")
-        self.db.execute(DB_NAME, DB_USER,
-                        "update oc_ldap_group_mapping set owncloud_name = 'admin' where owncloud_name = 'syncloud';")
+        self.occ.run('group:list')
 
         self.occ.run('user:delete {0}'.format(install_user_name))
         self.occ.run('db:add-missing-indices')
-        self.occ.run('ldap:promote-group admin -y')
+        self.occ.run('ldap:promote-group syncloud -y')
 
     def on_disk_change(self):
         storage.init_storage(APP_NAME, USER_NAME)
