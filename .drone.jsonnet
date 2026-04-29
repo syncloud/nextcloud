@@ -6,6 +6,7 @@ local nginx = "1.24.0";
 local nats = "2.10";
 local postgresql = "16-bullseye";
 local platform = '26.04.10';
+local go = '1.26';
 local python = '3.12-slim-bookworm';
 local debian = 'bookworm-slim';
 local selenium = '4.35.0-20250828';
@@ -118,19 +119,6 @@ local build(arch, test_ui) = [{
             ]
         } for distro in distros
         ] + [
-       {
-            name: "python",
-            image: "docker:" + dind,
-            commands: [
-                "./python/build.sh"
-            ],
-            volumes: [
-                {
-                    name: "dockersock",
-                    path: "/var/run"
-                }
-            ]
-        },
         {
             name: "php",
             image: "docker:" + dind,
@@ -149,6 +137,19 @@ local build(arch, test_ui) = [{
             image: "debian:" + debian,
             commands: [
                 "./build.sh"
+            ]
+        },
+        {
+            name: "cli",
+            image: "golang:" + go,
+            commands: [
+                "cd cli",
+                "mkdir -p ../build/snap/meta/hooks",
+                "CGO_ENABLED=0 go build -o ../build/snap/meta/hooks/install ./cmd/install",
+                "CGO_ENABLED=0 go build -o ../build/snap/meta/hooks/configure ./cmd/configure",
+                "CGO_ENABLED=0 go build -o ../build/snap/meta/hooks/pre-refresh ./cmd/pre-refresh",
+                "CGO_ENABLED=0 go build -o ../build/snap/meta/hooks/post-refresh ./cmd/post-refresh",
+                "CGO_ENABLED=0 go build -o ../build/snap/bin/cli ./cmd/cli",
             ]
         },
         {

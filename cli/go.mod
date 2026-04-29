@@ -1,6 +1,7 @@
 module hooks
 
 require (
+	github.com/google/uuid v1.6.0
 	github.com/spf13/cobra v1.8.0
 	github.com/syncloud/golib v1.1.15
 	go.uber.org/zap v1.26.0
