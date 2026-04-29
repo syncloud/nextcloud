@@ -8,7 +8,7 @@ build
 rootfs
 *.log
 *.iml
-log
+/log
 .cache
 lib
 src/version
