@@ -1,6 +1,7 @@
 package installer
 
 import (
+	"fmt"
 	"os/exec"
 	"strings"
 
@@ -24,5 +25,8 @@ func (e *Executor) Run(app string, args ...string) (string, error) {
 	for _, line := range strings.Split(string(out), "\n") {
 		e.logger.Debug(line)
 	}
-	return string(out), err
+	if err != nil {
+		return string(out), fmt.Errorf("%s %v: %w: %s", app, args, err, string(out))
+	}
+	return string(out), nil
 }

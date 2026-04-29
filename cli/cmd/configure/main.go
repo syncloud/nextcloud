@@ -3,14 +3,15 @@ package main
 import (
 	"fmt"
 	"hooks/installer"
+	"hooks/log"
 	"os"
 
 	"github.com/spf13/cobra"
-	"github.com/syncloud/golib/log"
+	"go.uber.org/zap"
 )
 
 func main() {
-	logger := log.Logger()
+	logger := log.Logger(zap.DebugLevel)
 
 	var rootCmd = &cobra.Command{
 		Use:          "configure",
