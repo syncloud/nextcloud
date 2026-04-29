@@ -43,9 +43,10 @@ func NewOCConfig(appDir string, executor *Executor, logger *zap.Logger) *OCConfi
 	}
 }
 
-func (c *OCConfig) SetValue(key, value string) error {
-	c.logger.Info("nextcloud-config", zap.String("key", key), zap.String("value", value))
-	out, err := c.executor.Run(c.tool, key, value)
+func (c *OCConfig) SetValue(key string, values ...string) error {
+	c.logger.Info("nextcloud-config", zap.String("key", key), zap.Strings("values", values))
+	args := append([]string{key}, values...)
+	out, err := c.executor.Run(c.tool, args...)
 	if err != nil {
 		c.logger.Error("config error", zap.Error(err), zap.String("output", out))
 	}

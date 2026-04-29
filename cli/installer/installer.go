@@ -304,10 +304,10 @@ func (i *Installer) AccessChange() error {
 	if len(localIP) == 0 {
 		localIP = []string{""}
 	}
-	if err := i.ocConfig.SetValue("trusted_domains", fmt.Sprintf("localhost %s %s", localIP[0], domain)); err != nil {
+	if err := i.ocConfig.SetValue("trusted_domains", "localhost", localIP[0], domain); err != nil {
 		return err
 	}
-	if err := i.ocConfig.SetValue("trusted_proxies", fmt.Sprintf("127.0.0.1 %s", localIP[0])); err != nil {
+	if err := i.ocConfig.SetValue("trusted_proxies", "127.0.0.1", localIP[0]); err != nil {
 		return err
 	}
 	return i.ocConfig.SetValue("overwrite.cli.url", "https://"+domain)
