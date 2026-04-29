@@ -468,7 +468,7 @@ func (i *Installer) prepareStorage() error {
 	} else {
 		f.Close()
 	}
-	if err := linux.Chown(ncdata, UserName); err != nil {
+	if err := chownFile(ncdata, UserName); err != nil {
 		return err
 	}
 	if err := os.Chmod(storageDir, 0777); err != nil {
@@ -529,7 +529,16 @@ func (i *Installer) fixVersionSpecificDbHost() error {
 }
 
 func (i *Installer) fixConfigPermission() error {
-	return linux.Chown(i.ncConfigFile, UserName)
+	return chownFile(i.ncConfigFile, UserName)
+}
+
+func chownFile(path, username string) error {
+	cmd := exec.Command("chown", fmt.Sprintf("%s:%s", username, username), path)
+	out, err := cmd.CombinedOutput()
+	if err != nil {
+		return fmt.Errorf("chown %s: %w: %s", path, err, string(out))
+	}
+	return nil
 }
 
 func (i *Installer) fixPermissions() error {
