@@ -57,6 +57,13 @@ func main() {
 		},
 	})
 
+	cmd.AddCommand(&cobra.Command{
+		Use: "post-start-repair",
+		RunE: func(cmd *cobra.Command, args []string) error {
+			return installer.New(logger).PostStartRepair()
+		},
+	})
+
 	err := cmd.Execute()
 	if err != nil {
 		fmt.Print(err)

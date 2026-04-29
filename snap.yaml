@@ -47,6 +47,12 @@ apps:
     start-timeout: 600s
     after: [postgresql]
     before: [nginx]
+
+  post-start-repair:
+    command: bin/cli post-start-repair
+    daemon: oneshot
+    install-mode: enable
+    after: [php-fpm]
   
   nginx:
     command: bin/service.nginx.sh

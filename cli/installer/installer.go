@@ -262,6 +262,18 @@ func (i *Installer) Configure() error {
 	return i.fixPermissions()
 }
 
+func (i *Installer) PostStartRepair() error {
+	i.logger.Info("post-start-repair")
+	if !i.installed() {
+		i.logger.Info("nextcloud not installed yet, skipping repair")
+		return nil
+	}
+	if _, err := i.occ.Run("maintenance:repair"); err != nil {
+		i.logger.Error("post-start repair failed; continuing", zap.Error(err))
+	}
+	return nil
+}
+
 func (i *Installer) StorageChange() error {
 	if _, err := i.platformClient.InitStorage(App, UserName); err != nil {
 		return err
