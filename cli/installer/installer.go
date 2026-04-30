@@ -271,6 +271,9 @@ func (i *Installer) PostStartRepair() error {
 	if _, err := i.occ.Run("maintenance:repair"); err != nil {
 		i.logger.Error("post-start repair failed; continuing", zap.Error(err))
 	}
+	if _, err := i.occ.Run("ldap:promote-group", "syncloud", "-y"); err != nil {
+		i.logger.Error("post-start ldap promote-group failed; continuing", zap.Error(err))
+	}
 	return nil
 }
 
@@ -358,7 +361,10 @@ func (i *Installer) upgrade() error {
 	if _, err := i.occ.Run("db:add-missing-columns"); err != nil {
 		return err
 	}
-	_, err = i.occ.Run("db:add-missing-primary-keys")
+	if _, err := i.occ.Run("db:add-missing-primary-keys"); err != nil {
+		return err
+	}
+	_, err = i.occ.Run("ldap:promote-group", "syncloud", "-y")
 	return err
 }
 
