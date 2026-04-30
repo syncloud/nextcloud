@@ -284,10 +284,10 @@ func (i *Installer) StorageChange() error {
 	if _, err := i.occ.Run("config:system:delete", "instanceid"); err != nil {
 		return err
 	}
-	if _, err := i.executor.Run("snapctl", "restart", App+".php-fpm"); err != nil {
+	if _, err := i.executor.Run("systemctl", "restart", "snap."+App+".php-fpm.service"); err != nil {
 		return err
 	}
-	_, err := i.executor.Run("snapctl", "restart", App+".nginx")
+	_, err := i.executor.Run("systemctl", "restart", "snap."+App+".nginx.service")
 	return err
 }
 
