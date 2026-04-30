@@ -28,28 +28,6 @@ local build(arch, test_ui) = [{
     },
     steps: [
         {
-            name: name + "." + distro + ".com",
-            image: platform_image(distro, arch),
-            detach: true,
-            privileged: true,
-            volumes: [
-                {
-                    name: "dbus",
-                    path: "/var/run/dbus"
-                },
-                {
-                    name: "dev",
-                    path: "/dev"
-                }
-            ],
-            commands: [
-                "mkdir -p /etc/systemd/system/snapd.service.d",
-                "cp test/snapd-disable-refresh.conf /etc/systemd/system/snapd.service.d/disable-refresh.conf",
-                "exec /sbin/init"
-            ]
-        } for distro in distros
-        ] + [
-        {
             name: "version",
             image: "debian:" + debian,
             commands: [
@@ -346,7 +324,27 @@ local build(arch, test_ui) = [{
                     path: "/var/run"
                 }
             ]
-        }
+        }] + [
+        {
+            name: name + "."+distro+".com",
+            image: platform_image(distro, arch),
+            privileged: true,
+            volumes: [
+                {
+                    name: "dbus",
+                    path: "/var/run/dbus"
+                },
+                {
+                    name: "dev",
+                    path: "/dev"
+                }
+            ],
+            commands: [
+                "mkdir -p /etc/systemd/system/snapd.service.d",
+                "cp test/snapd-disable-refresh.conf /etc/systemd/system/snapd.service.d/disable-refresh.conf",
+                "exec /sbin/init"
+            ]
+        } for distro in distros
     ],
     volumes: [
         {
