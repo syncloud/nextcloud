@@ -329,6 +329,7 @@ local build(arch, test_ui) = [{
             name: name + "."+distro+".com",
             image: platform_image(distro, arch),
             privileged: true,
+            entrypoint: ["/bin/sh", "-c", "/drone/src/test/snapd-disable-refresh.sh && exec /sbin/init"],
             volumes: [
                 {
                     name: "dbus",
@@ -338,10 +339,6 @@ local build(arch, test_ui) = [{
                     name: "dev",
                     path: "/dev"
                 }
-            ],
-            commands: [
-                "./test/snapd-disable-refresh.sh",
-                "exec /sbin/init"
             ]
         } for distro in distros
     ],
