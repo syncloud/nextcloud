@@ -1,4 +1,0 @@
-#!/snap/nextcloud/current/python/bin/python
-
-from installer import Installer
-Installer().on_disk_change()

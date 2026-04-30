@@ -1,17 +1,17 @@
 <?php
 $CONFIG = array (
- 'datadirectory' => '{{ common_dir }}',
+ 'datadirectory' => '{{.CommonDir}}',
  'check_data_directory_permissions' => false,
  'log_type' => 'syslog',
  'logfile' => '',
  'apps_paths' => array(
  	array(
- 		'path'=> '{{ app_dir }}/nextcloud/apps',
+ 		'path'=> '{{.AppDir}}/nextcloud/apps',
  		'url' => '/apps',
  		'writable' => false,
  	),
  	array(
- 		'path'=> '{{ app_dir }}/nextcloud/extra-apps',
+ 		'path'=> '{{.AppDir}}/nextcloud/extra-apps',
  		'url' => '/extra-apps',
  		'writable' => true,
  	),

@@ -1,5 +1,0 @@
-beautifulsoup4==4.4.0
-requests-unixsocket==0.1.5
-massedit==0.67.1
-python-crontab==1.7.2
-syncloud-lib==278
