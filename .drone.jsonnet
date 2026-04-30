@@ -5,14 +5,18 @@ local redis = "7.0.15";
 local nginx = "1.24.0";
 local nats = "2.10";
 local postgresql = "16-bullseye";
-local platform = '25.09';
+local platform = '26.04.10';
+local go = '1.26';
 local python = '3.12-slim-bookworm';
 local debian = 'bookworm-slim';
 local selenium = '4.35.0-20250828';
 local deployer = 'https://github.com/syncloud/store/releases/download/4/syncloud-release';
 local distro_default = "bookworm";
-local distros = ["bookworm"];
+local distros = ['bookworm', 'buster'];
 local dind = '20.10.21-dind';
+
+local platform_image(distro, arch) =
+  'syncloud/platform-' + distro + '-' + arch + ':' + platform;
 
 local build(arch, test_ui) = [{
     kind: "pipeline",
@@ -58,13 +62,15 @@ local build(arch, test_ui) = [{
                 "./redis/build.sh"
             ]
         },
-         {
-            name: "redis test",
-            image: "debian:" + debian,
+         ] + [
+        {
+            name: "redis test " + distro,
+            image: platform_image(distro, arch),
             commands: [
                 "./redis/test.sh"
             ]
-        },
+        } for distro in distros
+        ] + [
          {
             name: "nats",
             image: "debian:" + debian,
@@ -72,13 +78,15 @@ local build(arch, test_ui) = [{
                 "./nats/build.sh"
             ]
         },
-         {
-            name: "nats test",
-            image: "syncloud/platform-" + distro_default + "-" + arch + ":" + platform,
+         ] + [
+        {
+            name: "nats test " + distro,
+            image: platform_image(distro, arch),
             commands: [
                 "./nats/test.sh"
             ]
-        },
+        } for distro in distros
+        ] + [
          {
             name: "signaling",
             image: "debian:" + debian,
@@ -86,13 +94,15 @@ local build(arch, test_ui) = [{
                 "./signaling/build.sh"
             ]
         },
-         {
-            name: "signaling test",
-            image: "syncloud/platform-" + distro_default + "-" + arch + ":" + platform,
+         ] + [
+        {
+            name: "signaling test " + distro,
+            image: platform_image(distro, arch),
             commands: [
                 "./signaling/test.sh"
             ]
-        },
+        } for distro in distros
+        ] + [
          {
             name: "postgresql",
             image: "postgres:" + postgresql,
@@ -100,26 +110,15 @@ local build(arch, test_ui) = [{
                 "./postgresql/build.sh"
             ]
         },
+        ] + [
         {
-            name: "postgresql test",
-            image: "syncloud/platform-" + distro_default + "-" + arch + ":" + platform,
+            name: "postgresql test " + distro,
+            image: platform_image(distro, arch),
             commands: [
                 "./postgresql/test.sh"
             ]
-        },
-       {
-            name: "python",
-            image: "docker:" + dind,
-            commands: [
-                "./python/build.sh"
-            ],
-            volumes: [
-                {
-                    name: "dockersock",
-                    path: "/var/run"
-                }
-            ]
-        },
+        } for distro in distros
+        ] + [
         {
             name: "php",
             image: "docker:" + dind,
@@ -138,6 +137,19 @@ local build(arch, test_ui) = [{
             image: "debian:" + debian,
             commands: [
                 "./build.sh"
+            ]
+        },
+        {
+            name: "cli",
+            image: "golang:" + go,
+            commands: [
+                "cd cli",
+                "mkdir -p ../build/snap/meta/hooks",
+                "CGO_ENABLED=0 go build -o ../build/snap/meta/hooks/install ./cmd/install",
+                "CGO_ENABLED=0 go build -o ../build/snap/meta/hooks/configure ./cmd/configure",
+                "CGO_ENABLED=0 go build -o ../build/snap/meta/hooks/pre-refresh ./cmd/pre-refresh",
+                "CGO_ENABLED=0 go build -o ../build/snap/meta/hooks/post-refresh ./cmd/post-refresh",
+                "CGO_ENABLED=0 go build -o ../build/snap/bin/cli ./cmd/cli",
             ]
         },
         {
@@ -315,8 +327,9 @@ local build(arch, test_ui) = [{
         }] + [
         {
             name: name + "."+distro+".com",
-            image: "syncloud/platform-"+distro+"-" + arch + ":" + platform,
+            image: platform_image(distro, arch),
             privileged: true,
+            entrypoint: ["/bin/sh", "-c", "mkdir -p /etc/systemd/system/snapd.service.d && printf '[Service]\\nExecStartPost=/bin/sh -c \"/usr/bin/snap set system refresh.hold=2099-01-01T00:00:00Z\"\\n' > /etc/systemd/system/snapd.service.d/disable-refresh.conf && exec /sbin/init"],
             volumes: [
                 {
                     name: "dbus",
