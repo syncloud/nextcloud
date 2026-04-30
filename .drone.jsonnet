@@ -44,7 +44,7 @@ local build(arch, test_ui) = [{
             ],
             commands: [
                 "mkdir -p /etc/systemd/system/snapd.service.d",
-                "printf '[Service]\\nExecStartPost=/bin/sh -c \"/usr/bin/snap set system refresh.hold=2099-01-01T00:00:00Z\"\\n' > /etc/systemd/system/snapd.service.d/disable-refresh.conf",
+                "cp test/snapd-disable-refresh.conf /etc/systemd/system/snapd.service.d/disable-refresh.conf",
                 "exec /sbin/init"
             ]
         } for distro in distros
