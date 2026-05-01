@@ -1,3 +1,4 @@
+import base64
 import json
 import pytest
 from subprocess import check_output, run
@@ -45,6 +46,22 @@ def test_pre_upgrade_write_marker(app_domain, device_user, device_password):
         verify=False,
     )
     assert r.status_code in (201, 204), r.text
+
+
+def test_simulate_legacy_admin_rename(device):
+    sql = (
+        "UPDATE oc_ldap_group_mapping SET owncloud_name='admin' "
+        "WHERE owncloud_name='syncloud' AND ldap_dn ILIKE 'cn=syncloud,%';\n"
+    )
+    b64 = base64.b64encode(sql.encode()).decode()
+    device.run_ssh("echo {0} | base64 -d > /tmp/migrate.sql".format(b64))
+    out = device.run_ssh(
+        "snap run nextcloud.psql -d nextcloud -e -f /tmp/migrate.sql"
+    )
+    assert 'UPDATE 1' in out, out
+    device.run_ssh(
+        "snap run nextcloud.occ ldap:set-config s01 ldapAdminGroup admin"
+    )
 
 
 def test_upgrade(device_host, device_password, app_archive_path, app_domain):
