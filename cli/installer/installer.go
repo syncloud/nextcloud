@@ -364,6 +364,9 @@ func (i *Installer) upgrade() error {
 	if _, err := i.occ.Run("db:add-missing-primary-keys"); err != nil {
 		return err
 	}
+	if err := i.database.Execute(DbName, "UPDATE oc_ldap_group_mapping SET owncloud_name='syncloud' WHERE owncloud_name='admin' AND ldap_dn ILIKE 'cn=syncloud,%';"); err != nil {
+		return err
+	}
 	_, err = i.occ.Run("ldap:promote-group", "syncloud", "-y")
 	return err
 }
