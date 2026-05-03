@@ -86,14 +86,6 @@ func New(logger *zap.Logger) *Installer {
 }
 
 func (i *Installer) installConfig() error {
-	if err := linux.CreateUser(UserName); err != nil {
-		return err
-	}
-
-	if _, err := i.platformClient.InitStorage(App, UserName); err != nil {
-		return err
-	}
-
 	secrets, err := loadOrCreateSignalingSecrets(i.signalingSecretsPath)
 	if err != nil {
 		return err
@@ -137,6 +129,12 @@ func (i *Installer) installConfig() error {
 }
 
 func (i *Installer) Install() error {
+	if err := linux.CreateUser(UserName); err != nil {
+		return err
+	}
+	if _, err := i.platformClient.InitStorage(App, UserName); err != nil {
+		return err
+	}
 	if err := i.installConfig(); err != nil {
 		return err
 	}
@@ -160,6 +158,9 @@ func (i *Installer) PreRefresh() error {
 }
 
 func (i *Installer) PostRefresh() error {
+	if _, err := i.platformClient.InitStorage(App, UserName); err != nil {
+		return err
+	}
 	if err := i.installConfig(); err != nil {
 		return err
 	}
@@ -179,19 +180,18 @@ func (i *Installer) PostRefresh() error {
 }
 
 func (i *Installer) Configure() error {
+	storageDir, err := i.platformClient.GetAppStorageDir(App)
+	if err != nil {
+		return err
+	}
 	if i.installed() {
-		if err := i.upgrade(); err != nil {
+		if err := i.upgrade(storageDir); err != nil {
 			return err
 		}
 	} else {
-		if err := i.initialize(); err != nil {
+		if err := i.initialize(storageDir); err != nil {
 			return err
 		}
-	}
-
-	storageDir, err := i.platformClient.InitStorage(App, UserName)
-	if err != nil {
-		return err
 	}
 
 	if _, err := i.occ.Run("ldap:set-config", "s01", "ldapEmailAttribute", "mail"); err != nil {
@@ -278,10 +278,11 @@ func (i *Installer) PostStartRepair() error {
 }
 
 func (i *Installer) StorageChange() error {
-	if _, err := i.platformClient.InitStorage(App, UserName); err != nil {
+	storageDir, err := i.platformClient.InitStorage(App, UserName)
+	if err != nil {
 		return err
 	}
-	if err := i.prepareStorage(); err != nil {
+	if err := i.prepareStorage(storageDir); err != nil {
 		return err
 	}
 	if _, err := i.occ.Run("config:system:delete", "instanceid"); err != nil {
@@ -290,7 +291,7 @@ func (i *Installer) StorageChange() error {
 	if _, err := i.executor.Run("systemctl", "restart", "snap."+App+".php-fpm.service"); err != nil {
 		return err
 	}
-	_, err := i.executor.Run("systemctl", "restart", "snap."+App+".nginx.service")
+	_, err = i.executor.Run("systemctl", "restart", "snap."+App+".nginx.service")
 	return err
 }
 
@@ -336,11 +337,11 @@ func (i *Installer) installed() bool {
 	return strings.Contains(string(data), "installed")
 }
 
-func (i *Installer) upgrade() error {
+func (i *Installer) upgrade(storageDir string) error {
 	if err := i.database.Restore(); err != nil {
 		return err
 	}
-	if err := i.prepareStorage(); err != nil {
+	if err := i.prepareStorage(storageDir); err != nil {
 		return err
 	}
 	status, err := i.occ.Run("status")
@@ -371,12 +372,8 @@ func (i *Installer) upgrade() error {
 	return err
 }
 
-func (i *Installer) initialize() error {
-	if err := i.prepareStorage(); err != nil {
-		return err
-	}
-	storageDir, err := i.platformClient.InitStorage(App, UserName)
-	if err != nil {
+func (i *Installer) initialize(storageDir string) error {
+	if err := i.prepareStorage(storageDir); err != nil {
 		return err
 	}
 
@@ -466,11 +463,7 @@ func (i *Installer) initialize() error {
 	return err
 }
 
-func (i *Installer) prepareStorage() error {
-	storageDir, err := i.platformClient.InitStorage(App, UserName)
-	if err != nil {
-		return err
-	}
+func (i *Installer) prepareStorage(storageDir string) error {
 	ncdata := path.Join(storageDir, ".ncdata")
 	if f, err := os.OpenFile(ncdata, os.O_CREATE|os.O_WRONLY, 0644); err != nil {
 		return err
