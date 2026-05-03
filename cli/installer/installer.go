@@ -23,7 +23,6 @@ const (
 	DbUser     = "nextcloud"
 	DbPassword = "nextcloud"
 	PsqlPort   = 5436
-	LogPath    = "log/nextcloud.log"
 
 	SignalingSecretsFile = "signaling.secrets"
 )
@@ -190,7 +189,26 @@ func (i *Installer) PostRefresh() error {
 	if err := i.database.InitConfig(); err != nil {
 		return err
 	}
+	i.logger.Info("post-refresh: removing legacy file-based nextcloud logs")
+	if err := i.removeLegacyLogs(); err != nil {
+		i.logger.Error("post-refresh: failed to remove legacy logs; continuing", zap.Error(err))
+	}
 	i.logger.Info("post-refresh: done")
+	return nil
+}
+
+func (i *Installer) removeLegacyLogs() error {
+	logDir := path.Join(i.commonDir, "log")
+	matches, err := filepath.Glob(path.Join(logDir, "nextcloud.log*"))
+	if err != nil {
+		return err
+	}
+	for _, p := range matches {
+		i.logger.Info("removing legacy log file", zap.String("path", p))
+		if err := os.Remove(p); err != nil && !os.IsNotExist(err) {
+			return err
+		}
+	}
 	return nil
 }
 
@@ -246,7 +264,10 @@ func (i *Installer) Configure() error {
 	if err := i.ocConfig.SetValue("loglevel", "2"); err != nil {
 		return err
 	}
-	if err := i.ocConfig.SetValue("logfile", path.Join(i.commonDir, LogPath)); err != nil {
+	if err := i.ocConfig.SetValue("log_type", "syslog"); err != nil {
+		return err
+	}
+	if err := i.ocConfig.SetValue("syslog_tag", "nextcloud"); err != nil {
 		return err
 	}
 	realStorage, err := filepath.EvalSymlinks(storageDir)
