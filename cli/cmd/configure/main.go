@@ -11,7 +11,7 @@ import (
 )
 
 func main() {
-	logger := log.Logger(zap.DebugLevel)
+	logger := log.HookLogger("nextcloud-configure", zap.DebugLevel)
 
 	var rootCmd = &cobra.Command{
 		Use:          "configure",
