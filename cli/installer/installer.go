@@ -23,7 +23,6 @@ const (
 	DbUser     = "nextcloud"
 	DbPassword = "nextcloud"
 	PsqlPort   = 5436
-	LogPath    = "log/nextcloud.log"
 
 	SignalingSecretsFile = "signaling.secrets"
 )
@@ -154,45 +153,83 @@ func (i *Installer) Install() error {
 }
 
 func (i *Installer) PreRefresh() error {
-	return i.database.Backup()
+	i.logger.Info("pre-refresh: starting database backup (pg_dumpall)")
+	if err := i.database.Backup(); err != nil {
+		return err
+	}
+	i.logger.Info("pre-refresh: backup done")
+	return nil
 }
 
 func (i *Installer) PostRefresh() error {
+	i.logger.Info("post-refresh: init platform storage")
 	if _, err := i.platformClient.InitStorage(App, UserName); err != nil {
 		return err
 	}
+	i.logger.Info("post-refresh: install config templates")
 	if err := i.installConfig(); err != nil {
 		return err
 	}
+	i.logger.Info("post-refresh: migrate nextcloud config.php")
 	if err := i.migrateNextcloudConfig(); err != nil {
 		return err
 	}
 	if err := i.fixVersionSpecificDbHost(); err != nil {
 		return err
 	}
+	i.logger.Info("post-refresh: removing old database cluster")
 	if err := i.database.Remove(); err != nil {
 		return err
 	}
+	i.logger.Info("post-refresh: initdb new database cluster")
 	if err := i.database.Init(); err != nil {
 		return err
 	}
-	return i.database.InitConfig()
+	i.logger.Info("post-refresh: copying postgresql.conf into new cluster")
+	if err := i.database.InitConfig(); err != nil {
+		return err
+	}
+	i.logger.Info("post-refresh: removing legacy file-based nextcloud logs")
+	if err := i.removeLegacyLogs(); err != nil {
+		i.logger.Error("post-refresh: failed to remove legacy logs; continuing", zap.Error(err))
+	}
+	i.logger.Info("post-refresh: done")
+	return nil
+}
+
+func (i *Installer) removeLegacyLogs() error {
+	logDir := path.Join(i.commonDir, "log")
+	matches, err := filepath.Glob(path.Join(logDir, "nextcloud.log*"))
+	if err != nil {
+		return err
+	}
+	for _, p := range matches {
+		i.logger.Info("removing legacy log file", zap.String("path", p))
+		if err := os.Remove(p); err != nil && !os.IsNotExist(err) {
+			return err
+		}
+	}
+	return nil
 }
 
 func (i *Installer) Configure() error {
+	i.logger.Info("configure: start")
 	storageDir, err := i.platformClient.GetAppStorageDir(App)
 	if err != nil {
 		return err
 	}
 	if i.installed() {
+		i.logger.Info("configure: existing install detected, running upgrade")
 		if err := i.upgrade(storageDir); err != nil {
 			return err
 		}
 	} else {
+		i.logger.Info("configure: no existing install, running initialize")
 		if err := i.initialize(storageDir); err != nil {
 			return err
 		}
 	}
+	i.logger.Info("configure: upgrade/initialize done, applying post-config")
 
 	if _, err := i.occ.Run("ldap:set-config", "s01", "ldapEmailAttribute", "mail"); err != nil {
 		return err
@@ -227,7 +264,10 @@ func (i *Installer) Configure() error {
 	if err := i.ocConfig.SetValue("loglevel", "2"); err != nil {
 		return err
 	}
-	if err := i.ocConfig.SetValue("logfile", path.Join(i.commonDir, LogPath)); err != nil {
+	if err := i.ocConfig.SetValue("log_type", "syslog"); err != nil {
+		return err
+	}
+	if err := i.ocConfig.SetValue("syslog_tag", "nextcloud"); err != nil {
 		return err
 	}
 	realStorage, err := filepath.EvalSymlinks(storageDir)
@@ -338,45 +378,60 @@ func (i *Installer) installed() bool {
 }
 
 func (i *Installer) upgrade(storageDir string) error {
+	i.logger.Info("upgrade: restoring database from dump")
 	if err := i.database.Restore(); err != nil {
 		return err
 	}
+	i.logger.Info("upgrade: database restore done, preparing storage")
 	if err := i.prepareStorage(storageDir); err != nil {
 		return err
 	}
+	i.logger.Info("upgrade: storage prepared, running occ status")
 	status, err := i.occ.Run("status")
 	if err != nil {
 		return err
 	}
 	i.logger.Info("status", zap.String("status", status))
-	i.logger.Info("upgrading nextcloud")
+	i.logger.Info("upgrade: running occ upgrade")
 	if _, err := i.occ.Run("upgrade"); err != nil {
 		return err
 	}
+	i.logger.Info("upgrade: occ upgrade done, turning maintenance mode off")
 	if _, err := i.occ.Run("maintenance:mode", "--off"); err != nil {
 		return err
 	}
+	i.logger.Info("upgrade: db:add-missing-indices")
 	if _, err := i.occ.Run("db:add-missing-indices"); err != nil {
 		return err
 	}
+	i.logger.Info("upgrade: db:add-missing-columns")
 	if _, err := i.occ.Run("db:add-missing-columns"); err != nil {
 		return err
 	}
+	i.logger.Info("upgrade: db:add-missing-primary-keys")
 	if _, err := i.occ.Run("db:add-missing-primary-keys"); err != nil {
 		return err
 	}
+	i.logger.Info("upgrade: legacy admin->syncloud ldap mapping fix")
 	if err := i.database.Execute(DbName, "UPDATE oc_ldap_group_mapping SET owncloud_name='syncloud' WHERE owncloud_name='admin' AND ldap_dn ILIKE 'cn=syncloud,%';"); err != nil {
 		return err
 	}
+	i.logger.Info("upgrade: promoting syncloud ldap group")
 	_, err = i.occ.Run("ldap:promote-group", "syncloud", "-y")
-	return err
+	if err != nil {
+		return err
+	}
+	i.logger.Info("upgrade: done")
+	return nil
 }
 
 func (i *Installer) initialize(storageDir string) error {
+	i.logger.Info("initialize: preparing storage")
 	if err := i.prepareStorage(storageDir); err != nil {
 		return err
 	}
 
+	i.logger.Info("initialize: creating database + user")
 	if err := i.database.Execute("postgres", fmt.Sprintf("ALTER USER %s WITH PASSWORD '%s';", DbUser, DbPassword)); err != nil {
 		return err
 	}
@@ -442,28 +497,38 @@ func (i *Installer) initialize(storageDir string) error {
 		}
 	}
 
+	i.logger.Info("initialize: db:convert-filecache-bigint")
 	if _, err := i.occ.Run("db:convert-filecache-bigint"); err != nil {
 		return err
 	}
 
+	i.logger.Info("initialize: running first cron tick (scans existing data dir)")
 	if err := i.cron.Run(); err != nil {
 		return err
 	}
 
+	i.logger.Info("initialize: group:list (forces ldap getGroups)")
 	if _, err := i.occ.Run("group:list"); err != nil {
 		return err
 	}
+	i.logger.Info("initialize: deleting bootstrap installer user")
 	if _, err := i.occ.Run("user:delete", installUser); err != nil {
 		return err
 	}
+	i.logger.Info("initialize: db:add-missing-indices")
 	if _, err := i.occ.Run("db:add-missing-indices"); err != nil {
 		return err
 	}
-	_, err = i.occ.Run("ldap:promote-group", "syncloud", "-y")
-	return err
+	i.logger.Info("initialize: promoting syncloud ldap group")
+	if _, err := i.occ.Run("ldap:promote-group", "syncloud", "-y"); err != nil {
+		return err
+	}
+	i.logger.Info("initialize: done")
+	return nil
 }
 
 func (i *Installer) prepareStorage(storageDir string) error {
+	i.logger.Info("prepareStorage: touch .ncdata + chmod storageDir", zap.String("dir", storageDir))
 	ncdata := path.Join(storageDir, ".ncdata")
 	if f, err := os.OpenFile(ncdata, os.O_CREATE|os.O_WRONLY, 0644); err != nil {
 		return err
@@ -480,14 +545,20 @@ func (i *Installer) prepareStorage(storageDir string) error {
 	if err := os.MkdirAll(tmpDir, 0755); err != nil {
 		return err
 	}
+	i.logger.Info("prepareStorage: recursive chown tmp (may be slow on big dirs)", zap.String("tmp", tmpDir))
 	if err := linux.Chown(tmpDir, UserName); err != nil {
 		return err
 	}
+	i.logger.Info("prepareStorage: chown tmp done, fixing datadirectory in config.php")
 	realStorage, err := filepath.EvalSymlinks(storageDir)
 	if err != nil {
 		realStorage = storageDir
 	}
-	return i.fixDataDirectory(realStorage)
+	if err := i.fixDataDirectory(realStorage); err != nil {
+		return err
+	}
+	i.logger.Info("prepareStorage: done")
+	return nil
 }
 
 func (i *Installer) fixDataDirectory(dir string) error {
