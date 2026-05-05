@@ -1,10 +1,16 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"hooks/installer"
 	"hooks/log"
+	"hooks/repair"
+	"io"
+	"net"
+	"net/http"
 	"os"
+	"time"
 
 	"github.com/spf13/cobra"
 	"go.uber.org/zap"
@@ -59,9 +65,28 @@ func main() {
 	})
 
 	cmd.AddCommand(&cobra.Command{
-		Use: "post-start-repair",
+		Use: "repair-status",
 		RunE: func(cmd *cobra.Command, args []string) error {
-			return installer.New(logger).PostStartRepair()
+			c := &http.Client{
+				Transport: &http.Transport{
+					DialContext: func(ctx context.Context, _ string, _ string) (net.Conn, error) {
+						var d net.Dialer
+						return d.DialContext(ctx, "unix", repair.SocketPath)
+					},
+				},
+				Timeout: 5 * time.Second,
+			}
+			resp, err := c.Get("http://repair/status")
+			if err != nil {
+				return err
+			}
+			defer resp.Body.Close()
+			body, err := io.ReadAll(resp.Body)
+			if err != nil {
+				return err
+			}
+			fmt.Println(string(body))
+			return nil
 		},
 	})
 

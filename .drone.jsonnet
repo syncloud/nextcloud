@@ -150,6 +150,7 @@ local build(arch, test_ui) = [{
                 "CGO_ENABLED=0 go build -o ../build/snap/meta/hooks/pre-refresh ./cmd/pre-refresh",
                 "CGO_ENABLED=0 go build -o ../build/snap/meta/hooks/post-refresh ./cmd/post-refresh",
                 "CGO_ENABLED=0 go build -o ../build/snap/bin/cli ./cmd/cli",
+                "CGO_ENABLED=0 go build -o ../build/snap/bin/repair-service ./cmd/repair-service",
             ]
         },
         {

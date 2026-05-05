@@ -8,6 +8,7 @@ import (
 	"path/filepath"
 	"regexp"
 	"strings"
+	"time"
 
 	"github.com/google/uuid"
 	"github.com/syncloud/golib/config"
@@ -25,6 +26,8 @@ const (
 	PsqlPort   = 5436
 
 	SignalingSecretsFile = "signaling.secrets"
+	ConfigureDoneMarker  = ".configure-done"
+	RefreshNeededMarker  = ".refresh-needed"
 )
 
 type Variables struct {
@@ -162,6 +165,14 @@ func (i *Installer) PreRefresh() error {
 }
 
 func (i *Installer) PostRefresh() error {
+	i.logger.Info("post-refresh: clearing configure-done marker")
+	if err := os.Remove(path.Join(i.dataDir, ConfigureDoneMarker)); err != nil && !os.IsNotExist(err) {
+		return err
+	}
+	i.logger.Info("post-refresh: writing refresh-needed marker")
+	if err := os.WriteFile(path.Join(i.dataDir, RefreshNeededMarker), []byte(time.Now().UTC().Format(time.RFC3339)+"\n"), 0644); err != nil {
+		return err
+	}
 	i.logger.Info("post-refresh: init platform storage")
 	if _, err := i.platformClient.InitStorage(App, UserName); err != nil {
 		return err
@@ -175,6 +186,10 @@ func (i *Installer) PostRefresh() error {
 		return err
 	}
 	if err := i.fixVersionSpecificDbHost(); err != nil {
+		return err
+	}
+	i.logger.Info("post-refresh: migrate legacy dbuser if needed")
+	if err := i.migrateLegacyDbUser(); err != nil {
 		return err
 	}
 	i.logger.Info("post-refresh: removing old database cluster")
@@ -191,7 +206,7 @@ func (i *Installer) PostRefresh() error {
 	}
 	i.logger.Info("post-refresh: removing legacy file-based nextcloud logs")
 	if err := i.removeLegacyLogs(); err != nil {
-		i.logger.Error("post-refresh: failed to remove legacy logs; continuing", zap.Error(err))
+		return err
 	}
 	i.logger.Info("post-refresh: done")
 	return nil
@@ -296,25 +311,87 @@ func (i *Installer) Configure() error {
 	if err := i.AccessChange(); err != nil {
 		return err
 	}
-	if _, err := i.occ.Run("maintenance:repair"); err != nil {
+	if err := i.fixPermissions(); err != nil {
 		return err
 	}
-	return i.fixPermissions()
+	i.logger.Info("configure: writing configure-done marker")
+	return os.WriteFile(path.Join(i.dataDir, ConfigureDoneMarker), []byte(time.Now().UTC().Format(time.RFC3339)+"\n"), 0644)
 }
 
-func (i *Installer) PostStartRepair() error {
-	i.logger.Info("post-start-repair")
-	if !i.installed() {
-		i.logger.Info("nextcloud not installed yet, skipping repair")
-		return nil
-	}
-	if _, err := i.occ.Run("maintenance:repair"); err != nil {
-		i.logger.Error("post-start repair failed; continuing", zap.Error(err))
-	}
-	if _, err := i.occ.Run("ldap:promote-group", "syncloud", "-y"); err != nil {
-		i.logger.Error("post-start ldap promote-group failed; continuing", zap.Error(err))
+func (i *Installer) NextcloudInstalled() bool {
+	return i.installed()
+}
+
+func (i *Installer) ConfigureDoneMarkerPath() string {
+	return path.Join(i.dataDir, ConfigureDoneMarker)
+}
+
+func (i *Installer) RefreshNeeded() bool {
+	_, err := os.Stat(path.Join(i.dataDir, RefreshNeededMarker))
+	return err == nil
+}
+
+func (i *Installer) ClearRefreshNeeded() error {
+	if err := os.Remove(path.Join(i.dataDir, RefreshNeededMarker)); err != nil && !os.IsNotExist(err) {
+		return err
 	}
 	return nil
+}
+
+func (i *Installer) WaitForConfigureDone(timeout time.Duration) error {
+	marker := i.ConfigureDoneMarkerPath()
+	deadline := time.Now().Add(timeout)
+	for time.Now().Before(deadline) {
+		if _, err := os.Stat(marker); err == nil {
+			return nil
+		}
+		time.Sleep(5 * time.Second)
+	}
+	return fmt.Errorf("configure-done marker %s not present within %s", marker, timeout)
+}
+
+func (i *Installer) RunOccUpgrade() error {
+	_, err := i.occ.Run("upgrade")
+	return err
+}
+
+func (i *Installer) RunMaintenanceModeOff() error {
+	_, err := i.occ.Run("maintenance:mode", "--off")
+	return err
+}
+
+func (i *Installer) RunDbAddMissingIndices() error {
+	_, err := i.occ.Run("db:add-missing-indices")
+	return err
+}
+
+func (i *Installer) RunDbAddMissingColumns() error {
+	_, err := i.occ.Run("db:add-missing-columns")
+	return err
+}
+
+func (i *Installer) RunDbAddMissingPrimaryKeys() error {
+	_, err := i.occ.Run("db:add-missing-primary-keys")
+	return err
+}
+
+func (i *Installer) RunMigrateLegacyAdminLdapGroup() error {
+	return i.database.Execute(DbName, "UPDATE oc_ldap_group_mapping SET owncloud_name='syncloud' WHERE owncloud_name='admin' AND ldap_dn ILIKE 'cn=syncloud,%';")
+}
+
+func (i *Installer) RunMaintenanceRepair() error {
+	_, err := i.occ.Run("maintenance:repair", "--include-expensive", "-n")
+	return err
+}
+
+func (i *Installer) RunGroupList() error {
+	_, err := i.occ.Run("group:list")
+	return err
+}
+
+func (i *Installer) RunLdapPromoteSyncloud() error {
+	_, err := i.occ.Run("ldap:promote-group", "syncloud", "-y")
+	return err
 }
 
 func (i *Installer) StorageChange() error {
@@ -386,42 +463,19 @@ func (i *Installer) upgrade(storageDir string) error {
 	if err := i.prepareStorage(storageDir); err != nil {
 		return err
 	}
-	i.logger.Info("upgrade: storage prepared, running occ status")
-	status, err := i.occ.Run("status")
-	if err != nil {
-		return err
-	}
-	i.logger.Info("status", zap.String("status", status))
-	i.logger.Info("upgrade: running occ upgrade")
-	if _, err := i.occ.Run("upgrade"); err != nil {
-		return err
-	}
-	i.logger.Info("upgrade: occ upgrade done, turning maintenance mode off")
-	if _, err := i.occ.Run("maintenance:mode", "--off"); err != nil {
-		return err
-	}
-	i.logger.Info("upgrade: db:add-missing-indices")
-	if _, err := i.occ.Run("db:add-missing-indices"); err != nil {
-		return err
-	}
-	i.logger.Info("upgrade: db:add-missing-columns")
-	if _, err := i.occ.Run("db:add-missing-columns"); err != nil {
-		return err
-	}
-	i.logger.Info("upgrade: db:add-missing-primary-keys")
-	if _, err := i.occ.Run("db:add-missing-primary-keys"); err != nil {
-		return err
-	}
 	i.logger.Info("upgrade: legacy admin->syncloud ldap mapping fix")
-	if err := i.database.Execute(DbName, "UPDATE oc_ldap_group_mapping SET owncloud_name='syncloud' WHERE owncloud_name='admin' AND ldap_dn ILIKE 'cn=syncloud,%';"); err != nil {
+	if err := i.RunMigrateLegacyAdminLdapGroup(); err != nil {
+		return err
+	}
+	i.logger.Info("upgrade: forcing ldap getGroups via group:list")
+	if err := i.RunGroupList(); err != nil {
 		return err
 	}
 	i.logger.Info("upgrade: promoting syncloud ldap group")
-	_, err = i.occ.Run("ldap:promote-group", "syncloud", "-y")
-	if err != nil {
+	if err := i.RunLdapPromoteSyncloud(); err != nil {
 		return err
 	}
-	i.logger.Info("upgrade: done")
+	i.logger.Info("upgrade: done (heavy occ steps deferred to repair-service)")
 	return nil
 }
 
@@ -596,6 +650,30 @@ func (i *Installer) fixVersionSpecificDbHost() error {
 	pattern := regexp.MustCompile(`'dbhost'\s*=>\s*'.*?'`)
 	updated := pattern.ReplaceAllString(string(content), fmt.Sprintf("'dbhost' => '%s'", i.database.DatabaseHost()))
 	if err := os.WriteFile(i.ncConfigFile, []byte(updated), 0644); err != nil {
+		return err
+	}
+	return i.fixConfigPermission()
+}
+
+func (i *Installer) migrateLegacyDbUser() error {
+	content, err := os.ReadFile(i.ncConfigFile)
+	if err != nil {
+		if os.IsNotExist(err) {
+			return nil
+		}
+		return err
+	}
+	canonical := fmt.Sprintf("'dbuser' => '%s'", DbUser)
+	if strings.Contains(string(content), canonical) {
+		return nil
+	}
+	i.logger.Warn("rewriting legacy dbuser/dbpassword in config.php to canonical values",
+		zap.String("path", i.ncConfigFile))
+	userPattern := regexp.MustCompile(`'dbuser'\s*=>\s*'.*?'`)
+	updated := userPattern.ReplaceAll(content, []byte(canonical))
+	passPattern := regexp.MustCompile(`'dbpassword'\s*=>\s*'.*?'`)
+	updated = passPattern.ReplaceAll(updated, []byte(fmt.Sprintf("'dbpassword' => '%s'", DbPassword)))
+	if err := os.WriteFile(i.ncConfigFile, updated, 0644); err != nil {
 		return err
 	}
 	return i.fixConfigPermission()
