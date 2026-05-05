@@ -96,3 +96,30 @@ def test_post_upgrade_admin_can_list_users(app_domain, device_user, device_passw
     assert r.status_code == 200, r.text
     meta = r.json()['ocs']['meta']
     assert meta['statuscode'] == 100, r.text
+
+
+def test_post_upgrade_repair_status(device):
+    import time
+    expected_steps = [
+        'wait-for-configure',
+        'occ-upgrade',
+        'maintenance-mode-off',
+        'db-add-missing-indices',
+        'db-add-missing-columns',
+        'db-add-missing-primary-keys',
+        'maintenance-repair',
+    ]
+    deadline = time.time() + 1800
+    last = ''
+    while time.time() < deadline:
+        last = device.run_ssh('snap run nextcloud.repair-status')
+        status = json.loads(last)
+        if status.get('done'):
+            assert status.get('configure_done') is True, last
+            steps_by_name = {s['name']: s for s in status.get('steps', [])}
+            for name in expected_steps:
+                assert name in steps_by_name, 'missing step ' + name + ': ' + last
+                assert not steps_by_name[name].get('error'), 'step ' + name + ' errored: ' + last
+            return
+        time.sleep(10)
+    raise AssertionError('repair-status never reported done within 30 minutes: ' + last)
