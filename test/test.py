@@ -13,6 +13,8 @@ from syncloudlib.integration.loop import loop_device_add, loop_device_cleanup
 from syncloudlib.http import wait_for_response
 
 TMP_DIR = '/tmp/syncloud'
+MAIL_SMTPHOST = 'mail.example.com:587'
+MAIL_SMTPNAME = 'mailuser@example.com'
 
 requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
 
@@ -265,8 +267,25 @@ def test_reinstall(app_archive_path, device_host, device_password):
     local_install(device_host, device_password, app_archive_path)
 
 
+def test_mail_set_config(device):
+    device.run_ssh('snap run nextcloud.occ config:system:set mail_smtpmode --value=smtp')
+    device.run_ssh('snap run nextcloud.occ config:system:set mail_smtphost --value={0}'.format(MAIL_SMTPHOST))
+    device.run_ssh('snap run nextcloud.occ config:system:set mail_smtpauth --value=1 --type=boolean')
+    device.run_ssh('snap run nextcloud.occ config:system:set mail_smtpname --value={0}'.format(MAIL_SMTPNAME))
+    device.run_ssh('snap run nextcloud.occ config:system:set mail_smtppassword --value=secret')
+    host = device.run_ssh('snap run nextcloud.occ config:system:get mail_smtphost').strip()
+    assert host == MAIL_SMTPHOST, host
+
+
 def test_upgrade(app_archive_path, device_host, device_password):
     local_install(device_host, device_password, app_archive_path)
+
+
+def test_mail_config_survives_upgrade(device):
+    host = device.run_ssh('snap run nextcloud.occ config:system:get mail_smtphost').strip()
+    name = device.run_ssh('snap run nextcloud.occ config:system:get mail_smtpname').strip()
+    assert host == MAIL_SMTPHOST, 'mail_smtphost lost after upgrade: ' + host
+    assert name == MAIL_SMTPNAME, 'mail_smtpname lost after upgrade: ' + name
 
 
 

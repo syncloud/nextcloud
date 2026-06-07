@@ -10,8 +10,6 @@ import requests
 TMP_DIR = '/tmp/syncloud'
 MARKER_NAME = 'upgrade-marker.txt'
 MARKER_BODY = b'pre-store-upgrade-marker'
-MAIL_SMTPHOST = 'mail.example.com:587'
-MAIL_SMTPNAME = 'mailuser@example.com'
 
 
 @pytest.fixture(scope="session")
@@ -125,25 +123,3 @@ def test_post_upgrade_repair_status(device):
             return
         time.sleep(10)
     raise AssertionError('repair-status never reported done within 30 minutes: ' + last)
-
-
-def test_mail_set_config(device):
-    device.run_ssh('snap run nextcloud.occ config:system:set mail_smtpmode --value=smtp')
-    device.run_ssh('snap run nextcloud.occ config:system:set mail_smtphost --value={0}'.format(MAIL_SMTPHOST))
-    device.run_ssh('snap run nextcloud.occ config:system:set mail_smtpauth --value=1 --type=boolean')
-    device.run_ssh('snap run nextcloud.occ config:system:set mail_smtpname --value={0}'.format(MAIL_SMTPNAME))
-    device.run_ssh('snap run nextcloud.occ config:system:set mail_smtppassword --value=secret')
-    host = device.run_ssh('snap run nextcloud.occ config:system:get mail_smtphost').strip()
-    assert host == MAIL_SMTPHOST, host
-
-
-def test_mail_local_upgrade(device_host, device_password, app_archive_path, app_domain):
-    local_install(device_host, device_password, app_archive_path)
-    wait_for_rest(requests.session(), "https://{0}".format(app_domain), 200, 10)
-
-
-def test_mail_config_survives_upgrade(device):
-    host = device.run_ssh('snap run nextcloud.occ config:system:get mail_smtphost').strip()
-    name = device.run_ssh('snap run nextcloud.occ config:system:get mail_smtpname').strip()
-    assert host == MAIL_SMTPHOST, 'mail_smtphost lost after upgrade: ' + host
-    assert name == MAIL_SMTPNAME, 'mail_smtpname lost after upgrade: ' + name
