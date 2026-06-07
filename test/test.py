@@ -270,9 +270,7 @@ def test_reinstall(app_archive_path, device_host, device_password):
 def test_mail_set_config(device):
     device.run_ssh('snap run nextcloud.occ config:system:set mail_smtpmode --value=smtp')
     device.run_ssh('snap run nextcloud.occ config:system:set mail_smtphost --value={0}'.format(MAIL_SMTPHOST))
-    device.run_ssh('snap run nextcloud.occ config:system:set mail_smtpauth --value=1 --type=boolean')
     device.run_ssh('snap run nextcloud.occ config:system:set mail_smtpname --value={0}'.format(MAIL_SMTPNAME))
-    device.run_ssh('snap run nextcloud.occ config:system:set mail_smtppassword --value=secret')
     host = device.run_ssh('snap run nextcloud.occ config:system:get mail_smtphost').strip()
     assert host == MAIL_SMTPHOST, host
 
