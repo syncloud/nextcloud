@@ -18,3 +18,4 @@ geckodriver
 *.test.upload
 test.file*
 venv
+.drone.yml
