@@ -243,6 +243,9 @@ func (i *Installer) Configure() error {
 		if err := i.initialize(storageDir); err != nil {
 			return err
 		}
+		if err := i.setMailDefaults(); err != nil {
+			return err
+		}
 	}
 	i.logger.Info("configure: upgrade/initialize done, applying post-config")
 
@@ -292,15 +295,6 @@ func (i *Installer) Configure() error {
 	if err := i.ocConfig.SetValue("datadirectory", realStorage); err != nil {
 		return err
 	}
-	if err := i.ocConfig.SetValue("mail_smtpmode", "smtp"); err != nil {
-		return err
-	}
-	if err := i.ocConfig.SetValue("mail_smtphost", "localhost:25"); err != nil {
-		return err
-	}
-	if err := i.ocConfig.SetValue("mail_smtpauth", "false"); err != nil {
-		return err
-	}
 
 	if _, err := i.occ.Run("app:disable", "logreader"); err != nil {
 		return err
@@ -316,6 +310,16 @@ func (i *Installer) Configure() error {
 	}
 	i.logger.Info("configure: writing configure-done marker")
 	return os.WriteFile(path.Join(i.dataDir, ConfigureDoneMarker), []byte(time.Now().UTC().Format(time.RFC3339)+"\n"), 0644)
+}
+
+func (i *Installer) setMailDefaults() error {
+	if err := i.ocConfig.SetValue("mail_smtpmode", "smtp"); err != nil {
+		return err
+	}
+	if err := i.ocConfig.SetValue("mail_smtphost", "localhost:25"); err != nil {
+		return err
+	}
+	return i.ocConfig.SetValue("mail_smtpauth", "false")
 }
 
 func (i *Installer) NextcloudInstalled() bool {
