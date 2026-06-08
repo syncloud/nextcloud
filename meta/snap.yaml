@@ -98,7 +98,7 @@ apps:
     command: bin/cli repair-status
 
 confinement: strict
-description: Nextcloud
+description: "Access & share your files from any device"
 grade: stable
 name: nextcloud
-summary: Nextcloud
+summary: Nextcloud file sharing
