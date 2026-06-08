@@ -1,5 +1,4 @@
 local name = "nextcloud";
-local browser = "firefox";
 local nextcloud = "32.0.5";
 local redis = "7.0.15";
 local nginx = "1.24.0";
@@ -9,7 +8,7 @@ local platform = '26.04.10';
 local go = '1.26';
 local python = '3.12-slim-bookworm';
 local debian = 'bookworm-slim';
-local selenium = '4.35.0-20250828';
+local playwright = 'v1.48.2-jammy';
 local store_publisher = 'stable-291';
 local distro_default = "bookworm";
 local distros = ['bookworm', 'buster'];
@@ -172,56 +171,22 @@ local build(arch, test_ui) = [{
         } for distro in distros 
         ] + ( if test_ui then [
         {
-            name: "selenium",
-            image: "selenium/standalone-" + browser + ":" + selenium,
-            detach: true,
+            name: "e2e",
+            image: "mcr.microsoft.com/playwright:" + playwright,
             environment: {
-                SE_NODE_SESSION_TIMEOUT: "999999",
-                START_XVFB: "true"
+                PLAYWRIGHT_FULL_DOMAIN: distro_default + ".com",
+                PLAYWRIGHT_APP_DOMAIN: name + "." + distro_default + ".com",
+                PLAYWRIGHT_DEVICE_HOST: name + "." + distro_default + ".com",
+                PLAYWRIGHT_DEVICE_USER: "user",
+                PLAYWRIGHT_DEVICE_PASSWORD: "Password1",
+                PLAYWRIGHT_ARTIFACT_DIR: "/drone/src/artifact/e2e"
             },
-               volumes: [{
-                name: "shm",
-                path: "/dev/shm"
-            }],
             commands: [
-                "cat /etc/hosts",
-                "getent hosts " + name + ".buster.com | sed 's/" + name +".buster.com/auth.buster.com/g' | sudo tee -a /etc/hosts",
-                "cat /etc/hosts",
-                "/opt/bin/entry_point.sh"
+                "apt-get update -qq && apt-get install -y -qq sshpass openssh-client curl",
+                "cd test/e2e",
+                "npm ci --no-audit --no-fund",
+                "npx playwright test --project=desktop"
             ]
-         },
-
-        {
-            name: "selenium-video",
-            image: "selenium/video:ffmpeg-4.3.1-20220208",
-            detach: true,
-            environment: {
-                DISPLAY_CONTAINER_NAME: "selenium",
-                FILE_NAME: "video.mkv"
-            },
-            volumes: [
-                {
-                    name: "shm",
-                    path: "/dev/shm"
-                },
-               {
-                    name: "videos",
-                    path: "/videos"
-                }
-            ]
-        },
-        {
-            name: "test-ui",
-            image: "python:" + python,
-            commands: [
-              "cd test",
-              "./deps.sh",
-             'py.test -x -s ui.py --distro=' + distro_default + ' --ver=$DRONE_BUILD_NUMBER --app=' + name + ' --browser=' + browser,
-             ],
-            volumes: [{
-                name: "videos",
-                path: "/videos"
-            }]
         }
 
 ] else [] ) +[
@@ -231,7 +196,7 @@ local build(arch, test_ui) = [{
         commands: [
           "cd test",
           "./deps.sh",
-          'py.test -x -s upgrade.py --distro=' + distro_default + ' --ver=$DRONE_BUILD_NUMBER --app=' + name + ' --browser=' + browser,
+          'py.test -x -s upgrade.py --distro=' + distro_default + ' --ver=$DRONE_BUILD_NUMBER --app=' + name,
          ]
     },
         {
@@ -319,15 +284,7 @@ local build(arch, test_ui) = [{
             }
         },
         {
-            name: "shm",
-            temp: {}
-        },
-        {
             name: "dockersock",
-            temp: {}
-        },
-        {
-            name: "videos",
             temp: {}
         },
       ]

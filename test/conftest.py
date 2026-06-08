@@ -1,6 +1,5 @@
 from os.path import dirname, join
 from syncloudlib.integration.conftest import *
-from syncloudlib.integration.selenium_conftest import *
 
 DIR = dirname(__file__)
 

@@ -19,3 +19,5 @@ geckodriver
 test.file*
 venv
 .drone.yml
+node_modules
+test/e2e/artifact
