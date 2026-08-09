@@ -233,9 +233,11 @@ func (i *Installer) Configure() error {
 	if err != nil {
 		return err
 	}
+	dbUpgradePending := false
 	if i.installed() {
-		i.logger.Info("configure: existing install detected, running upgrade")
-		if err := i.upgrade(storageDir); err != nil {
+		dbUpgradePending = i.NeedsDbUpgrade()
+		i.logger.Info("configure: existing install detected, running upgrade", zap.Bool("dbUpgradePending", dbUpgradePending))
+		if err := i.upgrade(storageDir, dbUpgradePending); err != nil {
 			return err
 		}
 	} else {
@@ -249,7 +251,9 @@ func (i *Installer) Configure() error {
 	}
 	i.logger.Info("configure: upgrade/initialize done, applying post-config")
 
-	if _, err := i.occ.Run("ldap:set-config", "s01", "ldapEmailAttribute", "mail"); err != nil {
+	if dbUpgradePending {
+		i.logger.Info("configure: db upgrade pending, deferring ldap config to repair-service")
+	} else if err := i.RunLdapSetEmailAttribute(); err != nil {
 		return err
 	}
 	if _, err := i.occ.Run("config:system:set", "apps_paths", "1", "path", "--value="+i.extraAppsDir); err != nil {
@@ -398,6 +402,22 @@ func (i *Installer) RunLdapPromoteSyncloud() error {
 	return err
 }
 
+func (i *Installer) RunLdapSetEmailAttribute() error {
+	_, err := i.occ.Run("ldap:set-config", "s01", "ldapEmailAttribute", "mail")
+	return err
+}
+
+// occ hides app-provided commands (ldap:*) until the schema matches the code,
+// so anything in that namespace has to wait for RunOccUpgrade.
+func (i *Installer) NeedsDbUpgrade() bool {
+	out, err := i.occ.Run("status")
+	if err != nil {
+		i.logger.Info("occ status failed, assuming a db upgrade is pending", zap.Error(err))
+		return true
+	}
+	return strings.Contains(out, "needsDbUpgrade: true")
+}
+
 func (i *Installer) StorageChange() error {
 	storageDir, err := i.platformClient.InitStorage(App, UserName)
 	if err != nil {
@@ -458,7 +478,7 @@ func (i *Installer) installed() bool {
 	return strings.Contains(string(data), "installed")
 }
 
-func (i *Installer) upgrade(storageDir string) error {
+func (i *Installer) upgrade(storageDir string, dbUpgradePending bool) error {
 	i.logger.Info("upgrade: restoring database from dump")
 	if err := i.database.Restore(); err != nil {
 		return err
@@ -470,6 +490,10 @@ func (i *Installer) upgrade(storageDir string) error {
 	i.logger.Info("upgrade: legacy admin->syncloud ldap mapping fix")
 	if err := i.RunMigrateLegacyAdminLdapGroup(); err != nil {
 		return err
+	}
+	if dbUpgradePending {
+		i.logger.Info("upgrade: db schema behind code, deferring ldap steps to repair-service")
+		return nil
 	}
 	i.logger.Info("upgrade: forcing ldap getGroups via group:list")
 	if err := i.RunGroupList(); err != nil {

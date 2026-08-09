@@ -1,5 +1,5 @@
 local name = "nextcloud";
-local nextcloud = "32.0.5";
+local nextcloud = "33.0.7";
 local redis = "7.0.15";
 local nginx = "1.24.0";
 local nats = "2.10";
