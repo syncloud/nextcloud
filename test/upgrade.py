@@ -10,6 +10,7 @@ import requests
 TMP_DIR = '/tmp/syncloud'
 MARKER_NAME = 'upgrade-marker.txt'
 MARKER_BODY = b'pre-store-upgrade-marker'
+MAINTENANCE_MARKER = 'syncloud-nextcloud-maintenance'
 
 
 @pytest.fixture(scope="session")
@@ -66,6 +67,31 @@ def test_simulate_legacy_admin_rename(device):
 
 def test_upgrade(device_host, device_password, app_archive_path):
     local_install(device_host, device_password, app_archive_path)
+
+
+def test_maintenance_page_visible_during_upgrade(device, app_domain, artifact_dir):
+    import time
+    session = requests.session()
+    deadline = time.time() + 1800
+    last_status = None
+    while time.time() < deadline:
+        try:
+            r = session.get('https://{0}/'.format(app_domain), verify=False, timeout=10)
+            last_status = r.status_code
+            if MAINTENANCE_MARKER in r.text:
+                with open('{0}/maintenance.page.html'.format(artifact_dir), 'w') as f:
+                    f.write(r.text)
+                assert r.status_code == 503, r.status_code
+                return
+        except requests.RequestException:
+            pass
+        status = json.loads(device.run_ssh('snap run nextcloud.repair-status'))
+        if status.get('done'):
+            raise AssertionError(
+                'repair finished without ever serving the maintenance page, '
+                'last status {0}'.format(last_status))
+        time.sleep(1)
+    raise AssertionError('maintenance page never appeared, last status {0}'.format(last_status))
 
 
 def test_post_upgrade_repair_status(device):
