@@ -46,16 +46,26 @@ func main() {
 			fn   func() error
 		}
 		var steps []step
-		if inst.RefreshNeeded() {
-			logger.Info("refresh-needed marker present; running post-refresh repair")
+		ldapDeferred := inst.NeedsDbUpgrade()
+		if inst.RefreshNeeded() || ldapDeferred {
+			logger.Info("running post-refresh repair", zap.Bool("ldapDeferred", ldapDeferred))
 			steps = []step{
 				{"occ-upgrade", inst.RunOccUpgrade},
 				{"maintenance-mode-off", inst.RunMaintenanceModeOff},
-				{"db-add-missing-indices", inst.RunDbAddMissingIndices},
-				{"db-add-missing-columns", inst.RunDbAddMissingColumns},
-				{"db-add-missing-primary-keys", inst.RunDbAddMissingPrimaryKeys},
-				{"maintenance-repair", inst.RunMaintenanceRepair},
 			}
+			if ldapDeferred {
+				steps = append(steps,
+					step{"ldap-set-email-attribute", inst.RunLdapSetEmailAttribute},
+					step{"group-list", inst.RunGroupList},
+					step{"ldap-promote-syncloud", inst.RunLdapPromoteSyncloud},
+				)
+			}
+			steps = append(steps,
+				step{"db-add-missing-indices", inst.RunDbAddMissingIndices},
+				step{"db-add-missing-columns", inst.RunDbAddMissingColumns},
+				step{"db-add-missing-primary-keys", inst.RunDbAddMissingPrimaryKeys},
+				step{"maintenance-repair", inst.RunMaintenanceRepair},
+			)
 		} else {
 			logger.Info("refresh-needed marker absent; skipping heavy post-refresh repair")
 		}

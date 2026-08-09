@@ -10,6 +10,7 @@ import requests
 TMP_DIR = '/tmp/syncloud'
 MARKER_NAME = 'upgrade-marker.txt'
 MARKER_BODY = b'pre-store-upgrade-marker'
+MAINTENANCE_MARKER = 'syncloud-nextcloud-maintenance'
 
 
 @pytest.fixture(scope="session")
@@ -64,8 +65,64 @@ def test_simulate_legacy_admin_rename(device):
     )
 
 
-def test_upgrade(device_host, device_password, app_archive_path, app_domain):
+def test_upgrade(device_host, device_password, app_archive_path):
     local_install(device_host, device_password, app_archive_path)
+
+
+def test_maintenance_page_visible_during_upgrade(device, app_domain, artifact_dir):
+    import time
+    session = requests.session()
+    deadline = time.time() + 1800
+    last_status = None
+    while time.time() < deadline:
+        try:
+            r = session.get('https://{0}/'.format(app_domain), verify=False, timeout=10)
+            last_status = r.status_code
+            if MAINTENANCE_MARKER in r.text:
+                with open('{0}/maintenance.page.html'.format(artifact_dir), 'w') as f:
+                    f.write(r.text)
+                assert r.status_code == 503, r.status_code
+                return
+        except requests.RequestException:
+            pass
+        status = json.loads(device.run_ssh('snap run nextcloud.repair-status'))
+        if status.get('done'):
+            raise AssertionError(
+                'repair finished without ever serving the maintenance page, '
+                'last status {0}'.format(last_status))
+        time.sleep(1)
+    raise AssertionError('maintenance page never appeared, last status {0}'.format(last_status))
+
+
+def test_post_upgrade_repair_status(device):
+    import time
+    expected_steps = [
+        'wait-for-configure',
+        'occ-upgrade',
+        'maintenance-mode-off',
+        'db-add-missing-indices',
+        'db-add-missing-columns',
+        'db-add-missing-primary-keys',
+        'maintenance-repair',
+    ]
+    deadline = time.time() + 1800
+    last = ''
+    while time.time() < deadline:
+        last = device.run_ssh('snap run nextcloud.repair-status')
+        status = json.loads(last)
+        if status.get('done'):
+            assert status.get('configure_done') is True, last
+            steps_by_name = {s['name']: s for s in status.get('steps', [])}
+            for name in expected_steps:
+                assert name in steps_by_name, 'missing step ' + name + ': ' + last
+            for step in status.get('steps', []):
+                assert not step.get('error'), 'step ' + step['name'] + ' errored: ' + last
+            return
+        time.sleep(10)
+    raise AssertionError('repair-status never reported done within 30 minutes: ' + last)
+
+
+def test_post_upgrade_available(app_domain):
     wait_for_rest(requests.session(), "https://{0}".format(app_domain), 200, 10)
 
 
@@ -96,30 +153,3 @@ def test_post_upgrade_admin_can_list_users(app_domain, device_user, device_passw
     assert r.status_code == 200, r.text
     meta = r.json()['ocs']['meta']
     assert meta['statuscode'] == 100, r.text
-
-
-def test_post_upgrade_repair_status(device):
-    import time
-    expected_steps = [
-        'wait-for-configure',
-        'occ-upgrade',
-        'maintenance-mode-off',
-        'db-add-missing-indices',
-        'db-add-missing-columns',
-        'db-add-missing-primary-keys',
-        'maintenance-repair',
-    ]
-    deadline = time.time() + 1800
-    last = ''
-    while time.time() < deadline:
-        last = device.run_ssh('snap run nextcloud.repair-status')
-        status = json.loads(last)
-        if status.get('done'):
-            assert status.get('configure_done') is True, last
-            steps_by_name = {s['name']: s for s in status.get('steps', [])}
-            for name in expected_steps:
-                assert name in steps_by_name, 'missing step ' + name + ': ' + last
-                assert not steps_by_name[name].get('error'), 'step ' + name + ' errored: ' + last
-            return
-        time.sleep(10)
-    raise AssertionError('repair-status never reported done within 30 minutes: ' + last)

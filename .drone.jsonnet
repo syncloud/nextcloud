@@ -1,5 +1,5 @@
 local name = "nextcloud";
-local nextcloud = "32.0.5";
+local nextcloud = "33.0.7";
 local redis = "7.0.15";
 local nginx = "1.24.0";
 local nats = "2.10";
@@ -9,7 +9,7 @@ local go = '1.26';
 local python = '3.12-slim-bookworm';
 local debian = 'bookworm-slim';
 local playwright = 'v1.48.2-jammy';
-local store_publisher = 'stable-291';
+local store_publisher = 'stable-346';
 local distro_default = "bookworm";
 local distros = ['bookworm', 'buster'];
 local dind = '20.10.21-dind';
