@@ -451,8 +451,19 @@ func (i *Installer) RunGroupList() error {
 	return err
 }
 
+// Something can re-enable maintenance mode between maintenance-mode-off and
+// here (seen in the wild: apps loaded fine one second earlier, then
+// 'no apps are loaded'), which hides the whole ldap namespace.
 func (i *Installer) RunLdapPromoteSyncloud() error {
 	_, err := i.occ.Run("ldap:promote-group", "syncloud", "-y")
+	if err == nil {
+		return nil
+	}
+	i.logger.Info("ldap promote failed, forcing maintenance mode off and retrying", zap.Error(err))
+	if _, offErr := i.occ.Run("maintenance:mode", "--off"); offErr != nil {
+		return err
+	}
+	_, err = i.occ.Run("ldap:promote-group", "syncloud", "-y")
 	return err
 }
 
