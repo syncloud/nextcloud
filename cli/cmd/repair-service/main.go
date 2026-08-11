@@ -46,7 +46,7 @@ func main() {
 			fn   func() error
 		}
 		var steps []step
-		ldapDeferred := inst.NeedsDbUpgrade()
+		ldapDeferred := inst.LdapDeferred()
 		if inst.RefreshNeeded() || ldapDeferred {
 			logger.Info("running post-refresh repair", zap.Bool("ldapDeferred", ldapDeferred))
 			steps = []step{
@@ -65,9 +65,26 @@ func main() {
 				step{"db-add-missing-columns", inst.RunDbAddMissingColumns},
 				step{"db-add-missing-primary-keys", inst.RunDbAddMissingPrimaryKeys},
 				step{"maintenance-repair", inst.RunMaintenanceRepair},
+				step{"maintenance-mode-off-final", inst.RunMaintenanceModeOff},
 			)
 		} else {
 			logger.Info("refresh-needed marker absent; skipping heavy post-refresh repair")
+		}
+
+		if len(steps) > 0 {
+			attempt := inst.IncrementRepairAttempts()
+			logger.Info("repair attempt", zap.Int("attempt", attempt), zap.Int("max", installer.MaxRepairAttempts))
+			if attempt > installer.MaxRepairAttempts {
+				logger.Error("giving up after repeated repair attempts; showing upgrade-failed page")
+				if err := inst.ShowUpgradeFailedPage(); err != nil {
+					logger.Error("cannot show upgrade-failed page", zap.Error(err))
+				}
+				srv.MarkDone()
+				return
+			}
+			if err := inst.ShowUpgradingPage(); err != nil {
+				logger.Error("cannot show upgrading page", zap.Error(err))
+			}
 		}
 
 		failed := false
@@ -77,6 +94,24 @@ func main() {
 			done(err)
 			if err != nil {
 				failed = true
+			}
+		}
+		if len(steps) > 0 {
+			if failed {
+				logger.Error("repair finished with errors; showing upgrade-failed page")
+				if err := inst.ShowUpgradeFailedPage(); err != nil {
+					logger.Error("cannot show upgrade-failed page", zap.Error(err))
+				}
+			} else {
+				if err := inst.ClearStatusPage(); err != nil {
+					logger.Error("cannot clear status page", zap.Error(err))
+				}
+				if err := inst.ClearRepairAttempts(); err != nil {
+					logger.Error("cannot clear repair attempts", zap.Error(err))
+				}
+				if err := inst.ClearLdapDeferred(); err != nil {
+					logger.Error("cannot clear ldap-deferred marker", zap.Error(err))
+				}
 			}
 		}
 		if !failed {
