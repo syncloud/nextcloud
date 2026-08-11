@@ -30,6 +30,7 @@ const (
 	ConfigureDoneMarker  = ".configure-done"
 	RefreshNeededMarker  = ".refresh-needed"
 	RepairAttemptsFile   = ".repair-attempts"
+	LdapDeferredMarker   = ".ldap-deferred"
 	StatusPageFile       = "syncloud-status.html"
 	UpgradingPage        = "syncloud-maintenance.html"
 	UpgradeFailedPage    = "syncloud-upgrade-failed.html"
@@ -241,9 +242,10 @@ func (i *Installer) Configure() error {
 	}
 	dbUpgradePending := false
 	if i.installed() {
-		dbUpgradePending = i.NeedsDbUpgrade()
-		i.logger.Info("configure: existing install detected, running upgrade", zap.Bool("dbUpgradePending", dbUpgradePending))
-		if err := i.upgrade(storageDir, dbUpgradePending); err != nil {
+		i.logger.Info("configure: existing install detected, running upgrade")
+		var err error
+		dbUpgradePending, err = i.upgrade(storageDir)
+		if err != nil {
 			return err
 		}
 	} else {
@@ -347,6 +349,25 @@ func (i *Installer) RefreshNeeded() bool {
 
 func (i *Installer) ClearRefreshNeeded() error {
 	if err := os.Remove(path.Join(i.dataDir, RefreshNeededMarker)); err != nil && !os.IsNotExist(err) {
+		return err
+	}
+	return nil
+}
+
+// Configure and the daemon must not each decide this for themselves: they ask
+// at different points in the refresh and got different answers, which left the
+// ldap steps running in neither. Configure decides, the daemon obeys.
+func (i *Installer) MarkLdapDeferred() error {
+	return os.WriteFile(path.Join(i.dataDir, LdapDeferredMarker), []byte(time.Now().UTC().Format(time.RFC3339)+"\n"), 0644)
+}
+
+func (i *Installer) LdapDeferred() bool {
+	_, err := os.Stat(path.Join(i.dataDir, LdapDeferredMarker))
+	return err == nil
+}
+
+func (i *Installer) ClearLdapDeferred() error {
+	if err := os.Remove(path.Join(i.dataDir, LdapDeferredMarker)); err != nil && !os.IsNotExist(err) {
 		return err
 	}
 	return nil
@@ -543,33 +564,43 @@ func (i *Installer) installed() bool {
 	return strings.Contains(string(data), "installed")
 }
 
-func (i *Installer) upgrade(storageDir string, dbUpgradePending bool) error {
+func (i *Installer) upgrade(storageDir string) (bool, error) {
 	i.logger.Info("upgrade: restoring database from dump")
 	if err := i.database.Restore(); err != nil {
-		return err
+		return false, err
 	}
 	i.logger.Info("upgrade: database restore done, preparing storage")
 	if err := i.prepareStorage(storageDir); err != nil {
-		return err
+		return false, err
 	}
+	// Only meaningful once the dump is back: post-refresh wipes and re-initdb's
+	// the cluster, so asking before the restore always errors and looks pending.
+	dbUpgradePending := i.NeedsDbUpgrade()
+	i.logger.Info("upgrade: checked schema", zap.Bool("dbUpgradePending", dbUpgradePending))
 	i.logger.Info("upgrade: legacy admin->syncloud ldap mapping fix")
 	if err := i.RunMigrateLegacyAdminLdapGroup(); err != nil {
-		return err
+		return false, err
 	}
 	if dbUpgradePending {
-		i.logger.Info("upgrade: db schema behind code, deferring ldap steps to repair-service")
-		return nil
+		i.logger.Info("upgrade: db schema behind code, handing ldap steps to repair-service")
+		if err := i.MarkLdapDeferred(); err != nil {
+			return false, err
+		}
+		return true, nil
+	}
+	if err := i.ClearLdapDeferred(); err != nil {
+		return false, err
 	}
 	i.logger.Info("upgrade: forcing ldap getGroups via group:list")
 	if err := i.RunGroupList(); err != nil {
-		return err
+		return false, err
 	}
 	i.logger.Info("upgrade: promoting syncloud ldap group")
 	if err := i.RunLdapPromoteSyncloud(); err != nil {
-		return err
+		return false, err
 	}
 	i.logger.Info("upgrade: done (heavy occ steps deferred to repair-service)")
-	return nil
+	return false, nil
 }
 
 func (i *Installer) initialize(storageDir string) error {

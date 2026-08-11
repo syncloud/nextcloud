@@ -46,7 +46,7 @@ func main() {
 			fn   func() error
 		}
 		var steps []step
-		ldapDeferred := inst.NeedsDbUpgrade()
+		ldapDeferred := inst.LdapDeferred()
 		if inst.RefreshNeeded() || ldapDeferred {
 			logger.Info("running post-refresh repair", zap.Bool("ldapDeferred", ldapDeferred))
 			steps = []step{
@@ -111,6 +111,9 @@ func main() {
 				}
 				if err := inst.ClearRepairAttempts(); err != nil {
 					logger.Error("cannot clear repair attempts", zap.Error(err))
+				}
+				if err := inst.ClearLdapDeferred(); err != nil {
+					logger.Error("cannot clear ldap-deferred marker", zap.Error(err))
 				}
 			}
 		}
