@@ -7,6 +7,7 @@ import (
 	"path"
 	"path/filepath"
 	"regexp"
+	"strconv"
 	"strings"
 	"time"
 
@@ -28,6 +29,11 @@ const (
 	SignalingSecretsFile = "signaling.secrets"
 	ConfigureDoneMarker  = ".configure-done"
 	RefreshNeededMarker  = ".refresh-needed"
+	RepairAttemptsFile   = ".repair-attempts"
+	StatusPageFile       = "syncloud-status.html"
+	UpgradingPage        = "syncloud-maintenance.html"
+	UpgradeFailedPage    = "syncloud-upgrade-failed.html"
+	MaxRepairAttempts    = 3
 )
 
 type Variables struct {
@@ -341,6 +347,54 @@ func (i *Installer) RefreshNeeded() bool {
 
 func (i *Installer) ClearRefreshNeeded() error {
 	if err := os.Remove(path.Join(i.dataDir, RefreshNeededMarker)); err != nil && !os.IsNotExist(err) {
+		return err
+	}
+	return nil
+}
+
+// nginx serves this for nextcloud's own 503, so it must say whether the upgrade
+// is still working or has given up - a spinner shown forever reads as progress.
+func (i *Installer) ShowUpgradingPage() error {
+	return i.writeStatusPage(UpgradingPage)
+}
+
+func (i *Installer) ShowUpgradeFailedPage() error {
+	return i.writeStatusPage(UpgradeFailedPage)
+}
+
+func (i *Installer) ClearStatusPage() error {
+	if err := os.Remove(path.Join(i.dataDir, StatusPageFile)); err != nil && !os.IsNotExist(err) {
+		return err
+	}
+	return nil
+}
+
+func (i *Installer) writeStatusPage(page string) error {
+	return copyFile(path.Join(i.appDir, "config", page), path.Join(i.dataDir, StatusPageFile))
+}
+
+func (i *Installer) RepairAttempts() int {
+	data, err := os.ReadFile(path.Join(i.dataDir, RepairAttemptsFile))
+	if err != nil {
+		return 0
+	}
+	n, err := strconv.Atoi(strings.TrimSpace(string(data)))
+	if err != nil {
+		return 0
+	}
+	return n
+}
+
+func (i *Installer) IncrementRepairAttempts() int {
+	n := i.RepairAttempts() + 1
+	if err := os.WriteFile(path.Join(i.dataDir, RepairAttemptsFile), []byte(strconv.Itoa(n)+"\n"), 0644); err != nil {
+		i.logger.Error("cannot record repair attempt", zap.Error(err))
+	}
+	return n
+}
+
+func (i *Installer) ClearRepairAttempts() error {
+	if err := os.Remove(path.Join(i.dataDir, RepairAttemptsFile)); err != nil && !os.IsNotExist(err) {
 		return err
 	}
 	return nil
