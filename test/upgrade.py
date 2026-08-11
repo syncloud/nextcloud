@@ -145,31 +145,6 @@ def test_status_page_cleared_after_success(device):
     assert 'No such file' in out, out
 
 
-def test_upgrade_failed_page_when_repair_gives_up(device, app_domain):
-    import time
-    device.run_ssh('snap run nextcloud.occ maintenance:mode --on')
-    device.run_ssh('echo 99 > /var/snap/nextcloud/current/.repair-attempts')
-    device.run_ssh('touch /var/snap/nextcloud/current/.refresh-needed')
-    device.run_ssh('systemctl restart snap.nextcloud.post-start-repair')
-    try:
-        deadline = time.time() + 180
-        body = ''
-        while time.time() < deadline:
-            r = requests.get('https://{0}/'.format(app_domain), verify=False)
-            body = r.text
-            if UPGRADE_FAILED_MARKER in body:
-                assert r.status_code == 503, r.status_code
-                return
-            time.sleep(5)
-        raise AssertionError('upgrade-failed page never served, last body: ' + body[:500])
-    finally:
-        device.run_ssh('rm -f /var/snap/nextcloud/current/.repair-attempts', throw=False)
-        device.run_ssh('rm -f /var/snap/nextcloud/current/.refresh-needed', throw=False)
-        device.run_ssh('rm -f /var/snap/nextcloud/current/syncloud-status.html', throw=False)
-        device.run_ssh('snap run nextcloud.occ maintenance:mode --off', throw=False)
-        device.run_ssh('systemctl restart snap.nextcloud.post-start-repair', throw=False)
-
-
 def test_post_upgrade_marker_survives(app_domain, device_user, device_password):
     r = requests.get(
         'https://{0}/remote.php/webdav/{1}'.format(app_domain, MARKER_NAME),
@@ -197,3 +172,28 @@ def test_post_upgrade_admin_can_list_users(app_domain, device_user, device_passw
     assert r.status_code == 200, r.text
     meta = r.json()['ocs']['meta']
     assert meta['statuscode'] == 100, r.text
+
+
+def test_upgrade_failed_page_when_repair_gives_up(device, app_domain):
+    import time
+    device.run_ssh('snap run nextcloud.occ maintenance:mode --on')
+    device.run_ssh('echo 99 > /var/snap/nextcloud/current/.repair-attempts')
+    device.run_ssh('touch /var/snap/nextcloud/current/.refresh-needed')
+    device.run_ssh('systemctl restart snap.nextcloud.post-start-repair')
+    try:
+        deadline = time.time() + 180
+        body = ''
+        while time.time() < deadline:
+            r = requests.get('https://{0}/'.format(app_domain), verify=False)
+            body = r.text
+            if UPGRADE_FAILED_MARKER in body:
+                assert r.status_code == 503, r.status_code
+                return
+            time.sleep(5)
+        raise AssertionError('upgrade-failed page never served, last body: ' + body[:500])
+    finally:
+        device.run_ssh('rm -f /var/snap/nextcloud/current/.repair-attempts', throw=False)
+        device.run_ssh('rm -f /var/snap/nextcloud/current/.refresh-needed', throw=False)
+        device.run_ssh('rm -f /var/snap/nextcloud/current/syncloud-status.html', throw=False)
+        device.run_ssh('snap run nextcloud.occ maintenance:mode --off', throw=False)
+        device.run_ssh('systemctl restart snap.nextcloud.post-start-repair', throw=False)
