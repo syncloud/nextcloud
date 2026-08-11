@@ -65,9 +65,6 @@ func main() {
 				step{"db-add-missing-columns", inst.RunDbAddMissingColumns},
 				step{"db-add-missing-primary-keys", inst.RunDbAddMissingPrimaryKeys},
 				step{"maintenance-repair", inst.RunMaintenanceRepair},
-				// last line of defence: nextcloud left in maintenance mode
-				// serves 503 forever, so never exit the sequence without
-				// trying to clear it, whatever failed above.
 				step{"maintenance-mode-off-final", inst.RunMaintenanceModeOff},
 			)
 		} else {

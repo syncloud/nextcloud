@@ -354,9 +354,6 @@ func (i *Installer) ClearRefreshNeeded() error {
 	return nil
 }
 
-// Configure and the daemon must not each decide this for themselves: they ask
-// at different points in the refresh and got different answers, which left the
-// ldap steps running in neither. Configure decides, the daemon obeys.
 func (i *Installer) MarkLdapDeferred() error {
 	return os.WriteFile(path.Join(i.dataDir, LdapDeferredMarker), []byte(time.Now().UTC().Format(time.RFC3339)+"\n"), 0644)
 }
@@ -373,8 +370,6 @@ func (i *Installer) ClearLdapDeferred() error {
 	return nil
 }
 
-// nginx serves this for nextcloud's own 503, so it must say whether the upgrade
-// is still working or has given up - a spinner shown forever reads as progress.
 func (i *Installer) ShowUpgradingPage() error {
 	return i.writeStatusPage(UpgradingPage)
 }
@@ -472,9 +467,6 @@ func (i *Installer) RunGroupList() error {
 	return err
 }
 
-// Something can re-enable maintenance mode between maintenance-mode-off and
-// here (seen in the wild: apps loaded fine one second earlier, then
-// 'no apps are loaded'), which hides the whole ldap namespace.
 func (i *Installer) RunLdapPromoteSyncloud() error {
 	_, err := i.occ.Run("ldap:promote-group", "syncloud", "-y")
 	if err == nil {
@@ -573,8 +565,6 @@ func (i *Installer) upgrade(storageDir string) (bool, error) {
 	if err := i.prepareStorage(storageDir); err != nil {
 		return false, err
 	}
-	// Only meaningful once the dump is back: post-refresh wipes and re-initdb's
-	// the cluster, so asking before the restore always errors and looks pending.
 	dbUpgradePending := i.NeedsDbUpgrade()
 	i.logger.Info("upgrade: checked schema", zap.Bool("dbUpgradePending", dbUpgradePending))
 	i.logger.Info("upgrade: legacy admin->syncloud ldap mapping fix")
