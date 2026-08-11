@@ -12,6 +12,7 @@ MARKER_NAME = 'upgrade-marker.txt'
 MARKER_BODY = b'pre-store-upgrade-marker'
 MAINTENANCE_MARKER = 'syncloud-nextcloud-maintenance'
 UPGRADE_FAILED_MARKER = 'syncloud-nextcloud-upgrade-failed'
+STORE_VERSION = {}
 
 
 @pytest.fixture(scope="session")
@@ -38,6 +39,11 @@ def test_start(module_setup, app, device_host, domain, device):
 def test_install_store(device):
     device.run_ssh('snap remove nextcloud')
     device.run_ssh('snap install nextcloud', retries=10)
+
+
+def test_record_store_version(device):
+    out = device.run_ssh('snap run nextcloud.occ status --output=json')
+    STORE_VERSION['v'] = json.loads(out).get('versionstring')
 
 
 def test_pre_upgrade_write_marker(app_domain, device_user, device_password):
@@ -72,6 +78,12 @@ def test_upgrade(device_host, device_password, app_archive_path):
 
 def test_maintenance_page_visible_during_upgrade(device, app_domain, artifact_dir):
     import time
+    built = device.run_ssh('grep OC_VersionString /snap/nextcloud/current/nextcloud/version.php')
+    store = STORE_VERSION.get('v')
+    if store and store in built:
+        pytest.skip(
+            'store snap is already {0}; a same-version refresh runs no schema '
+            'migration, so there is no 503 window to observe'.format(store))
     session = requests.session()
     deadline = time.time() + 1800
     last_status = None
