@@ -26,15 +26,17 @@ const (
 	DbPassword = "nextcloud"
 	PsqlPort   = 5436
 
-	SignalingSecretsFile = "signaling.secrets"
-	ConfigureDoneMarker  = ".configure-done"
-	RefreshNeededMarker  = ".refresh-needed"
-	RepairAttemptsFile   = ".repair-attempts"
-	LdapDeferredMarker   = ".ldap-deferred"
-	StatusPageFile       = "syncloud-status.html"
-	UpgradingPage        = "syncloud-maintenance.html"
-	UpgradeFailedPage    = "syncloud-upgrade-failed.html"
-	MaxRepairAttempts    = 3
+	SignalingSecretsFile  = "signaling.secrets"
+	ConfigureDoneMarker   = ".configure-done"
+	RefreshNeededMarker   = ".refresh-needed"
+	RepairAttemptsFile    = ".repair-attempts"
+	LdapDeferredMarker    = ".ldap-deferred"
+	StatusPageFile        = "syncloud-status.html"
+	UpgradingPage         = "syncloud-maintenance.html"
+	UpgradeFailedPage     = "syncloud-upgrade-failed.html"
+	MaxRepairAttempts     = 3
+	MaxAppDisableAttempts = 3
+	DisabledAppsFile      = ".disabled-apps"
 )
 
 type Variables struct {
@@ -52,21 +54,21 @@ type Variables struct {
 }
 
 type Installer struct {
-	appDir              string
-	commonDir           string
-	dataDir             string
-	configDir           string
-	extraAppsDir        string
-	ncConfigPath        string
-	ncConfigFile        string
+	appDir               string
+	commonDir            string
+	dataDir              string
+	configDir            string
+	extraAppsDir         string
+	ncConfigPath         string
+	ncConfigFile         string
 	signalingSecretsPath string
-	platformClient      *platform.Client
-	executor            *Executor
-	database            *Database
-	occ                 *OCConsole
-	ocConfig            *OCConfig
-	cron                *Cron
-	logger              *zap.Logger
+	platformClient       *platform.Client
+	executor             *Executor
+	database             *Database
+	occ                  *OCConsole
+	ocConfig             *OCConfig
+	cron                 *Cron
+	logger               *zap.Logger
 }
 
 func New(logger *zap.Logger) *Installer {
@@ -429,8 +431,80 @@ func (i *Installer) WaitForConfigureDone(timeout time.Duration) error {
 }
 
 func (i *Installer) RunOccUpgrade() error {
-	_, err := i.occ.Run("upgrade")
+	out, err := i.occ.Run("upgrade")
+	if err == nil {
+		return nil
+	}
+	for attempt := 0; attempt < MaxAppDisableAttempts; attempt++ {
+		app := failingApp(out)
+		if app == "" {
+			i.logger.Error("upgrade failed and no app could be blamed", zap.Error(err))
+			return err
+		}
+		i.logger.Info("app blocked the upgrade, disabling it and retrying", zap.String("app", app))
+		if _, offErr := i.occ.Run("maintenance:mode", "--off"); offErr != nil {
+			return err
+		}
+		if _, disErr := i.occ.Run("app:disable", app); disErr != nil {
+			i.logger.Error("cannot disable app", zap.String("app", app), zap.Error(disErr))
+			return err
+		}
+		i.recordDisabledApp(app)
+		out, err = i.occ.Run("upgrade")
+		if err == nil {
+			i.logger.Info("upgrade completed with app disabled", zap.String("app", app))
+			return nil
+		}
+	}
 	return err
+}
+
+var appUpgradeStarted = regexp.MustCompile(`Updating <([^>]+)> \.\.\.`)
+var appUpgradeFinished = regexp.MustCompile(`Updated <([^>]+)> to `)
+var appSchemaChecked = regexp.MustCompile(`database schema for <([^>]+)> can be updated`)
+
+func failingApp(out string) string {
+	finished := map[string]bool{}
+	for _, m := range appUpgradeFinished.FindAllStringSubmatch(out, -1) {
+		finished[m[1]] = true
+	}
+	var started []string
+	for _, re := range []*regexp.Regexp{appUpgradeStarted, appSchemaChecked} {
+		for _, m := range re.FindAllStringSubmatch(out, -1) {
+			started = append(started, m[1])
+		}
+	}
+	for n := len(started) - 1; n >= 0; n-- {
+		if !finished[started[n]] {
+			return started[n]
+		}
+	}
+	return ""
+}
+
+func (i *Installer) recordDisabledApp(app string) {
+	p := path.Join(i.dataDir, DisabledAppsFile)
+	existing, _ := os.ReadFile(p)
+	if strings.Contains(string(existing), app+"\n") {
+		return
+	}
+	if err := os.WriteFile(p, append(existing, []byte(app+"\n")...), 0644); err != nil {
+		i.logger.Error("cannot record disabled app", zap.String("app", app), zap.Error(err))
+	}
+}
+
+func (i *Installer) DisabledApps() []string {
+	data, err := os.ReadFile(path.Join(i.dataDir, DisabledAppsFile))
+	if err != nil {
+		return nil
+	}
+	var apps []string
+	for _, line := range strings.Split(string(data), "\n") {
+		if line != "" {
+			apps = append(apps, line)
+		}
+	}
+	return apps
 }
 
 func (i *Installer) RunMaintenanceModeOff() error {
