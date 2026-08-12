@@ -7,6 +7,7 @@ import (
 	"path"
 	"path/filepath"
 	"regexp"
+	"strconv"
 	"strings"
 	"time"
 
@@ -28,6 +29,12 @@ const (
 	SignalingSecretsFile = "signaling.secrets"
 	ConfigureDoneMarker  = ".configure-done"
 	RefreshNeededMarker  = ".refresh-needed"
+	RepairAttemptsFile   = ".repair-attempts"
+	LdapDeferredMarker   = ".ldap-deferred"
+	StatusPageFile       = "syncloud-status.html"
+	UpgradingPage        = "syncloud-maintenance.html"
+	UpgradeFailedPage    = "syncloud-upgrade-failed.html"
+	MaxRepairAttempts    = 3
 )
 
 type Variables struct {
@@ -235,9 +242,10 @@ func (i *Installer) Configure() error {
 	}
 	dbUpgradePending := false
 	if i.installed() {
-		dbUpgradePending = i.NeedsDbUpgrade()
-		i.logger.Info("configure: existing install detected, running upgrade", zap.Bool("dbUpgradePending", dbUpgradePending))
-		if err := i.upgrade(storageDir, dbUpgradePending); err != nil {
+		i.logger.Info("configure: existing install detected, running upgrade")
+		var err error
+		dbUpgradePending, err = i.upgrade(storageDir)
+		if err != nil {
 			return err
 		}
 	} else {
@@ -346,6 +354,68 @@ func (i *Installer) ClearRefreshNeeded() error {
 	return nil
 }
 
+func (i *Installer) MarkLdapDeferred() error {
+	return os.WriteFile(path.Join(i.dataDir, LdapDeferredMarker), []byte(time.Now().UTC().Format(time.RFC3339)+"\n"), 0644)
+}
+
+func (i *Installer) LdapDeferred() bool {
+	_, err := os.Stat(path.Join(i.dataDir, LdapDeferredMarker))
+	return err == nil
+}
+
+func (i *Installer) ClearLdapDeferred() error {
+	if err := os.Remove(path.Join(i.dataDir, LdapDeferredMarker)); err != nil && !os.IsNotExist(err) {
+		return err
+	}
+	return nil
+}
+
+func (i *Installer) ShowUpgradingPage() error {
+	return i.writeStatusPage(UpgradingPage)
+}
+
+func (i *Installer) ShowUpgradeFailedPage() error {
+	return i.writeStatusPage(UpgradeFailedPage)
+}
+
+func (i *Installer) ClearStatusPage() error {
+	if err := os.Remove(path.Join(i.dataDir, StatusPageFile)); err != nil && !os.IsNotExist(err) {
+		return err
+	}
+	return nil
+}
+
+func (i *Installer) writeStatusPage(page string) error {
+	return copyFile(path.Join(i.appDir, "config", page), path.Join(i.dataDir, StatusPageFile))
+}
+
+func (i *Installer) RepairAttempts() int {
+	data, err := os.ReadFile(path.Join(i.dataDir, RepairAttemptsFile))
+	if err != nil {
+		return 0
+	}
+	n, err := strconv.Atoi(strings.TrimSpace(string(data)))
+	if err != nil {
+		return 0
+	}
+	return n
+}
+
+func (i *Installer) IncrementRepairAttempts() int {
+	n := i.RepairAttempts() + 1
+	if err := os.WriteFile(path.Join(i.dataDir, RepairAttemptsFile), []byte(strconv.Itoa(n)+"\n"), 0644); err != nil {
+		i.logger.Error("cannot record repair attempt", zap.Error(err))
+	}
+	return n
+}
+
+func (i *Installer) ClearRepairAttempts() error {
+	if err := os.Remove(path.Join(i.dataDir, RepairAttemptsFile)); err != nil && !os.IsNotExist(err) {
+		return err
+	}
+	return nil
+}
+
 func (i *Installer) WaitForConfigureDone(timeout time.Duration) error {
 	marker := i.ConfigureDoneMarkerPath()
 	deadline := time.Now().Add(timeout)
@@ -399,6 +469,14 @@ func (i *Installer) RunGroupList() error {
 
 func (i *Installer) RunLdapPromoteSyncloud() error {
 	_, err := i.occ.Run("ldap:promote-group", "syncloud", "-y")
+	if err == nil {
+		return nil
+	}
+	i.logger.Info("ldap promote failed, forcing maintenance mode off and retrying", zap.Error(err))
+	if _, offErr := i.occ.Run("maintenance:mode", "--off"); offErr != nil {
+		return err
+	}
+	_, err = i.occ.Run("ldap:promote-group", "syncloud", "-y")
 	return err
 }
 
@@ -478,33 +556,41 @@ func (i *Installer) installed() bool {
 	return strings.Contains(string(data), "installed")
 }
 
-func (i *Installer) upgrade(storageDir string, dbUpgradePending bool) error {
+func (i *Installer) upgrade(storageDir string) (bool, error) {
 	i.logger.Info("upgrade: restoring database from dump")
 	if err := i.database.Restore(); err != nil {
-		return err
+		return false, err
 	}
 	i.logger.Info("upgrade: database restore done, preparing storage")
 	if err := i.prepareStorage(storageDir); err != nil {
-		return err
+		return false, err
 	}
+	dbUpgradePending := i.NeedsDbUpgrade()
+	i.logger.Info("upgrade: checked schema", zap.Bool("dbUpgradePending", dbUpgradePending))
 	i.logger.Info("upgrade: legacy admin->syncloud ldap mapping fix")
 	if err := i.RunMigrateLegacyAdminLdapGroup(); err != nil {
-		return err
+		return false, err
 	}
 	if dbUpgradePending {
-		i.logger.Info("upgrade: db schema behind code, deferring ldap steps to repair-service")
-		return nil
+		i.logger.Info("upgrade: db schema behind code, handing ldap steps to repair-service")
+		if err := i.MarkLdapDeferred(); err != nil {
+			return false, err
+		}
+		return true, nil
+	}
+	if err := i.ClearLdapDeferred(); err != nil {
+		return false, err
 	}
 	i.logger.Info("upgrade: forcing ldap getGroups via group:list")
 	if err := i.RunGroupList(); err != nil {
-		return err
+		return false, err
 	}
 	i.logger.Info("upgrade: promoting syncloud ldap group")
 	if err := i.RunLdapPromoteSyncloud(); err != nil {
-		return err
+		return false, err
 	}
 	i.logger.Info("upgrade: done (heavy occ steps deferred to repair-service)")
-	return nil
+	return false, nil
 }
 
 func (i *Installer) initialize(storageDir string) error {
