@@ -65,7 +65,6 @@ func main() {
 				step{"db-add-missing-columns", inst.RunDbAddMissingColumns},
 				step{"db-add-missing-primary-keys", inst.RunDbAddMissingPrimaryKeys},
 				step{"maintenance-repair", inst.RunMaintenanceRepair},
-				step{"maintenance-mode-off-final", inst.RunMaintenanceModeOff},
 			)
 		} else {
 			logger.Info("refresh-needed marker absent; skipping heavy post-refresh repair")
@@ -88,12 +87,32 @@ func main() {
 		}
 
 		failed := false
+		coreConsistent := true
 		for _, s := range steps {
 			done := srv.StartStep(s.name)
 			err := s.fn()
 			done(err)
 			if err != nil {
 				failed = true
+				if s.name == "occ-upgrade" {
+					coreConsistent = false
+				}
+			}
+		}
+		if len(steps) > 0 {
+			if coreConsistent {
+				done := srv.StartStep("maintenance-mode-off-final")
+				err := inst.RunMaintenanceModeOff()
+				done(err)
+				if err != nil {
+					failed = true
+				}
+			} else {
+				logger.Error("core upgrade failed; leaving maintenance mode on rather than exposing a half-upgraded instance")
+			}
+			if apps := inst.DisabledApps(); len(apps) > 0 {
+				logger.Info("apps disabled to let the upgrade through", zap.Strings("apps", apps))
+				srv.SetDisabledApps(apps)
 			}
 		}
 		if len(steps) > 0 {

@@ -26,6 +26,7 @@ type Status struct {
 	StartedAt     time.Time `json:"started_at"`
 	ConfigureDone bool      `json:"configure_done"`
 	Steps         []Step    `json:"steps"`
+	DisabledApps  []string  `json:"disabled_apps,omitempty"`
 	Done          bool      `json:"done"`
 }
 
@@ -69,6 +70,12 @@ func (s *Server) StartStep(name string) func(error) {
 			s.logger.Info("step end", zap.String("name", name), zap.Duration("took", took))
 		}
 	}
+}
+
+func (s *Server) SetDisabledApps(apps []string) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	s.status.DisabledApps = apps
 }
 
 func (s *Server) MarkDone() {
