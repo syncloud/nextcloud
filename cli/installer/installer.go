@@ -77,6 +77,7 @@ func New(logger *zap.Logger) *Installer {
 	dataDir := fmt.Sprintf("/var/snap/%s/current", App)
 	configDir := path.Join(dataDir, "config")
 	executor := NewExecutor(logger)
+	occ := NewOCConsole(appDir, executor, logger)
 	return &Installer{
 		appDir:               appDir,
 		commonDir:            commonDir,
@@ -89,8 +90,8 @@ func New(logger *zap.Logger) *Installer {
 		platformClient:       platform.New(),
 		executor:             executor,
 		database:             NewDatabase(appDir, dataDir, configDir, DbUser, PsqlPort, executor, logger),
-		occ:                  NewOCConsole(appDir, executor, logger),
-		ocConfig:             NewOCConfig(appDir, executor, logger),
+		occ:                  occ,
+		ocConfig:             NewOCConfig(occ, logger),
 		cron:                 NewCron(UserName, executor, logger),
 		logger:               logger,
 	}
