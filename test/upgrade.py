@@ -117,6 +117,7 @@ def test_post_upgrade_repair_status(device):
         'db-add-missing-columns',
         'db-add-missing-primary-keys',
         'maintenance-repair',
+        'disable-broken-apps',
     ]
     deadline = time.time() + 1800
     last = ''
