@@ -65,6 +65,7 @@ func main() {
 				step{"db-add-missing-columns", inst.RunDbAddMissingColumns},
 				step{"db-add-missing-primary-keys", inst.RunDbAddMissingPrimaryKeys},
 				step{"maintenance-repair", inst.RunMaintenanceRepair},
+				step{"disable-broken-apps", inst.RunDisableBrokenApps},
 			)
 		} else {
 			logger.Info("refresh-needed marker absent; skipping heavy post-refresh repair")

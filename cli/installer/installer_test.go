@@ -47,3 +47,35 @@ func TestNoFailingAppWhenOutputMentionsNoApps(t *testing.T) {
 		t.Fatalf("expected empty, got %q", got)
 	}
 }
+
+func TestBrokenAppFromExtraAppsPath(t *testing.T) {
+	out := `An unhandled exception has been thrown:
+Error: Call to undefined method OC\Server::getContentSecurityPolicyManager() in ` +
+		`/var/snap/nextcloud/1011/extra-apps/radio/lib/AppInfo/Application.php:24`
+
+	if got := brokenApp(out); got != "radio" {
+		t.Fatalf("expected radio, got %q", got)
+	}
+}
+
+func TestBrokenAppFromBundledAppPath(t *testing.T) {
+	out := `Exception: Call to undefined method OC\Server::getURLGenerator() in file ` +
+		`'/var/snap/nextcloud/1011/extra-apps/quicknotes/lib/AppInfo/Application.php' line 70`
+
+	if got := brokenApp(out); got != "quicknotes" {
+		t.Fatalf("expected quicknotes, got %q", got)
+	}
+}
+
+func TestBrokenAppFromAppinfoPath(t *testing.T) {
+	out := `Error in /snap/nextcloud/current/nextcloud/apps/files_rightclick/appinfo/app.php`
+	if got := brokenApp(out); got != "files_rightclick" {
+		t.Fatalf("expected files_rightclick, got %q", got)
+	}
+}
+
+func TestNoBrokenAppWhenOutputHasNoAppPath(t *testing.T) {
+	if got := brokenApp("Doctrine\\DBAL\\Exception: database is gone"); got != "" {
+		t.Fatalf("expected empty, got %q", got)
+	}
+}

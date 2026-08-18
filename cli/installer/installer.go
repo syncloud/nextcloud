@@ -483,6 +483,42 @@ func failingApp(out string) string {
 	return ""
 }
 
+func (i *Installer) RunDisableBrokenApps() error {
+	out, err := i.occ.Run("app:list")
+	if err == nil {
+		return nil
+	}
+	for attempt := 0; attempt < MaxAppDisableAttempts; attempt++ {
+		app := brokenApp(out)
+		if app == "" {
+			i.logger.Error("apps fail to load and no app could be blamed", zap.Error(err))
+			return err
+		}
+		i.logger.Info("app fails to load, disabling it", zap.String("app", app))
+		if _, disErr := i.occ.Run("app:disable", app); disErr != nil {
+			i.logger.Error("cannot disable app", zap.String("app", app), zap.Error(disErr))
+			return err
+		}
+		i.recordDisabledApp(app)
+		out, err = i.occ.Run("app:list")
+		if err == nil {
+			i.logger.Info("apps load again with app disabled", zap.String("app", app))
+			return nil
+		}
+	}
+	return err
+}
+
+var brokenAppPath = regexp.MustCompile(`/(?:extra-apps|apps)/([a-z0-9_]+)/(?:lib|appinfo)/`)
+
+func brokenApp(out string) string {
+	m := brokenAppPath.FindStringSubmatch(out)
+	if m == nil {
+		return ""
+	}
+	return m[1]
+}
+
 func (i *Installer) recordDisabledApp(app string) {
 	p := path.Join(i.dataDir, DisabledAppsFile)
 	existing, _ := os.ReadFile(p)
