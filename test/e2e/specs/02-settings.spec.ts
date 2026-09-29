@@ -8,7 +8,7 @@ test.describe('settings', () => {
   })
 
   test('admin overview shows background jobs', async ({ page }, testInfo) => {
-    await page.goto('/settings/admin')
+    await page.goto('/settings/admin/server')
     await expect(page.locator('//h2[contains(.,"Background jobs")]')).toBeVisible()
     await shoot(page, testInfo, 'admin')
   })
