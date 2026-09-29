@@ -1,5 +1,7 @@
 FROM php:8.3.9-fpm-bullseye
-RUN apt-get update && apt-get install -y \
+RUN printf 'deb http://archive.debian.org/debian bullseye main\n' > /etc/apt/sources.list \
+ && rm -rf /var/lib/apt/lists/* /etc/apt/sources.list.d/* \
+ && apt-get -o Acquire::Check-Valid-Until=false update && apt-get install -y \
 		libfreetype6-dev \
 		libjpeg62-turbo-dev \
 		libpng-dev \
