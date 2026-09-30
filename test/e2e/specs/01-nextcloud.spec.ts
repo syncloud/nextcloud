@@ -69,8 +69,8 @@ test.describe('nextcloud', () => {
 
     await test.step('personal settings show the profile picture controls', async () => {
       await openMenuItem(page, 'settings_personal')
-      await expect(page.getByRole('heading', { name: 'Profile & contact' })).toBeVisible()
-      await expect(page.getByText('Upload profile picture')).toBeVisible()
+      await expect(page.getByRole('heading', { name: 'Profile & contact' }).first()).toBeVisible()
+      await expect(page.getByText('Upload profile picture').first()).toBeVisible()
       await shoot(page, info, 'user')
     })
 
