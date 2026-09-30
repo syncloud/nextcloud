@@ -6,7 +6,7 @@ import {
 } from '../helpers/auth'
 
 test.describe('nextcloud', () => {
-  test('a user signs in and navigates the app by clicking', async ({ page }, info) => {
+  test('a user signs in and navigates the app by clicking', async ({ page, request }, info) => {
     await test.step('sign in and dismiss the first-run wizard', async () => {
       await signIn(page)
       await dismissWizard(page)
@@ -15,7 +15,7 @@ test.describe('nextcloud', () => {
 
     await test.step('webdav accepts syncloud password basic auth', async () => {
       const auth = 'Basic ' + Buffer.from(`${deviceUser}:${devicePassword}`).toString('base64')
-      const resp = await page.request.fetch(`https://${appDomain}/remote.php/webdav/`, {
+      const resp = await request.fetch(`https://${appDomain}/remote.php/webdav/`, {
         method: 'PROPFIND', headers: { Authorization: auth, Depth: '0' },
       })
       expect(resp.status()).toBe(207)
