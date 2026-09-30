@@ -26,10 +26,9 @@ export const wizardCloseLocator = wizardClose
 
 export async function dismissWizard(page: Page) {
   const w = page.locator(wizard)
-  if (await w.isVisible().catch(() => false)) {
-    await page.locator(wizardClose).click()
-    await expect(w).toBeHidden({ timeout: 30_000 })
-  }
+  await expect(w).toBeVisible({ timeout: 30_000 })
+  await page.locator(wizardClose).click()
+  await expect(w).toBeHidden({ timeout: 30_000 })
 }
 
 export async function openUserMenu(page: Page) {
