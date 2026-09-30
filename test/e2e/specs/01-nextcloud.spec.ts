@@ -76,12 +76,8 @@ test.describe('nextcloud', () => {
 
     await test.step('install memories from the app store', async () => {
       await openMenuItem(page, 'appstore')
-      const search = page.getByRole('searchbox')
-        .or(page.getByPlaceholder(/search/i))
-        .or(page.locator('input[type="search"]'))
-        .first()
-      await search.fill('memories')
-      await page.getByRole('link', { name: /^memories/i }).first().click()
+      await page.getByPlaceholder(/Search apps/i).fill('memories')
+      await page.locator('a[href*="/memories"]').first().click()
       await page.locator('//input[@value="Download and enable"] | //button[@aria-label="Download and enable"]').click()
       await expect(page.locator('//div[contains(.,"Error")]')).toHaveCount(0)
       await shoot(page, info, 'install-app')

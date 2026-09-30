@@ -9,7 +9,7 @@ export default defineConfig({
   fullyParallel: false,
   workers: 1,
   retries: 0,
-  maxFailures: 0,
+  maxFailures: 1,
   reporter: [['list']],
   outputDir: `${artifactDir}/playwright/test-results`,
   globalTeardown: './globalTeardown.ts',
