@@ -23,3 +23,23 @@ export async function signIn(page: Page, user: string = deviceUser, password: st
 
 export const wizardLocator = wizard
 export const wizardCloseLocator = wizardClose
+
+export async function dismissWizard(page: Page) {
+  const w = page.locator(wizard)
+  await expect(w).toBeVisible({ timeout: 30_000 })
+  await page.locator(wizardClose).click()
+  await expect(w).toBeHidden({ timeout: 30_000 })
+}
+
+export async function openUserMenu(page: Page) {
+  await page.getByRole('button', { name: 'Settings menu' }).click()
+}
+
+export async function openMenuItem(page: Page, id: string) {
+  await openUserMenu(page)
+  await page.locator('#' + id).click()
+}
+
+export async function openSettingsSection(page: Page, href: string) {
+  await page.locator('a[href="' + href + '"]').first().click()
+}
