@@ -1,4 +1,4 @@
-FROM php:8.3.9-fpm-bullseye
+FROM php:8.3.35-fpm-bookworm
 RUN apt-get update && apt-get install -y \
 		libfreetype6-dev \
 		libjpeg62-turbo-dev \
@@ -50,10 +50,11 @@ RUN git clone https://github.com/Imagick/imagick.git --depth 1 /tmp/imagick && \
     make install && \
     docker-php-ext-enable imagick
 
-RUN pecl install smbclient
-RUN pecl install apcu
-RUN pecl install mcrypt-1.0.7
-RUN pecl install redis
+RUN for i in 1 2 3 4 5; do pecl channel-update pecl.php.net && break || sleep 10; done
+RUN for i in 1 2 3 4 5; do pecl install smbclient && break || sleep 10; done
+RUN for i in 1 2 3 4 5; do pecl install apcu && break || sleep 10; done
+RUN for i in 1 2 3 4 5; do pecl install mcrypt-1.0.7 && break || sleep 10; done
+RUN for i in 1 2 3 4 5; do pecl install redis && break || sleep 10; done
 RUN docker-php-ext-enable redis
 RUN docker-php-ext-configure intl
 RUN docker-php-ext-install intl

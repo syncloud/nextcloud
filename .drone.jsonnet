@@ -1,5 +1,5 @@
 local name = "nextcloud";
-local nextcloud = "34.0.2";
+local nextcloud = "35.0.1";
 local redis = "7.0.15";
 local nginx = "1.24.0";
 local nats = "2.10";
@@ -209,7 +209,7 @@ local build(arch, test_ui) = [{
             },
             command: ["snap", "-c", "${DRONE_BRANCH}"],
             when: {
-                branch: ["master", "stable"],
+                branch: ["stable"],
                 event: ["push"]
             }
         },
