@@ -1,4 +1,4 @@
-FROM php:8.4.26-fpm-bookworm
+FROM php:8.4.27-fpm-bookworm
 RUN apt-get update && apt-get install -y \
 		libfreetype6-dev \
 		libjpeg62-turbo-dev \
