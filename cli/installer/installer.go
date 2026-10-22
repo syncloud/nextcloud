@@ -243,6 +243,9 @@ func (i *Installer) Configure() error {
 	if err != nil {
 		return err
 	}
+	if err := i.cron.Remove(); err != nil {
+		return err
+	}
 	dbUpgradePending := false
 	if i.installed() {
 		i.logger.Info("configure: existing install detected, running upgrade")
@@ -274,9 +277,6 @@ func (i *Installer) Configure() error {
 		return err
 	}
 
-	if err := i.cron.Remove(); err != nil {
-		return err
-	}
 	if err := i.cron.Create(); err != nil {
 		return err
 	}

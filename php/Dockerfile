@@ -1,4 +1,4 @@
-FROM php:8.4.26-fpm-bookworm
+FROM php:8.4.27-fpm-bookworm
 RUN apt-get update && apt-get install -y \
 		libfreetype6-dev \
 		libjpeg62-turbo-dev \
@@ -49,10 +49,10 @@ RUN git clone https://github.com/Imagick/imagick.git --depth 1 /tmp/imagick && \
     make install && \
     docker-php-ext-enable imagick
 
-RUN for i in 1 2 3 4 5; do pecl channel-update pecl.php.net && break || sleep 10; done
-RUN for i in 1 2 3 4 5; do pecl install smbclient && break || sleep 10; done
-RUN for i in 1 2 3 4 5; do pecl install apcu && break || sleep 10; done
-RUN for i in 1 2 3 4 5; do pecl install redis && break || sleep 10; done
+RUN i=0; until pecl channel-update pecl.php.net; do i=$((i+1)); [ $i -lt 60 ] || exit 1; sleep 60; done
+RUN i=0; until pecl install smbclient; do i=$((i+1)); [ $i -lt 60 ] || exit 1; sleep 60; done
+RUN i=0; until pecl install apcu; do i=$((i+1)); [ $i -lt 60 ] || exit 1; sleep 60; done
+RUN i=0; until pecl install redis; do i=$((i+1)); [ $i -lt 60 ] || exit 1; sleep 60; done
 RUN docker-php-ext-enable redis
 RUN docker-php-ext-configure intl
 RUN docker-php-ext-install intl
