@@ -39,20 +39,6 @@ const (
 	DisabledAppsFile      = ".disabled-apps"
 )
 
-type Variables struct {
-	AppDir                   string
-	CommonDir                string
-	DataDir                  string
-	DbPsqlPort               int
-	DatabaseDir              string
-	ConfigDir                string
-	Domain                   string
-	SignalingSessionHashkey  string
-	SignalingSessionBlockkey string
-	SignalingInternalSecret  string
-	SignalingBackendSecret   string
-}
-
 type Installer struct {
 	appDir               string
 	commonDir            string
@@ -108,6 +94,13 @@ func (i *Installer) installConfig() error {
 		return err
 	}
 
+	memoryMB, err := totalMemoryMB()
+	if err != nil {
+		return err
+	}
+	sharedBuffersMB, effectiveCacheMB := postgresMemoryMB(memoryMB)
+	i.logger.Info("postgresql memory", zap.Int64("total_mb", memoryMB), zap.Int64("shared_buffers_mb", sharedBuffersMB), zap.Int64("effective_cache_size_mb", effectiveCacheMB))
+
 	variables := Variables{
 		AppDir:                   i.appDir,
 		CommonDir:                i.commonDir,
@@ -120,6 +113,8 @@ func (i *Installer) installConfig() error {
 		SignalingSessionBlockkey: secrets.SessionBlockkey,
 		SignalingInternalSecret:  secrets.InternalSecret,
 		SignalingBackendSecret:   secrets.BackendSecret,
+		PsqlSharedBuffersMB:      sharedBuffersMB,
+		PsqlEffectiveCacheMB:     effectiveCacheMB,
 	}
 
 	if err := config.Generate(path.Join(i.appDir, "config"), i.configDir, variables); err != nil {
