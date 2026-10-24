@@ -108,6 +108,20 @@ def test_occ(device):
     device.run_ssh('snap run nextcloud.occ')
 
 
+def test_postgres_memory_sized_from_ram(device):
+    meminfo = device.run_ssh('grep MemTotal /proc/meminfo')
+    total_mb = int(meminfo.split()[1]) // 1024
+    shared_buffers = min(max(total_mb // 8, 128), 2048)
+    effective_cache_size = max(total_mb // 2, shared_buffers)
+    assert postgres_setting_mb(device, 'shared_buffers') == shared_buffers
+    assert postgres_setting_mb(device, 'effective_cache_size') == effective_cache_size
+
+
+def postgres_setting_mb(device, name):
+    output = device.run_ssh("snap run nextcloud.psql -tA -c \\\"select setting::bigint * 8 / 1024 from pg_settings where name = '{0}'\\\"".format(name))
+    return int(output.strip().splitlines()[-1])
+
+
 def test_psql_oc_ldap_group_mapping(device):
     device.run_ssh("snap run nextcloud.psql -c 'select * from oc_ldap_group_mapping' > {0}/psql.oc_ldap_group_mapping.log".format(TMP_DIR))
 
