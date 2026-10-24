@@ -3,6 +3,7 @@ import json
 import pytest
 import requests
 import shutil
+import time
 from os.path import join
 from requests.auth import HTTPBasicAuth
 from requests.packages.urllib3.exceptions import InsecureRequestWarning
@@ -10,7 +11,7 @@ from subprocess import check_output
 from syncloudlib.integration.hosts import add_host_alias
 from syncloudlib.integration.installer import local_install, wait_for_installer
 from syncloudlib.integration.loop import loop_device_add, loop_device_cleanup
-from syncloudlib.http import wait_for_response
+from syncloudlib.http import wait_for_response, wait_for_rest
 
 TMP_DIR = '/tmp/syncloud'
 MAIL_SMTPHOST = 'mail.example.com:587'
@@ -298,6 +299,56 @@ def test_mail_config_survives_upgrade(device):
     name = device.run_ssh('snap run nextcloud.occ config:system:get mail_smtpname').strip()
     assert host == MAIL_SMTPHOST, 'mail_smtphost lost after upgrade: ' + host
     assert name == MAIL_SMTPNAME, 'mail_smtpname lost after upgrade: ' + name
+
+
+def test_backup(device, artifact_dir):
+    wait_for_repair(device)
+    set_backup_markers(device, 'before')
+    out = device.run_ssh('snap run platform.cli backup create nextcloud', throw=False)
+    response = device.run_ssh('snap run platform.cli backup list')
+    open(join(artifact_dir, 'cli.backup.list.json'), 'w').write(response)
+    backups = [b for b in json.loads(response) if b['app'] == 'nextcloud']
+    assert backups, 'backup create failed:\n{0}'.format(out)
+    backup = backups[-1]
+    entries = device.run_ssh('tar tzf {0}/{1}'.format(backup['path'], backup['file'])).split()
+    open(join(artifact_dir, 'backup.tar.list.log'), 'w').write('\n'.join(entries))
+    for entry in ['./current/nextcloud/config/config.php', './current/database.dump', './common']:
+        assert entry in entries, 'backup {0} has no {1}:\n{2}'.format(backup['file'], entry, out)
+
+
+def test_restore(device, app_domain):
+    backup = [b for b in json.loads(device.run_ssh('snap run platform.cli backup list')) if b['app'] == 'nextcloud'][-1]
+    set_backup_markers(device, 'after')
+    device.run_ssh('snap run platform.cli backup restore {0}'.format(backup['file']))
+    wait_for_rest(requests.session(), 'https://{0}'.format(app_domain), 200, 100)
+    wait_for_repair(device)
+    assert get_backup_markers(device) == ('before', 'before')
+
+
+def wait_for_repair(device):
+    deadline = time.time() + 1800
+    last = ''
+    while time.time() < deadline:
+        last = device.run_ssh('snap run nextcloud.repair-status', throw=False)
+        try:
+            if json.loads(last).get('done'):
+                return
+        except ValueError:
+            pass
+        time.sleep(10)
+    raise AssertionError('repair-status never reported done within 30 minutes: ' + last)
+
+
+def set_backup_markers(device, value):
+    device.run_ssh('snap run nextcloud.occ config:app:set backup_test marker --value={0}'.format(value))
+    device.run_ssh('snap run nextcloud.occ config:system:set backup_test_marker --value={0}'.format(value))
+    assert get_backup_markers(device) == (value, value)
+
+
+def get_backup_markers(device):
+    database = device.run_ssh('snap run nextcloud.occ config:app:get backup_test marker').strip()
+    config = device.run_ssh('snap run nextcloud.occ config:system:get backup_test_marker').strip()
+    return database, config
 
 
 
