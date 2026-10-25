@@ -4,7 +4,7 @@ local redis = "7.0.15";
 local nginx = "1.24.0";
 local nats = "2.10";
 local postgresql = "16-bullseye";
-local platform = '26.04.10';
+local platform = '26.10.01';
 local go = '1.26';
 local python = '3.12-slim-bookworm';
 local debian = 'bookworm-slim';
@@ -14,8 +14,7 @@ local distro_default = "bookworm";
 local distros = ['bookworm', 'buster'];
 local dind = '20.10.21-dind';
 
-local platform_image(distro, arch) =
-  'syncloud/platform-' + distro + '-' + arch + ':' + platform;
+local platform_image(distro) = 'syncloud/platform-' + distro + ':' + platform;
 
 local build(arch, test_ui) = [{
     kind: "pipeline",
@@ -64,7 +63,7 @@ local build(arch, test_ui) = [{
          ] + [
         {
             name: "redis test " + distro,
-            image: platform_image(distro, arch),
+            image: platform_image(distro),
             commands: [
                 "./redis/test.sh"
             ]
@@ -80,7 +79,7 @@ local build(arch, test_ui) = [{
          ] + [
         {
             name: "nats test " + distro,
-            image: platform_image(distro, arch),
+            image: platform_image(distro),
             commands: [
                 "./nats/test.sh"
             ]
@@ -96,7 +95,7 @@ local build(arch, test_ui) = [{
          ] + [
         {
             name: "signaling test " + distro,
-            image: platform_image(distro, arch),
+            image: platform_image(distro),
             commands: [
                 "./signaling/test.sh"
             ]
@@ -112,7 +111,7 @@ local build(arch, test_ui) = [{
         ] + [
         {
             name: "postgresql test " + distro,
-            image: platform_image(distro, arch),
+            image: platform_image(distro),
             commands: [
                 "./postgresql/test.sh"
             ]
@@ -255,7 +254,7 @@ local build(arch, test_ui) = [{
         }] + [
         {
             name: name + "."+distro+".com",
-            image: platform_image(distro, arch),
+            image: platform_image(distro),
             privileged: true,
             entrypoint: ["/bin/sh", "-c", "mkdir -p /etc/systemd/system/snapd.service.d && printf '[Service]\\nExecStartPost=/bin/sh -c \"/usr/bin/snap set system refresh.hold=2099-01-01T00:00:00Z\"\\n' > /etc/systemd/system/snapd.service.d/disable-refresh.conf && exec /sbin/init"],
             volumes: [
