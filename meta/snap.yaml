@@ -70,6 +70,9 @@ apps:
   psql:
     command: bin/psql.sh
 
+  redis-cli:
+    command: bin/redis-cli.sh
+
   pgdumpall:
     command: bin/pg_dumpall.sh
 

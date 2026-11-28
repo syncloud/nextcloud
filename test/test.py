@@ -155,6 +155,16 @@ def test_webdav(app_domain, artifact_dir, device_user, device_password):
         f.write(str(response.text).replace(',', '\n'))
 
 
+def test_webdav_works_when_redis_is_full(device, app_domain, device_user, device_password):
+    device.run_ssh("snap run nextcloud.redis-cli eval 'for i=1,70000 do redis.call([[set]],[[fill:]]..i,string.rep([[x]],1000)) end' 0", throw=False)
+    try:
+        response = requests.request('PROPFIND', 'https://{0}/remote.php/webdav/'.format(app_domain),
+                                    auth=HTTPBasicAuth(device_user, device_password), verify=False)
+        assert response.status_code == 207, response.text
+    finally:
+        device.run_ssh('snap run nextcloud.redis-cli flushall')
+
+
 def test_carddav(app_domain, artifact_dir, device_user, device_password):
     response = requests.request(
         'PROPFIND',
